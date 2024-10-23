@@ -7,7 +7,7 @@ export type FakeSOSocket = Server<ServerToClientEvents>;
 /**
  * Interface representing a User, which contains:
  * - username - The unique identifier of the user.
- * - firtName - The user's first name
+ * - firstName - The user's first name
  * - lastName - The user's last name
  * - email - The user's email address
  * - headline? - The user's one-liner headline. Optional field.

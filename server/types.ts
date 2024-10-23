@@ -210,3 +210,17 @@ export interface ServerToClientEvents {
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
 }
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: ObjectId;
+  name: string;
+  description: string;
+  color: string;
+}

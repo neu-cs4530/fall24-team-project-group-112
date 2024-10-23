@@ -6,7 +6,8 @@ import { Schema } from 'mongoose';
  * This schema defines the structure for storing users in the database.
  * Each user includes the following fields:
  * - `username`: The unique identifier of the user. This field is required.
- * - `fullName`: The user's full name. This field is required.
+ * - `firstName`: The user's first name. This field is required.
+ * - `lastName`: The user's last name. This field is required.
  * - `email`: The user's email address. This field is required.
  * - `headline`: The user's one-liner headline. Optional field.
  * - `bio`: The user's full bio. Optional field.
@@ -22,7 +23,8 @@ import { Schema } from 'mongoose';
 const userSchema: Schema = new Schema(
   {
     username: { type: String, required: true },
-    fullName: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: { type: String, required: true },
     headline: { type: String },
     bio: { type: String },

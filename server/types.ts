@@ -7,7 +7,8 @@ export type FakeSOSocket = Server<ServerToClientEvents>;
 /**
  * Interface representing a User, which contains:
  * - username - The unique identifier of the user.
- * - fullName - The user's full name
+ * - firtName - The user's first name
+ * - lastName - The user's last name
  * - email - The user's email address
  * - headline? - The user's one-liner headline. Optional field.
  * - bio? - The user's full bio. Optional field.
@@ -23,7 +24,8 @@ export type FakeSOSocket = Server<ServerToClientEvents>;
  */
 export interface User {
   username: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   headline?: string;
   bio?: string;

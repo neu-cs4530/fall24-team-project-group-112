@@ -39,6 +39,25 @@ export interface User {
   createdAt: Date;
 }
 
+/**
+ * Interface for the request query to find questions using a search string, which contains:
+ * - order - The order in which to sort the questions
+ * - search - The search string used to find questions
+ * - askedBy - The username of the user who asked the question
+ */
+export interface UpdateUserRequest extends Request {
+  body: {
+    headline?: string;
+    bio?: string;
+    githubUrl?: string;
+    company?: string;
+    school?: string;
+    city?: string;
+    state?: string;
+    avatarName?: string;
+  };
+}
+
 // TODO: fill in interface details
 export interface Badge {}
 

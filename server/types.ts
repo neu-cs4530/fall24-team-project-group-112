@@ -248,3 +248,29 @@ export interface ServerToClientEvents {
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
 }
+
+/**
+ * Enum representing the possible event types for notifications.
+ */
+export enum NotificationType {
+  ANSWER = 'answer',
+  COMMENT = 'comment',
+  BADGE = 'badge',
+  FOLLOW = 'follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+export interface Notification {
+  _id: ObjectId;
+  notificationType: NotificationType;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
+}

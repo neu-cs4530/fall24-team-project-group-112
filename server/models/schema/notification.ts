@@ -8,6 +8,7 @@ import { NotificationType } from '../../types';
  *
  * - _id: The unique identifier for the notification. This field is optional.
  * - notificationType: The type of notification, one of NotificationType. This field is required.
+ * - eventId: The unique identifier of the event that triggered the notification. This field is required.
  * - receiverUsername: The username of the user who will receive the notification. This field is required.
  * - notificationDate: The date and time when the notification was created. This field is required.
  * - seen: A boolean value indicating whether the notification has been seen by the user. This field is required and defaults to false.
@@ -19,6 +20,10 @@ const notificationSchema: Schema = new Schema({
   notificationType: {
     type: String,
     enum: NotificationType,
+    required: true,
+  },
+  eventId: {
+    type: Schema.Types.ObjectId,
     required: true,
   },
   receiverUsername: {

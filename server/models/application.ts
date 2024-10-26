@@ -9,11 +9,14 @@ import {
   Question,
   QuestionResponse,
   Tag,
+  User,
+  UserResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
+import UserModel from './user';
 
 /**
  * Parses tags from a search string.
@@ -640,5 +643,31 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
     return tmap;
   } catch (error) {
     return { error: 'Error when construction tag map' };
+  }
+};
+
+/**
+ * Checks if a user with the given username already exists in the database.
+ * @param {string} username - username to check.
+ * @returns true if the username is unique, false otherwise.
+ */
+export const isUsernameUnique = async (username: string): Promise<boolean> => {
+  const existingUser = await UserModel.findOne({ username });
+  return !existingUser;
+};
+
+/**
+ * Adds a new user to the database.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<UserResponse>} - The added user, or an error message if the addition failed.
+ */
+export const addUser = async (user: User): Promise<UserResponse> => {
+  try {
+    const result = await UserModel.create(user);
+    return result;
+  } catch (error) {
+    return { error: 'Error when saving a new user' };
   }
 };

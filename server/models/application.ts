@@ -5,6 +5,8 @@ import {
   AnswerResponse,
   Comment,
   CommentResponse,
+  Notification,
+  NotificationType,
   OrderType,
   Question,
   QuestionResponse,
@@ -14,6 +16,7 @@ import AnswerModel from './answers';
 import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
+import NotificationModel from './notifications';
 
 /**
  * Parses tags from a search string.
@@ -374,6 +377,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
 export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
+    await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
     return result;
   } catch (error) {
     return { error: 'Error when saving an answer' };
@@ -640,5 +644,33 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
     return tmap;
   } catch (error) {
     return { error: 'Error when construction tag map' };
+  }
+};
+
+export const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification | { error: string }> => {
+  try {
+    if (!eventId || !type || !receiverUsername) {
+      throw new Error('Invalid request');
+    }
+
+    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+    const notif: Notification = {
+      notificationType: type,
+      eventId,
+      receiverUsername,
+      notificationDate: new Date(),
+      seen: false,
+    };
+
+    console.log('Adding notification: ', notif);
+    return await NotificationModel.create(notif);
+  } catch (error) {
+    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };

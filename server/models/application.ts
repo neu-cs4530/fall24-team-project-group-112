@@ -374,7 +374,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
  *
  * @returns {Promise<AnswerResponse>} - The saved answer, or an error message if the save failed
  */
-const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
+export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
     await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
@@ -647,7 +647,7 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
   }
 };
 
-export const addNotifications = async (
+const addNotifications = async (
   eventId: ObjectId,
   receiverUsername: string,
   type: NotificationType,
@@ -668,9 +668,28 @@ export const addNotifications = async (
       seen: false,
     };
 
-    console.log('Adding notification: ', notif);
     return await NotificationModel.create(notif);
   } catch (error) {
     return { error: `Error when adding notification: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Updates the notification collection to mark all notifications as seen for a given user.
+ *
+ * @param username the username of the user whose notifications should be marked as seen
+ * @returns the number of notifications that were updated, or an error message if the operation fails
+ */
+export const markNotificationsAsSeen = async (
+  username: string,
+): Promise<{ updatedCount: number } | { error: string }> => {
+  try {
+    const result = await NotificationModel.updateMany(
+      { receiverUsername: username, seen: false },
+      { seen: true },
+    );
+    return { updatedCount: result.modifiedCount };
+  } catch (error) {
+    return { error: `Error when updating notifications: ${(error as Error).message}` };
   }
 };

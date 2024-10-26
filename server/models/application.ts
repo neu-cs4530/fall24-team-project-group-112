@@ -195,6 +195,33 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
   }
 };
 
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification | { error: string }> => {
+  try {
+    if (!eventId || !type || !receiverUsername) {
+      throw new Error('Invalid request');
+    }
+
+    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+    const notif: Notification = {
+      notificationType: type,
+      eventId,
+      receiverUsername,
+      notificationDate: new Date(),
+      seen: false,
+    };
+
+    return await NotificationModel.create(notif);
+  } catch (error) {
+    return { error: `Error when adding notification: ${(error as Error).message}` };
+  }
+};
+
 /**
  * Retrieves questions from the database, ordered by the specified criteria.
  *
@@ -374,7 +401,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
  *
  * @returns {Promise<AnswerResponse>} - The saved answer, or an error message if the save failed
  */
-const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
+export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
     await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
@@ -644,33 +671,5 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
     return tmap;
   } catch (error) {
     return { error: 'Error when construction tag map' };
-  }
-};
-
-export const addNotifications = async (
-  eventId: ObjectId,
-  receiverUsername: string,
-  type: NotificationType,
-): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
-
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
-
-    console.log('Adding notification: ', notif);
-    return await NotificationModel.create(notif);
-  } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };

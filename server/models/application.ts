@@ -374,7 +374,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
  *
  * @returns {Promise<AnswerResponse>} - The saved answer, or an error message if the save failed
  */
-export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
+const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
     await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);

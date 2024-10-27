@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { FakeSOSocket, UpdateUserRequest } from '../types';
+import { FakeSOSocket, UpdateUserRequest, User } from '../types';
 
 const userController = (socket: FakeSOSocket) => {
   const router = express.Router();

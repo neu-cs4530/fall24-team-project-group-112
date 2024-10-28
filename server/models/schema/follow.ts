@@ -10,11 +10,12 @@ import { Schema } from 'mongoose';
  */
 const followSchema: Schema = new Schema(
   {
-    followerId: {
-      type: Number,
+    followerUsername: {
+      type: String,
+      required: true,
     },
-    followeeId: {
-      type: Number,
+    followeeUsername: {
+      type: String,
     },
     followDateTime: {
       type: Date,

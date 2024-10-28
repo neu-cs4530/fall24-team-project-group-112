@@ -171,15 +171,15 @@ export type CommentResponse = Comment | { error: string };
 /**
  * Interface representing a Follow, which contains:
  * - _id - The unique identifier for the follower. Optional field.
- * - followerId - The id of the user who followed a user.
- * - followeeId - The id of the user who was followed by a user.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
  * - followDateTime - The date and time when the follow was posted.
  *
  */
 export interface Follow {
   _id?: ObjectId;
-  followerId: string;
-  followeeId: string;
+  followerUsername: string;
+  followeeUsername: string;
   followDateTime: Date;
 }
 

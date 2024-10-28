@@ -4,8 +4,8 @@ import { Schema } from 'mongoose';
  *
  * This schema defines the structure for storing follows in the database.
  * Each follow includes the following fields:
- * - `followerId`: The id of the user who followed another user.
- * - `followeeId`: The id of the user who was followed by another user.
+ * - `followerUsername`: The username of the user who followed another user.
+ * - `followeeUsername`: The username of the user who was followed by another user.
  * - `followDateTime`: The date and time when the follow was issued.
  */
 const followSchema: Schema = new Schema(
@@ -16,9 +16,11 @@ const followSchema: Schema = new Schema(
     },
     followeeUsername: {
       type: String,
+      required: true,
     },
     followDateTime: {
       type: Date,
+      required: true,
     },
   },
   { collection: 'Follow' },

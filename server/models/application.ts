@@ -9,14 +9,11 @@ import {
   Question,
   QuestionResponse,
   Tag,
-  UpdateUserRequest,
-  User,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
-import UserModel from './user';
 
 /**
  * Parses tags from a search string.
@@ -644,29 +641,4 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
   } catch (error) {
     return { error: 'Error when construction tag map' };
   }
-};
-
-export const updateUser = async (username: string, req: UpdateUserRequest): Promise<User> => {
-  const { headline, bio, githubUrl, company, school, city, state, avatarName } = req.body;
-  const user = await UserModel.findOne({ username: username });
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  const updatedUser = await UserModel.findOneAndUpdate(
-    { username: username },
-    {
-      headline: headline || user.headline,
-      bio: bio || user.bio,
-      githubUrl: githubUrl || user.githubUrl,
-      company: company || user.company,
-      school: school || user.school,
-      city: city || user.city,
-      state: state || user.state,
-      avatarName: avatarName || user.avatarName,
-    },
-    { new: true },
-  );
-
-  return updatedUser as User;
 };

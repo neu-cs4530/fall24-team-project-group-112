@@ -59,7 +59,7 @@ describe('POST /addUser', () => {
     isUsernameUniqueSpy.mockResolvedValueOnce(true);
     mockCreateUserWithEmailAndPassword.mockResolvedValueOnce({ user: { uid: '12345' } });
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBody);
+    const response = await supertest(app).post('/user').send(mockReqBody);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockUserCreated);
@@ -75,7 +75,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -92,7 +92,7 @@ describe('POST /addUser', () => {
       },
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -101,7 +101,7 @@ describe('POST /addUser', () => {
   it('should return an error if the request is empty', async () => {
     const mockReqBodyError = {};
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -118,7 +118,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -135,7 +135,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -152,7 +152,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -169,7 +169,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -186,7 +186,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -204,7 +204,7 @@ describe('POST /addUser', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).post('/user/addUser').send(mockReqBodyError);
+    const response = await supertest(app).post('/user').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid user');
@@ -212,7 +212,7 @@ describe('POST /addUser', () => {
 
   it('should return an error if username is already in use', async () => {
     isUsernameUniqueSpy.mockResolvedValueOnce(false);
-    const response = await supertest(app).post('/user/addUser').send(mockReqBody);
+    const response = await supertest(app).post('/user').send(mockReqBody);
     expect(response.status).toBe(400);
     expect(response.text).toBe('Username already exists, choose a unique username');
   });
@@ -221,7 +221,7 @@ describe('POST /addUser', () => {
     addUserSpy.mockResolvedValueOnce({ error: 'Error when creating a user' });
     mockCreateUserWithEmailAndPassword.mockResolvedValueOnce({});
     isUsernameUniqueSpy.mockResolvedValueOnce(true);
-    const response = await supertest(app).post('/user/addUser').send(mockReqBody);
+    const response = await supertest(app).post('/user').send(mockReqBody);
 
     expect(response.status).toBe(500);
   });
@@ -232,7 +232,7 @@ describe('POST /addUser', () => {
     mockCreateUserWithEmailAndPassword.mockRejectedValueOnce(
       new Error('Error when creating a firebase user'),
     );
-    const response = await supertest(app).post('/user/addUser').send(mockReqBody);
+    const response = await supertest(app).post('/user').send(mockReqBody);
 
     expect(response.status).toBe(500);
   });

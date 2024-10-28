@@ -47,7 +47,7 @@ const userController = () => {
    * Creates a corresponding user object in firebase with the username, email and password.
    * If there is an error, the HTTP response's status is updated.
    *
-   * @param _ The HTTP request object (not used in this function).
+   * @param req The HTTP request object (not used in this function).
    * @param res The HTTP response object used to send back the tag count mapping.
    *
    * @returns A Promise that resolves to void.
@@ -87,7 +87,7 @@ const userController = () => {
   };
 
   // Add appropriate HTTP verbs and their endpoints to the router.
-  router.post('/addUser', createUser);
+  router.post('', createUser);
 
   return router;
 };

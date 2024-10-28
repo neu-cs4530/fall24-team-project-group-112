@@ -41,7 +41,7 @@ const Header = () => {
           <Link
             key={index}
             to={`/${link.route}`}
-            className={`link hover:text-gray-300 ${pathname === `/${link.route}` ? 'active' : ''}`}>
+            className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}>
             <div className='header-element'>
               <span className='icon'>{link.image}</span>
               <span className='text'>{link.name}</span>

@@ -671,3 +671,25 @@ export const addUser = async (user: User): Promise<UserResponse> => {
     return { error: 'Error when saving a new user' };
   }
 };
+
+/**
+ * Finds all questions asked by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ */
+export const findQuestionAskedBy = async (username: string): Promise<Question[]> => {
+  try {
+    let qlist = [];
+    qlist = await QuestionModel.find({ askedBy: username }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+    ]);
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};

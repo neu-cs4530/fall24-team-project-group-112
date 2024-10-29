@@ -11,6 +11,8 @@ import useLoginContext from './useLoginContext';
  */
 const useLogin = () => {
   const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   const { setUser } = useLoginContext();
   const navigate = useNavigate();
 
@@ -20,7 +22,12 @@ const useLogin = () => {
    * @param e - the event object.
    */
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+    const { name, value } = e.target;
+    if (name === 'username') {
+      setUsername(value);
+    } else if (name === 'password') {
+      setPassword(value);
+    }
   };
 
   /**
@@ -30,11 +37,11 @@ const useLogin = () => {
    */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setUser({ username });
+    setUser({ username, password });
     navigate('/home');
   };
 
-  return { username, handleInputChange, handleSubmit };
+  return { username, password, error, handleInputChange, handleSubmit };
 };
 
 export default useLogin;

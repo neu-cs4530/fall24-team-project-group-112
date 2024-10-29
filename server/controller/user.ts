@@ -1,8 +1,9 @@
 import express, { Response, Router } from 'express';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { CreateUserRequest, User } from '../types';
+import { CreateUserRequest, User, FindUserRequest } from '../types';
 import { addUser, isUsernameUnique } from '../models/application';
 import { auth } from '../firebaseConfig';
+import UserModel from '../models/user';
 
 const userController = () => {
   const router: Router = express.Router();
@@ -86,8 +87,32 @@ const userController = () => {
     }
   };
 
+  /**
+   * Retrieves a user's public details.
+   *
+   * @param req The HTTP request object containing the username parameter.
+   * @param res The HTTP response object used to send back the user's public details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getUser = async (req: FindUserRequest, res: Response): Promise<void> => {
+    try {
+      const { user } = req.body;
+      // const user = await UserModel.findOne({ username });
+
+      if (!user) {
+        res.status(404).send(`User with username "${user.username}" not found`);
+      } else {
+        res.json(user); // Return the user as JSON
+      }
+    } catch (err) {
+      res.status(500).send(`Error retrieving user: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
+  router.get('/getUser/:username', getUser); // New endpoint to get user by username
 
   return router;
 };

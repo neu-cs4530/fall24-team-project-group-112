@@ -212,6 +212,27 @@ export interface ServerToClientEvents {
 }
 
 /**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  Gold = 'gold',
+  Silver = 'silver',
+  Bronze = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FirstCommenter = 'First Commenter',
+  Voter = 'Voter',
+  DiscussionStarter = 'Discussion Starter',
+  CommunityHelper = 'Community Helper',
+  Influencer = 'Influencer',
+  Lifesaver = 'Lifesaver',
+}
+
+/**
  * Interface representing a Badge, which contains:
  * - _id - The unique identifier for the badge. Optional field.
  * - name - The name of the badge.
@@ -220,7 +241,7 @@ export interface ServerToClientEvents {
  */
 export interface Badge {
   _id?: ObjectId;
-  name: string;
+  name: BadgeName;
   description: string;
-  color: string;
+  color: BadgeColor;
 }

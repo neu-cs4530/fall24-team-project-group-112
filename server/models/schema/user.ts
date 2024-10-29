@@ -16,7 +16,7 @@ import { Schema } from 'mongoose';
  * - `school`: The school a user currently attends. Optional field.
  * - `city`: The city a user lives in. Optional field.
  * - `state`: The state a user lives in. Optional field.
- * - `badges`: The list of badges a user has earned. This field is required but may be empty.
+ * - `badges`: The list of badges a user has earned. This field is required but defaults to an empty array.
  * - `avatarName`: The name of the user's avatar image. Optional field.
  * - `createdAt`: The date the user created their account. This field is required.
  */
@@ -33,7 +33,7 @@ const userSchema: Schema = new Schema(
     school: { type: String },
     city: { type: String },
     state: { type: String },
-    badges: { type: [{ type: String }], required: true },
+    badges: { type: [{ type: String }], default: [], required: true },
     avatarName: { type: String },
     createdAt: { type: Date, required: true },
   },

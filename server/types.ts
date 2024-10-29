@@ -5,6 +5,41 @@ import { Server } from 'socket.io';
 export type FakeSOSocket = Server<ServerToClientEvents>;
 
 /**
+ * Interface representing a User, which contains:
+ * - username - The unique identifier of the user.
+ * - firstName - The user's first name
+ * - lastName - The user's last name
+ * - email - The user's email address
+ * - headline? - The user's one-liner headline. Optional field.
+ * - bio? - The user's full bio. Optional field.
+ * - githubUrl? - The user's GitHub profile. Optional field.
+ * - company? - The company a user currently works at. Optional field.
+ * - school? - The school a user currently attends. Optional field.
+ * - city? - The city a user lives in. Optional field.
+ * - state? - The country a user lives in. Optional field.
+ * - badges - The list of badges a user has earned.
+ * - avatarName? - The name of the user's avatar image. Optional field.
+ * - createdAt - The date the user created their account.
+ *
+ */
+export interface User {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  badges: Badge[];
+  avatarName?: string;
+  createdAt: Date;
+}
+
+/**
  * Type representing the possible ordering options for questions.
  */
 export type OrderType = 'newest' | 'unanswered' | 'active' | 'mostViewed';
@@ -244,6 +279,23 @@ export interface Badge {
   name: BadgeName;
   description: string;
   color: BadgeColor;
+}
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
 }
 
 /**

@@ -3,9 +3,11 @@ import supertest from 'supertest';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
+import UserModel from '../models/user';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
+const findOneSpy = jest.spyOn(UserModel, 'findOne');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
@@ -235,5 +237,53 @@ describe('POST /addUser', () => {
     const response = await supertest(app).post('/user').send(mockReqBody);
 
     expect(response.status).toBe(500);
+  });
+});
+
+describe('GET /getUserByName/:name', () => {
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    findOneSpy.mockClear(); // Clear the mock after each test
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should return the user when found', async () => {
+    // Mock a user object to be returned by the findOne method
+    const mockUser = {
+      username: 'dummyUser',
+      lastName: 'User',
+      email: 'dummyUser@email.com',
+      createdAt: '2024-06-03T00:00:00.000Z',
+    };
+
+    findOneSpy.mockResolvedValueOnce(mockUser);
+
+    const response = await supertest(app).get('/user/getUserByUsername/dummyUser');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockUser);
+  });
+
+  it('should return 404 if the user is not found', async () => {
+    // Mock findOne to return null to simulate tag not found
+    findOneSpy.mockResolvedValueOnce(null);
+
+    const response = await supertest(app).get('/user/getUserByUsername/nonExistentUser');
+
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('User with the username "nonExistentUser" not found');
+  });
+
+  it('should return 500 if there is an error fetching the user', async () => {
+    // Mock findOne to throw an error
+    findOneSpy.mockRejectedValueOnce(new Error('Error fetching user'));
+
+    const response = await supertest(app).get('/user/getUserByUsername/errorUser');
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching user: Error fetching user');
   });
 });

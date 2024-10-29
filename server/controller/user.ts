@@ -88,31 +88,31 @@ const userController = () => {
   };
 
   /**
-   * Retrieves a user's public details.
+   * Retrieves a user's public details through their username.
    *
    * @param req The HTTP request object containing the username parameter.
    * @param res The HTTP response object used to send back the user's public details.
    *
    * @returns A Promise that resolves to void.
    */
-  const getUser = async (req: FindUserRequest, res: Response): Promise<void> => {
+  const getUserByUsername = async (req: FindUserRequest, res: Response): Promise<void> => {
     try {
-      const { user } = req.body;
-      // const user = await UserModel.findOne({ username });
+      const { username } = req.params;
+      const user = await UserModel.findOne({ username });
 
       if (!user) {
-        res.status(404).send(`User with username "${user.username}" not found`);
+        res.status(404).send(`User with the username "${username}" not found`);
       } else {
         res.json(user); // Return the user as JSON
       }
     } catch (err) {
-      res.status(500).send(`Error retrieving user: ${(err as Error).message}`);
+      res.status(500).send(`Error when fetching user: ${(err as Error).message}`);
     }
   };
 
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
-  router.get('/getUser/:username', getUser); // New endpoint to get user by username
+  router.get('/getUserByUsername/:username', getUserByUsername); // New endpoint to get user by username
 
   return router;
 };

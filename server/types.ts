@@ -293,3 +293,14 @@ export interface CreateUserRequest extends Request {
     password: string;
   };
 }
+
+
+/**
+ * Interface for the request parameters when finding questions answered by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAnsweredByRequest extends Request {
+  params: {
+    username: string;
+  };
+}

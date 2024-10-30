@@ -6,6 +6,7 @@ import {
   FindQuestionByIdRequest,
   AddQuestionRequest,
   VoteRequest,
+  FindQuestionsAnsweredByRequest,
   FakeSOSocket,
 } from '../types';
 import {
@@ -225,6 +226,48 @@ const questionController = (socket: FakeSOSocket) => {
    */
   const downvoteQuestion = async (req: VoteRequest, res: Response): Promise<void> => {
     voteQuestion(req, res, 'downvote');
+  };
+
+  /**
+   * Retrieves questions answerewd by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionsAnsweredByRequest object containing the question ID as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsAnsweredBy = async (
+    req: FindQuestionsAnsweredByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    const usernameUnique = await isUsernameUnique(username);
+
+    if (!usernameUnique) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionAskedBy(username);
+
+      if (qlist && !('error' in qlist)) {
+        res.json(qlist);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question asked by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question asked by user`);
+      }
+    }
   };
 
   // add appropriate HTTP verbs and their endpoints to the router

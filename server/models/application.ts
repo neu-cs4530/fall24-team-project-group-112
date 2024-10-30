@@ -671,3 +671,61 @@ export const addUser = async (user: User): Promise<UserResponse> => {
     return { error: 'Error when saving a new user' };
   }
 };
+
+/**
+ * Finds all questions answered by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ */
+export const findQuestionAnsweredBy = async (username: string): Promise<Question[]> => {
+  try {
+    let qlist = [];
+    qlist = await QuestionModel.find().populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+    ]);
+
+    qlist = qlist.filter(async q => {
+      for (const a of q.answers) {
+        if (typeof a === 'object' && a !== null && 'ansBy' in a) {
+          if (a.ansBy === username) {
+            return true;
+          }
+        } else {
+          const answer = await AnswerModel.findById(a);
+          if (answer && answer.ansBy === username) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+    // qlist = await Promise.all(
+    //   qlist.map(async q => {
+    //     const answers = await Promise.all(
+    //       q.answers.map(async a => {
+    //         if (typeof a === 'object' && a !== null && 'ansBy' in a) {
+    //           return a.ansBy === username;
+    //         } else {
+    //           const answer = await AnswerModel.findById(a);
+    //           return answer && answer.ansBy === username;
+    //         }
+    //       })
+    //     );
+    //     return answers.some(answeredByUser => answeredByUser) ? q : null;
+    //   })
+    // );
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};

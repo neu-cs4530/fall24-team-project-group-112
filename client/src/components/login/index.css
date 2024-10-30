@@ -51,10 +51,3 @@
 .login-button:active {
   background-color: #003f7f;
 }
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}

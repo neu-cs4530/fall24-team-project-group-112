@@ -7,34 +7,22 @@ import useLogin from '../../hooks/useLogin';
  * to the application's context through the useLoginContext hook.
  */
 const Login = () => {
-  const { username, password, error, handleSubmit, handleInputChange } = useLogin();
+  const { username, handleSubmit, handleInputChange } = useLogin();
 
   return (
     <div className='container'>
       <h2>Welcome to FakeStackOverflow!</h2>
-      <h4>Sign into your account.</h4>
-      <form className='login-form' onSubmit={handleSubmit}>
+      <h4>Please enter your username.</h4>
+      <form onSubmit={handleSubmit}>
         <input
           type='text'
           value={username}
-          name='username'
           onChange={handleInputChange}
           placeholder='Enter your username'
           required
           className='input-text'
           id={'usernameInput'}
         />
-        <input
-          type='password'
-          value={password}
-          name='password'
-          onChange={handleInputChange}
-          placeholder='Enter your password'
-          required
-          className='input-text'
-          id={'passwordInput'}
-        />
-        {error && <p className='error-message'>{error}</p>}
         <button type='submit' className='login-button'>
           Submit
         </button>

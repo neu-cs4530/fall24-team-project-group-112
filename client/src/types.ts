@@ -7,7 +7,6 @@ export type FakeSOSocket = Socket<ServerToClientEvents>;
  */
 export interface User {
   username: string;
-  password: string;
 }
 
 /**

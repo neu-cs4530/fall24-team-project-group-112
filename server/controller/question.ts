@@ -245,7 +245,14 @@ const questionController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     const { username } = req.params;
 
-    if (username === undefined || !isUsernameUnique(username)) {
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    const usernameUnique = await isUsernameUnique(username);
+
+    if (!usernameUnique) {
       res.status(400).send('User with provided username is invalid');
       return;
     }
@@ -255,10 +262,7 @@ const questionController = (socket: FakeSOSocket) => {
 
       if (qlist && !('error' in qlist)) {
         res.json(qlist);
-        return;
       }
-
-      throw new Error('Error while fetching question asked by user');
     } catch (err: unknown) {
       if (err instanceof Error) {
         res.status(500).send(`Error when fetching question asked by user: ${err.message}`);

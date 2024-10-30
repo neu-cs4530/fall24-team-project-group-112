@@ -252,19 +252,19 @@ describe('GET /getUserByName/:name', () => {
 
   it('should return the user when found', async () => {
     // Mock a user object to be returned by the findOne method
-    const mockUser = {
+    const newUser = {
       username: 'dummyUser',
       lastName: 'User',
       email: 'dummyUser@email.com',
       createdAt: '2024-06-03T00:00:00.000Z',
     };
 
-    findOneSpy.mockResolvedValueOnce(mockUser);
+    findOneSpy.mockResolvedValueOnce(newUser);
 
     const response = await supertest(app).get('/user/getUserByUsername/dummyUser');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockUser);
+    expect(response.body).toEqual(newUser);
   });
 
   it('should return 404 if the user is not found', async () => {

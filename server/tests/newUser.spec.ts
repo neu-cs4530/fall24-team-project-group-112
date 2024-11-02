@@ -44,7 +44,7 @@ const mockUserCreated = {
   createdAt: new Date('2024-06-03').toISOString(),
 };
 
-describe('POST /addUser', () => {
+describe('POST /user', () => {
   afterEach(async () => {
     jest.clearAllMocks();
   });

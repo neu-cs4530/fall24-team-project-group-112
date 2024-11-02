@@ -198,6 +198,13 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
   }
 };
 
+/**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
+ */
 const addNotifications = async (
   eventId: ObjectId,
   receiverUsername: string,

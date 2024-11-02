@@ -267,3 +267,48 @@ export interface ServerToClientEvents {
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
 }
+
+/**
+ * Enum representing the possible event types for notifications.
+ */
+export enum NotificationType {
+  ANSWER = 'answer',
+  COMMENT = 'comment',
+  BADGE = 'badge',
+  FOLLOW = 'follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+export interface Notification {
+  _id?: ObjectId;
+  notificationType: NotificationType;
+  eventId: ObjectId;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
+}
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
+}

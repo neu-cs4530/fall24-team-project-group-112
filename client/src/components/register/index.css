@@ -58,4 +58,13 @@
   .signup-button:active {
     background-color: #003f7f;
   }
-  
+
+  .account-creation-error {
+    padding: 20px;
+    background-color: #eb9497;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    font-size: 0.75rem;
+    display: block;
+    margin-top: -0.5em;
+  }

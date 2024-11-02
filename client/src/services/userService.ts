@@ -10,12 +10,15 @@ const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
  * @param ans - The answer object containing the answer details.
  * @throws Error Throws an error if the request fails or the response status is not 200.
  */
-const addUser = async (user: User, password: string): Promise<User> => {
+const addUser = async (
+  user: User,
+  password: string,
+): Promise<User | { status: number; error: string }> => {
   const data = { user, password };
 
   const res = await api.post(`${USER_API_URL}`, data);
   if (res.status !== 200) {
-    throw new Error(`Error while creating a new user:${res.statusText}`);
+    return { status: res.status, error: res.statusText };
   }
   return res.data;
 };

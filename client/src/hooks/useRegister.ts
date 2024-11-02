@@ -85,18 +85,22 @@ const useRegister = () => {
     event.preventDefault();
     const user: User = {
       username,
+      firstName,
+      lastName,
+      email,
+      createdAt: new Date(),
     };
 
     try {
       const res = await addUser(user, password);
       if (res) {
-        setUser({ username });
+        // setUser({ res.username });
         // navigate to the question that was answered
         navigate(`/`);
       }
     } catch (err) {
       if (err instanceof Error) {
-        setTextErr(`Error while creating a new user: ${err.message}`);
+        setTextErr(`${err.message}`);
       }
     }
   };

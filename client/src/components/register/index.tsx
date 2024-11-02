@@ -24,10 +24,19 @@ const Register = () => {
   } = useRegister();
   // create a new hook
 
+  console.log(textErr);
+
   return (
     <div className='container'>
       <h2>Welcome to FakeStackOverflow!</h2>
       <h4>Register a new account</h4>
+      {textErr !== '' && (
+        <div className='account-creation-error'>
+          {textErr === 'Username already exists, choose a unique username'
+            ? 'This username is taken, please choose a different one'
+            : 'Error in creating your account, please try again'}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className='form-container'>
         <input
           type='text'
@@ -66,7 +75,7 @@ const Register = () => {
           id={'usernameInput'}
         />
         <input
-          type='text'
+          type='password'
           value={password}
           onChange={handlePasswordChange}
           placeholder='Enter your password'

@@ -276,3 +276,20 @@ export interface Notification {
   notificationDate: Date;
   seen: boolean;
 }
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
+}

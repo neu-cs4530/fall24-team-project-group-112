@@ -269,7 +269,7 @@ export enum NotificationType {
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
 export interface Notification {
-  _id: ObjectId;
+  _id?: ObjectId;
   notificationType: NotificationType;
   eventId: ObjectId;
   receiverUsername: string;

@@ -20,7 +20,7 @@ import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
 import NotificationModel from './notifications';
-import UserModel from './user';
+import UserModel from './users';
 
 /**
  * Parses tags from a search string.

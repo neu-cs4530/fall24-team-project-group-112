@@ -98,25 +98,13 @@ describe('PATCH /:username', () => {
     bio: 'Software engineer in Boston',
   };
 
-  beforeAll(async () => {
-    mockingoose(UserModel).toReturn(mockUser, 'findOne');
-  });
-  beforeEach(async () => {});
-
-  afterEach(async () => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close(); // Ensure the connection is properly closed
-    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
-  });
-
   it('should update a user with the given username', async () => {
     const cityUpdate = 'Boston';
     const mockReqBody = {
       city: cityUpdate,
     };
+
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const expectedResult = { ...mockUser, city: cityUpdate };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
 
@@ -142,7 +130,20 @@ describe('PATCH /:username', () => {
     expect(response.status).toBe(404); // route is not matched
   });
 
+  it('should return an error if provided user does not exist', async () => {
+    const mockReqBody = {
+      city: 'Boston',
+    };
+
+    mockingoose.resetAll(); // make sure an existing mock isn't still set
+    const response = await supertest(app).patch(`/user/fakeUsername`).send(mockReqBody);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('User does not exist');
+  });
+
   it('should return the original object if all profile fields are empty', async () => {
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const response = await supertest(app).patch(`/user/${username}`).send();
 
     expect(response.status).toBe(200);
@@ -160,6 +161,8 @@ describe('PATCH /:username', () => {
       state: 'Massachusetts',
       avatarName: 'avatar1',
     };
+
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const expectedResult = { ...mockUser, ...mockReqBody };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
 
@@ -171,6 +174,8 @@ describe('PATCH /:username', () => {
     const mockReqBody = {
       city: cityUpdate,
     };
+
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const expectedResult = { ...mockUser, city: cityUpdate };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
 

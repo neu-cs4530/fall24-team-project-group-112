@@ -714,26 +714,14 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 export const updateUser = async (
   username: string,
   userUpdate: UpdateUserPayload,
-): Promise<User> => {
+): Promise<UserResponse> => {
   const existingUser = await UserModel.findOne({ username: username });
   if (!existingUser) {
-    throw new Error('User not found');
+    return { error: 'User does not exist' };
   }
 
-  const updatedUser = await UserModel.findOneAndUpdate(
-    { username: username },
-    {
-      headline: userUpdate.headline || existingUser.headline,
-      bio: userUpdate.bio || existingUser.bio,
-      githubUrl: userUpdate.githubUrl || existingUser.githubUrl,
-      company: userUpdate.company || existingUser.company,
-      school: userUpdate.school || existingUser.school,
-      city: userUpdate.city || existingUser.city,
-      state: userUpdate.state || existingUser.state,
-      avatarName: userUpdate.avatarName || existingUser.avatarName,
-    },
-    { new: true },
-  );
+  Object.assign(existingUser, userUpdate);
+  await existingUser.save();
 
-  return updatedUser as User;
+  return existingUser as User;
 };

@@ -17,6 +17,7 @@ import {
   addVoteToQuestion,
   addUser,
   isUsernameUnique,
+  updateUser,
 } from '../models/application';
 import { Answer, Question, Tag, Comment, User } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
@@ -926,6 +927,75 @@ describe('application module', () => {
         const unique = await isUsernameUnique(USERS[0].username);
 
         expect(unique).toEqual(true);
+      });
+    });
+
+    describe('updateUser', () => {
+      const username = 'dummyUser';
+      const mockUser = {
+        username: username,
+        firstName: 'Dummy',
+        lastName: 'User',
+        email: 'dummy@gmail.com',
+        createdAt: new Date('2024-06-03').toISOString(),
+        headline: 'Software engineer',
+        bio: 'Software engineer in Boston',
+      };
+
+      it('updateUser should return the updated user', async () => {
+        const mockReqBody = {
+          headline: 'Aspiring software engineer',
+          bio: 'Software engineer in Boston looking to connect with other engineers',
+          githubUrl: 'www.github.com',
+          company: 'Google',
+          school: 'Northeastern University',
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = await updateUser(username, mockReqBody);
+        expect(result).toMatchObject(mockReqBody);
+      });
+
+      it('updateUser should handle partial updates properly', async () => {
+        const mockReqBody = {
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = (await updateUser(username, mockReqBody)) as User;
+        expect(result).toMatchObject(mockReqBody);
+        expect(result.headline).toEqual(mockUser.headline);
+        expect(result.bio).toEqual(mockUser.bio);
+      });
+
+      it('updateUser should return an error when the provided username is invalid', async () => {
+        const mockReqBody = {
+          headline: 'Aspiring software engineer',
+          bio: 'Software engineer in Boston looking to connect with other engineers',
+          githubUrl: 'www.github.com',
+          company: 'Google',
+          school: 'Northeastern University',
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = await updateUser('notARealUser', mockReqBody);
+        expect(result).toEqual({ error: 'User does not exist' });
       });
     });
   });

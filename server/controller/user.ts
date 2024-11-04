@@ -141,15 +141,15 @@ const userController = (socket: FakeSOSocket) => {
    */
   const updateProfile = async (req: UpdateUserRequest, res: Response): Promise<void> => {
     const username = req.params.username;
-    if (!username) {
-      res.status(400).send('Invalid username');
-      return;
-    }
-
     const userUpdate: UpdateUserPayload = { ...req.body };
 
     try {
       const updatedUser = await updateUser(username, userUpdate);
+
+      if (updatedUser && 'error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
       res.json(updatedUser);
     } catch (err) {
       res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);

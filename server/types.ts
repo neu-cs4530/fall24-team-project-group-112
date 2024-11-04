@@ -40,8 +40,18 @@ export interface User {
 }
 
 /**
- * Interface extending the request body when updating a user's profile, which contains:
- * - username - The unique identifier of the user.
+ * Interface extending the request body when updating a user's profile, which contains a
+ * username parameter and UpdateUserPayload body containing updated profile information.
+ */
+export interface UpdateUserRequest extends Request {
+  params: {
+    username: string;
+  };
+  body: UpdateUserPayload;
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
  * - headline - The user's one-liner headline. Optional field.
  * - bio - The user's full bio. Optional field.
  * - githubUrl - The user's GitHub profile. Optional field.
@@ -51,13 +61,6 @@ export interface User {
  * - state - The country a user lives in. Optional field.
  * - avatarName - The name of the user's avatar image. Optional field.
  */
-export interface UpdateUserRequest extends Request {
-  params: {
-    username: string;
-  };
-  body: UpdateUserPayload;
-}
-
 export interface UpdateUserPayload {
   headline?: string;
   bio?: string;

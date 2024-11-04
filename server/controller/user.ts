@@ -134,8 +134,8 @@ const userController = (socket: FakeSOSocket) => {
   /**
    * Updates a user's profile information with the provided information.
    *
-   * @param req The FindQuestionRequest object containing the query parameters `order` and `search`.
-   * @param res The HTTP response object used to send back the filtered list of questions.
+   * @param req The UpdateUserRequest object containing the username and the updated user information.
+   * @param res The HTTP response object used to send back the updated user information.
    *
    * @returns A Promise that resolves to void.
    */

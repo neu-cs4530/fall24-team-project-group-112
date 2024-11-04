@@ -687,6 +687,12 @@ export const findQuestionAskedBy = async (username: string): Promise<Question[]>
         path: 'tags',
         model: TagModel,
       },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
     ]);
     return qlist;
   } catch (error) {

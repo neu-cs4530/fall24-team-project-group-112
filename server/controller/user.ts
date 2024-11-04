@@ -1,4 +1,4 @@
-import express, { Response } from 'express';
+import express, { Response, Router } from 'express';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import {
   FakeSOSocket,
@@ -12,7 +12,7 @@ import { addUser, isUsernameUnique, updateUser } from '../models/application';
 import { auth } from '../firebaseConfig';
 
 const userController = (socket: FakeSOSocket) => {
-  const router = express.Router();
+  const router: Router = express.Router();
 
   /**
    * Checks if the provided user request contains the required data.

@@ -1,30 +1,18 @@
 import express, { Response, Router } from 'express';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { FakeSOSocket, UpdateUserRequest, CreateUserRequest, LoginUserRequest, User } from '../types';
-import { addUser, isUsernameUnique } from '../models/application';
+import {
+  FakeSOSocket,
+  UpdateUserRequest,
+  CreateUserRequest,
+  LoginUserRequest,
+  User,
+  UpdateUserPayload,
+} from '../types';
+import { addUser, isUsernameUnique, updateUser } from '../models/application';
 import { auth } from '../firebaseConfig';
-
-const userController = () => {
-  const router: Router = express.Router();
 
 const userController = (socket: FakeSOSocket) => {
   const router = express.Router();
-
-  /**
-   * Updates a user's profile information with the provided information.
-   *
-   * @param req The FindQuestionRequest object containing the query parameters `order` and `search`.
-   * @param res The HTTP response object used to send back the filtered list of questions.
-   *
-   * @returns A Promise that resolves to void.
-   */
-  const updateProfile = async (req: UpdateUserRequest, res: Response): Promise<void> => {
-    const { headline, bio, githubUrl, company, school, city, state, avatarName } = req.body;
-  };
-
-  // add appropriate HTTP verbs and their endpoints to the router
-  router.patch('/', updateProfile);
-
 
   /**
    * Checks if the provided user request contains the required data.
@@ -142,9 +130,36 @@ const userController = (socket: FakeSOSocket) => {
       res.status(500).send(`Login error: ${(err as Error).message}`);
     }
   };
+
+  /**
+   * Updates a user's profile information with the provided information.
+   *
+   * @param req The FindQuestionRequest object containing the query parameters `order` and `search`.
+   * @param res The HTTP response object used to send back the filtered list of questions.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const updateProfile = async (req: UpdateUserRequest, res: Response): Promise<void> => {
+    const username = req.params.username;
+    if (!username) {
+      res.status(400).send('Invalid username');
+      return;
+    }
+
+    const userUpdate: UpdateUserPayload = { ...req.body };
+
+    try {
+      const updatedUser = await updateUser(username, userUpdate);
+      res.json(updatedUser);
+    } catch (err) {
+      res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
   router.get('/login', loginUser);
+  router.patch('/:username', updateProfile);
 
   return router;
 };

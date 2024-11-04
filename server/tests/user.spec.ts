@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import supertest from 'supertest';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
+import UserModel from '../models/users';
+const mockingoose = require('mockingoose');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
@@ -81,5 +83,106 @@ describe('GET /login', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toBe('Login error: Invalid email or password');
+  });
+});
+
+describe('PATCH /:username', () => {
+  const username = 'dummyUser';
+  const mockUser = {
+    username: username,
+    firstName: 'Dummy',
+    lastName: 'User',
+    email: 'dummy@gmail.com',
+    createdAt: new Date('2024-06-03').toISOString(),
+    headline: 'Software engineer',
+    bio: 'Software engineer in Boston',
+  };
+
+  beforeAll(async () => {
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
+  });
+  beforeEach(async () => {});
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should update a user with the given username', async () => {
+    const cityUpdate = 'Boston';
+    const mockReqBody = {
+      city: cityUpdate,
+    };
+    const expectedResult = { ...mockUser, city: cityUpdate };
+    mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+    const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    // updated user should have the provided user
+    expect(response.body.username).toBe(username);
+    // city should have been updated
+    expect(response.body.city).toBe(cityUpdate);
+    // other fields should not have changed
+    expect(response.body.email).toBe(mockUser.email);
+    expect(response.body.firstName).toBe(mockUser.firstName);
+    expect(response.body.lastName).toBe(mockUser.lastName);
+  });
+
+  it('should return an error if no user is provided', async () => {
+    const mockReqBody = {
+      city: 'Boston',
+    };
+    const response = await supertest(app).patch(`/user/`).send(mockReqBody);
+
+    expect(response.status).toBe(404); // route is not matched
+  });
+
+  it('should return the original object if all profile fields are empty', async () => {
+    const response = await supertest(app).patch(`/user/${username}`).send();
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject(mockUser);
+  });
+
+  it('should update all fields properly', async () => {
+    const mockReqBody = {
+      headline: 'Aspiring software engineer',
+      bio: 'Software engineer in Boston looking to connect with other engineers',
+      githubUrl: 'www.github.com',
+      company: 'Google',
+      school: 'Northeastern University',
+      city: 'Boston',
+      state: 'Massachusetts',
+      avatarName: 'avatar1',
+    };
+    const expectedResult = { ...mockUser, ...mockReqBody };
+    mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+    const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
+    expect(response.body).toMatchObject(expectedResult);
+  });
+  it('should handle a partial update properly', async () => {
+    const cityUpdate = 'Boston';
+    const mockReqBody = {
+      city: cityUpdate,
+    };
+    const expectedResult = { ...mockUser, city: cityUpdate };
+    mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+    const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    // updated user should have the provided user
+    expect(response.body.username).toBe(username);
+    // city should have been updated
+    expect(response.body.city).toBe(cityUpdate);
+    // other updatable fields should not have changed
+    expect(response.body.headline).toBe(mockUser.headline);
+    expect(response.body.bio).toBe(mockUser.bio);
   });
 });

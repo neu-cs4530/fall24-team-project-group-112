@@ -11,7 +11,7 @@ import {
   Question,
   QuestionResponse,
   Tag,
-  UpdateUserRequest,
+  UpdateUserPayload,
   User,
   UserResponse,
 } from '../types';
@@ -711,24 +711,26 @@ export const addUser = async (user: User): Promise<UserResponse> => {
   }
 };
 
-export const updateUser = async (username: string, req: UpdateUserRequest): Promise<User> => {
-  const { headline, bio, githubUrl, company, school, city, state, avatarName } = req.body;
-  const user = await UserModel.findOne({ username: username });
-  if (!user) {
+export const updateUser = async (
+  username: string,
+  userUpdate: UpdateUserPayload,
+): Promise<User> => {
+  const existingUser = await UserModel.findOne({ username: username });
+  if (!existingUser) {
     throw new Error('User not found');
   }
 
   const updatedUser = await UserModel.findOneAndUpdate(
     { username: username },
     {
-      headline: headline || user.headline,
-      bio: bio || user.bio,
-      githubUrl: githubUrl || user.githubUrl,
-      company: company || user.company,
-      school: school || user.school,
-      city: city || user.city,
-      state: state || user.state,
-      avatarName: avatarName || user.avatarName,
+      headline: userUpdate.headline || existingUser.headline,
+      bio: userUpdate.bio || existingUser.bio,
+      githubUrl: userUpdate.githubUrl || existingUser.githubUrl,
+      company: userUpdate.company || existingUser.company,
+      school: userUpdate.school || existingUser.school,
+      city: userUpdate.city || existingUser.city,
+      state: userUpdate.state || existingUser.state,
+      avatarName: userUpdate.avatarName || existingUser.avatarName,
     },
     { new: true },
   );

@@ -731,37 +731,22 @@ export const findQuestionAnsweredBy = async (username: string): Promise<Question
         populate: { path: 'comments', model: CommentModel },
       },
     ]);
-
-    qlist = qlist.filter(async q => {
-      for (const a of q.answers) {
-        if (typeof a === 'object' && a !== null && 'ansBy' in a) {
-          if (a.ansBy === username) {
-            return true;
-          }
-        } else {
-          const answer = await AnswerModel.findById(a);
-          if (answer && answer.ansBy === username) {
-            return true;
-          }
-        }
-      }
-      return false;
-    });
-    // qlist = await Promise.all(
-    //   qlist.map(async q => {
-    //     const answers = await Promise.all(
-    //       q.answers.map(async a => {
-    //         if (typeof a === 'object' && a !== null && 'ansBy' in a) {
-    //           return a.ansBy === username;
-    //         } else {
-    //           const answer = await AnswerModel.findById(a);
-    //           return answer && answer.ansBy === username;
-    //         }
-    //       })
-    //     );
-    //     return answers.some(answeredByUser => answeredByUser) ? q : null;
-    //   })
-    // );
+    qlist = await Promise.all(
+      qlist.map(async q => {
+        const filteredAnswers = await Promise.all(
+          q.answers.map(async a => {
+            if (typeof a === 'object' && a !== null && 'ansBy' in a) {
+              return a.ansBy === username ? a : null;
+            }
+            const answer = await AnswerModel.findById(a);
+            return answer && answer.ansBy === username ? answer : null;
+          }),
+        );
+        q.answers = filteredAnswers.filter(a => a !== null);
+        return q.answers.length > 0 ? q : null;
+      }),
+    );
+    qlist = qlist.filter(q => q !== null);
     return qlist;
   } catch (error) {
     return [];

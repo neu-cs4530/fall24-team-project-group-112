@@ -18,6 +18,8 @@ import {
   processTags,
   populateDocument,
   saveQuestion,
+  isUsernameUnique,
+  findQuestionAnsweredBy,
 } from '../models/application';
 
 const questionController = (socket: FakeSOSocket) => {
@@ -256,7 +258,7 @@ const questionController = (socket: FakeSOSocket) => {
     }
 
     try {
-      const qlist = await findQuestionAskedBy(username);
+      const qlist = await findQuestionAnsweredBy(username);
 
       if (qlist && !('error' in qlist)) {
         res.json(qlist);
@@ -276,6 +278,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
+  router.get('/answeredBy/:username', getQuestionsAnsweredBy);
 
   return router;
 };

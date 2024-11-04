@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
-import useLoginContext from './useLoginContext';
 import { User } from '../types';
 import addUser from '../services/userService';
 
@@ -18,7 +17,6 @@ const useRegister = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
-  const { setUser } = useLoginContext();
   const navigate = useNavigate();
 
   /**
@@ -94,8 +92,8 @@ const useRegister = () => {
     try {
       const res = await addUser(user, password);
       if (res) {
-        // setUser({ res.username });
-        // navigate to the question that was answered
+        setTextErr('');
+        // navigate to login page -- TODO: this may change based on login page updates!
         navigate(`/`);
       }
     } catch (err) {

@@ -204,6 +204,21 @@ export interface AddCommentRequest extends Request {
 export type CommentResponse = Comment | { error: string };
 
 /**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: ObjectId;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+}
+
+/**
  * Interface representing the payload for a comment update event, which contains:
  * - result - The updated question or answer.
  * - type - The type of the updated item, either 'question' or 'answer'.
@@ -282,6 +297,33 @@ export interface Badge {
 }
 
 /**
+ * Enum representing the possible colors for a badge.
+ */
+export enum NotificationType {
+  ANSWER = 'answer',
+  COMMENT = 'comment',
+  BADGE = 'badge',
+  FOLLOW = 'follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+export interface Notification {
+  _id?: ObjectId;
+  notificationType: NotificationType;
+  eventId: ObjectId;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
+}
+
+/**
  * Type representing the possible responses for a User-related operation.
  */
 export type UserResponse = User | { error: string };
@@ -306,5 +348,17 @@ export interface CreateUserRequest extends Request {
 export interface FindUserRequest extends Request {
   body: {
     username: string;
+  };
+}
+
+/**
+ * Interface extending the request body when logging in an existing user, which contains:
+ * - email - The email of the user.
+ * - password - The password of the user.
+ */
+export interface LoginUserRequest extends Request {
+  body: {
+    email: string;
+    password: string;
   };
 }

@@ -1,6 +1,6 @@
 import express, { Response, Router } from 'express';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { CreateUserRequest, User, FindUserRequest } from '../types';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { CreateUserRequest, LoginUserRequest, User, FindUserRequest } from '../types';
 import { addUser, isUsernameUnique } from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/user';
@@ -15,8 +15,19 @@ const userController = () => {
    *
    * @returns `true` if the request is valid, otherwise `false`.
    */
-  function isRequestValid(req: CreateUserRequest): boolean {
+  function isUserRequestValid(req: CreateUserRequest): boolean {
     return !!req.body.user && !!req.body.password;
+  }
+
+  /**
+   * Checks if the provided login request contains the required data.
+   *
+   * @param req The request object containing the login data.
+   *
+   * @returns `true` if the request is valid, otherwise `false`.
+   */
+  function isLoginRequestValid(req: LoginUserRequest): boolean {
+    return !!req.body.email && !!req.body.password;
   }
 
   /**
@@ -54,7 +65,7 @@ const userController = () => {
    * @returns A Promise that resolves to void.
    */
   const createUser = async (req: CreateUserRequest, res: Response): Promise<void> => {
-    if (!isRequestValid(req)) {
+    if (!isUserRequestValid(req)) {
       res.status(400).send('Invalid request');
       return;
     }
@@ -110,9 +121,37 @@ const userController = () => {
     }
   };
 
-  // Add appropriate HTTP verbs and their endpoints to the router.
+  /**
+   * Logs in a user with the given email and password.
+   *
+   * If the user does not exist or login fails, the HTTP response's status is updated.
+   *
+   * @param req The HTTP request object (not used in this function).
+   * @param res The HTTP response object used to send back the tag count mapping.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const loginUser = async (req: LoginUserRequest, res: Response): Promise<void> => {
+    if (!isLoginRequestValid(req)) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { email } = req.body;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, req.body.password);
+
+      res.json(email);
+    } catch (err) {
+      res.status(500).send(`Login error: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
-  router.get('/getUserByUsername/:username', getUserByUsername); // New endpoint to get user by username
+  router.get('/login', loginUser);
+  router.post('', createUser);
+  router.get('/getUserByUsername/:username', getUserByUsername);
 
   return router;
 };

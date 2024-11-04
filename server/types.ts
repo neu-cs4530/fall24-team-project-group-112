@@ -5,6 +5,44 @@ import { Server } from 'socket.io';
 export type FakeSOSocket = Server<ServerToClientEvents>;
 
 /**
+ * Interface representing a User, which contains:
+ * - username - The unique identifier of the user.
+ * - firstName - The user's first name
+ * - lastName - The user's last name
+ * - email - The user's email address
+ * - headline? - The user's one-liner headline. Optional field.
+ * - bio? - The user's full bio. Optional field.
+ * - githubUrl? - The user's GitHub profile. Optional field.
+ * - company? - The company a user currently works at. Optional field.
+ * - school? - The school a user currently attends. Optional field.
+ * - city? - The city a user lives in. Optional field.
+ * - state? - The country a user lives in. Optional field.
+ * - badges - The list of badges a user has earned.
+ * - avatarName? - The name of the user's avatar image. Optional field.
+ * - createdAt - The date the user created their account.
+ *
+ */
+export interface User {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  badges: Badge[];
+  avatarName?: string;
+  createdAt: Date;
+}
+
+// TODO: fill in interface details
+export interface Badge {}
+
+/**
  * Type representing the possible ordering options for questions.
  */
 export type OrderType = 'newest' | 'unanswered' | 'active' | 'mostViewed';
@@ -169,6 +207,21 @@ export interface AddCommentRequest extends Request {
 export type CommentResponse = Comment | { error: string };
 
 /**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: ObjectId;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+}
+
+/**
  * Interface representing the payload for a comment update event, which contains:
  * - result - The updated question or answer.
  * - type - The type of the updated item, either 'question' or 'answer'.
@@ -209,6 +262,63 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: QuestionResponse) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
+}
+
+/**
+ * Enum representing the possible event types for notifications.
+ */
+export enum NotificationType {
+  ANSWER = 'answer',
+  COMMENT = 'comment',
+  BADGE = 'badge',
+  FOLLOW = 'follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+export interface Notification {
+  _id?: ObjectId;
+  notificationType: NotificationType;
+  eventId: ObjectId;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
+}
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
+}
+
+/**
+ * Interface extending the request body when logging in an existing user, which contains:
+ * - email - The email of the user.
+ * - password - The password of the user.
+ */
+export interface LoginUserRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
 }
 
 /**

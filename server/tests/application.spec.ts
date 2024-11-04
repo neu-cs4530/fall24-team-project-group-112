@@ -15,10 +15,13 @@ import {
   saveComment,
   addComment,
   addVoteToQuestion,
+  addUser,
+  isUsernameUnique,
 } from '../models/application';
-import { Answer, Question, Tag, Comment } from '../types';
+import { Answer, Question, Tag, Comment, User } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
+import UserModel from '../models/user';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -132,6 +135,17 @@ const QUESTIONS: Question[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+  },
+];
+
+const USERS: User[] = [
+  {
+    username: 'dummyUser',
+    firstName: 'Dummy',
+    lastName: 'User',
+    email: 'dummyUser@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
   },
 ];
 
@@ -881,6 +895,37 @@ describe('application module', () => {
           expect(err).toBeInstanceOf(Error);
           if (err instanceof Error) expect(err.message).toBe('Invalid comment');
         }
+      });
+    });
+  });
+
+  describe('User model', () => {
+    describe('addUser', () => {
+      test('addUser should return the added user', async () => {
+        const result = (await addUser(USERS[0])) as User;
+
+        expect(result.username).toEqual(USERS[0].username);
+        expect(result.firstName).toEqual(USERS[0].firstName);
+        expect(result.lastName).toEqual(USERS[0].lastName);
+        expect(result.email).toEqual(USERS[0].email);
+        expect(result.badges).toEqual([]);
+        expect(result.createdAt).toEqual(USERS[0].createdAt);
+      });
+    });
+
+    describe('isUsernameUnique', () => {
+      test('isUsernameUnique should return false if a user with the given username already exists in the database', async () => {
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+        const unique = await isUsernameUnique(USERS[0].username);
+
+        expect(unique).toEqual(false);
+      });
+
+      test('isUsernameUnique should return true if a user with the given username does not exist in the database', async () => {
+        const unique = await isUsernameUnique(USERS[0].username);
+
+        expect(unique).toEqual(true);
       });
     });
   });

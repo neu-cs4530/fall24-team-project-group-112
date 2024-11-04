@@ -1,4 +1,4 @@
-import express, { Response, Router } from 'express';
+import express, { Response } from 'express';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import {
   FakeSOSocket,
@@ -140,7 +140,7 @@ const userController = (socket: FakeSOSocket) => {
    * @returns A Promise that resolves to void.
    */
   const updateProfile = async (req: UpdateUserRequest, res: Response): Promise<void> => {
-    const username = req.params.username;
+    const { username } = req.params;
     const userUpdate: UpdateUserPayload = { ...req.body };
 
     try {

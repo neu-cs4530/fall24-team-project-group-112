@@ -3,6 +3,8 @@ import supertest from 'supertest';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import UserModel from '../models/users';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
 
 jest.mock('firebase/auth', () => ({
@@ -89,7 +91,7 @@ describe('GET /login', () => {
 describe('PATCH /:username', () => {
   const username = 'dummyUser';
   const mockUser = {
-    username: username,
+    username,
     firstName: 'Dummy',
     lastName: 'User',
     email: 'dummy@gmail.com',

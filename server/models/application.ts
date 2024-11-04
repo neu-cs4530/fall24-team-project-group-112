@@ -715,7 +715,7 @@ export const updateUser = async (
   username: string,
   userUpdate: UpdateUserPayload,
 ): Promise<UserResponse> => {
-  const existingUser = await UserModel.findOne({ username: username });
+  const existingUser = await UserModel.findOne({ username });
   if (!existingUser) {
     return { error: 'User does not exist' };
   }

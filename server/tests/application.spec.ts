@@ -933,7 +933,7 @@ describe('application module', () => {
     describe('updateUser', () => {
       const username = 'dummyUser';
       const mockUser = {
-        username: username,
+        username,
         firstName: 'Dummy',
         lastName: 'User',
         email: 'dummy@gmail.com',

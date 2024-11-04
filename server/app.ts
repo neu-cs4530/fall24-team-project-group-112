@@ -25,7 +25,6 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 const port = parseInt(process.env.PORT || '8000');
 
 mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
-mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
 
 const app = express();
 const server = http.createServer(app);

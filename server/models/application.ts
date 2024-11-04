@@ -11,12 +11,15 @@ import {
   Question,
   QuestionResponse,
   Tag,
+  User,
+  UserResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
 import NotificationModel from './notifications';
+import UserModel from './user';
 
 /**
  * Parses tags from a search string.
@@ -192,6 +195,40 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
     return savedTag as Tag;
   } catch (error) {
     return null;
+  }
+};
+
+/**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
+ */
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification | { error: string }> => {
+  try {
+    if (!eventId || !type || !receiverUsername) {
+      throw new Error('Invalid request');
+    }
+
+    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+    const notif: Notification = {
+      notificationType: type,
+      eventId,
+      receiverUsername,
+      notificationDate: new Date(),
+      seen: false,
+    };
+
+    return await NotificationModel.create(notif);
+  } catch (error) {
+    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };
 
@@ -647,30 +684,29 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
   }
 };
 
-const addNotifications = async (
-  eventId: ObjectId,
-  receiverUsername: string,
-  type: NotificationType,
-): Promise<Notification | { error: string }> => {
+/**
+ * Checks if a user with the given username already exists in the database.
+ * @param {string} username - username to check.
+ * @returns true if the username is unique, false otherwise.
+ */
+export const isUsernameUnique = async (username: string): Promise<boolean> => {
+  const existingUser = await UserModel.findOne({ username });
+  return !existingUser;
+};
+
+/**
+ * Adds a new user to the database.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<UserResponse>} - The added user, or an error message if the addition failed.
+ */
+export const addUser = async (user: User): Promise<UserResponse> => {
   try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
-
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
-
-    return await NotificationModel.create(notif);
+    const result = await UserModel.create(user);
+    return result;
   } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
+    return { error: 'Error when saving a new user' };
   }
 };
 
@@ -690,6 +726,6 @@ export const markNotificationsAsSeen = async (
     );
     return { updatedCount: result.modifiedCount };
   } catch (error) {
-    return { error: `Error when updating notifications: ${(error as Error).message}` };
+    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };

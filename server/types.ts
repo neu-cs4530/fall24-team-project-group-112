@@ -207,6 +207,21 @@ export interface AddCommentRequest extends Request {
 export type CommentResponse = Comment | { error: string };
 
 /**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: ObjectId;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+}
+
+/**
  * Interface representing the payload for a comment update event, which contains:
  * - result - The updated question or answer.
  * - type - The type of the updated item, either 'question' or 'answer'.
@@ -275,4 +290,33 @@ export interface Notification {
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
+}
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
+}
+
+/**
+ * Interface extending the request body when logging in an existing user, which contains:
+ * - email - The email of the user.
+ * - password - The password of the user.
+ */
+export interface LoginUserRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
 }

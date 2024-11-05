@@ -39,6 +39,39 @@ export interface User {
   createdAt: Date;
 }
 
+/**
+ * Interface extending the request body when updating a user's profile, which contains a
+ * username parameter and UpdateUserPayload body containing updated profile information.
+ */
+export interface UpdateUserRequest extends Request {
+  params: {
+    username: string;
+  };
+  body: UpdateUserPayload;
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
+}
+
 // TODO: fill in interface details
 export interface Badge {}
 

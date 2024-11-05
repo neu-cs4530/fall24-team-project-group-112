@@ -1,10 +1,17 @@
 import express, { Response, Router } from 'express';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { CreateUserRequest, LoginUserRequest, User } from '../types';
-import { addUser, isUsernameUnique } from '../models/application';
+import {
+  FakeSOSocket,
+  UpdateUserRequest,
+  CreateUserRequest,
+  LoginUserRequest,
+  User,
+  UpdateUserPayload,
+} from '../types';
+import { addUser, isUsernameUnique, updateUser } from '../models/application';
 import { auth } from '../firebaseConfig';
 
-const userController = () => {
+const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
 
   /**
@@ -123,9 +130,36 @@ const userController = () => {
       res.status(500).send(`Login error: ${(err as Error).message}`);
     }
   };
+
+  /**
+   * Updates a user's profile information with the provided information.
+   *
+   * @param req The UpdateUserRequest object containing the username and the updated user information.
+   * @param res The HTTP response object used to send back the updated user information.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const updateProfile = async (req: UpdateUserRequest, res: Response): Promise<void> => {
+    const { username } = req.params;
+    const userUpdate: UpdateUserPayload = { ...req.body };
+
+    try {
+      const updatedUser = await updateUser(username, userUpdate);
+
+      if (updatedUser && 'error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      res.json(updatedUser);
+    } catch (err) {
+      res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
   router.get('/login', loginUser);
+  router.patch('/:username', updateProfile);
 
   return router;
 };

@@ -765,7 +765,7 @@ export const markNotificationsAsSeen = async (
   username: string,
 ): Promise<Notification[] | { error: string }> => {
   try {
-    const user = await UserModel.findOne({ username: username });
+    const user = await UserModel.findOne({ username });
     if (!user) {
       throw new Error('Invalid username');
     }

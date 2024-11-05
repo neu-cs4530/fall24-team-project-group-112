@@ -18,7 +18,6 @@ import {
   addUser,
   isUsernameUnique,
   findQuestionAskedBy,
-  updateUser,
   markNotificationsAsSeen,
 } from '../models/application';
 import { Answer, Question, Tag, Comment, User, Notification, NotificationType } from '../types';

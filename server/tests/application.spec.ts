@@ -1032,7 +1032,7 @@ describe('application module', () => {
 
         const result = await markNotificationsAsSeen('invalidUser');
         expect(result).toEqual({
-          error: 'Error when adding notification: Error performing update',
+          error: 'Error when marking notifications as seen: Error performing update',
         });
       });
 
@@ -1041,7 +1041,7 @@ describe('application module', () => {
 
         const result = await markNotificationsAsSeen('invalidUser');
         expect(result).toEqual({
-          error: 'Error when adding notification: Error finding notifications',
+          error: 'Error when marking notifications as seen: Error finding notifications',
         });
       });
     });

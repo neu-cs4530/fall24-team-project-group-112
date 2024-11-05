@@ -752,6 +752,6 @@ export const markNotificationsAsSeen = async (
     await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
     return await NotificationModel.find({ receiverUsername: username });
   } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
+    return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
   }
 };

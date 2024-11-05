@@ -711,6 +711,34 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 };
 
 /**
+ * Finds all questions asked by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ */
+export const findQuestionAskedBy = async (username: string): Promise<Question[]> => {
+  try {
+    let qlist = [];
+    qlist = await QuestionModel.find({ askedBy: username }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
+    ]);
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
  * Updates the notification collection to mark all notifications as seen for a given user.
  * If the provided user is invalid, no notifications will be marked as seen.
  *

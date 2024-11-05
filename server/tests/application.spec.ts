@@ -17,11 +17,13 @@ import {
   addVoteToQuestion,
   addUser,
   isUsernameUnique,
+  markNotificationsAsSeen,
 } from '../models/application';
-import { Answer, Question, Tag, Comment, User } from '../types';
+import { Answer, Question, Tag, Comment, User, Notification, NotificationType } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
 import UserModel from '../models/user';
+import NotificationModel from '../models/notifications';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -926,6 +928,73 @@ describe('application module', () => {
         const unique = await isUsernameUnique(USERS[0].username);
 
         expect(unique).toEqual(true);
+      });
+    });
+  });
+
+  describe('Notification model', () => {
+    describe('markNotificationsAsSeen', () => {
+      const notifications: Notification[] = [
+        {
+          _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+          notificationType: NotificationType.ANSWER,
+          eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+          receiverUsername: 'receiver1',
+          notificationDate: new Date('2023-11-19T09:24:00'),
+          seen: false,
+        },
+        {
+          _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+          notificationType: NotificationType.ANSWER,
+          eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+          receiverUsername: 'receiver1',
+          notificationDate: new Date('2023-11-19T09:24:00'),
+          seen: false,
+        },
+        {
+          _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+          notificationType: NotificationType.ANSWER,
+          eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+          receiverUsername: 'receiver2',
+          notificationDate: new Date('2023-11-19T09:24:00'),
+          seen: false,
+        },
+      ];
+
+      test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
+        const expectedResults = notifications
+          .filter(notif => notif.receiverUsername == 'receiver1')
+          .map(result => {
+            return { ...result, seen: true };
+          });
+
+        mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        const result = (await markNotificationsAsSeen('receiver1')) as Notification[];
+
+        expect(result).toHaveLength(2);
+        expect(result[0].seen).toBe(true);
+        expect(result[1].seen).toBe(true);
+        expect(result[0].receiverUsername).toBe('receiver1');
+        expect(result[1].receiverUsername).toBe('receiver1');
+      });
+      test('markNotificationsAsSeen should return an error if there is an error updating the notifications', async () => {
+        mockingoose(NotificationModel).toReturn(new Error('Error performing update'), 'updateMany');
+
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when adding notification: Error performing update',
+        });
+      });
+
+      test('markNotificationsAsSeen should return an error if there is an error finding relevant notifications', async () => {
+        mockingoose(NotificationModel).toReturn(new Error('Error finding notifications'), 'find');
+
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when adding notification: Error finding notifications',
+        });
       });
     });
   });

@@ -16,7 +16,7 @@ const notificationController = (socket: FakeSOSocket) => {
     try {
       const result = await markNotificationsAsSeen(username);
 
-      if ('error' in result) {
+      if (result && 'error' in result) {
         throw new Error(result.error);
       }
 

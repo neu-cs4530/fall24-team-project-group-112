@@ -714,17 +714,14 @@ export const addUser = async (user: User): Promise<UserResponse> => {
  * Updates the notification collection to mark all notifications as seen for a given user.
  *
  * @param username the username of the user whose notifications should be marked as seen
- * @returns the number of notifications that were updated, or an error message if the operation fails
+ * @returns a Promise resolving to void, or an error message if the operation fails
  */
 export const markNotificationsAsSeen = async (
   username: string,
-): Promise<{ updatedCount: number } | { error: string }> => {
+): Promise<Notification[] | { error: string }> => {
   try {
-    const result = await NotificationModel.updateMany(
-      { receiverUsername: username, seen: false },
-      { seen: true },
-    );
-    return { updatedCount: result.modifiedCount };
+    await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
+    return await NotificationModel.find({ receiverUsername: username });
   } catch (error) {
     return { error: `Error when adding notification: ${(error as Error).message}` };
   }

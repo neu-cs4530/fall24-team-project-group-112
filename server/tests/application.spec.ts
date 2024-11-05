@@ -18,12 +18,13 @@ import {
   addUser,
   isUsernameUnique,
   findQuestionAskedBy,
+  updateUser,
   markNotificationsAsSeen,
 } from '../models/application';
 import { Answer, Question, Tag, Comment, User, Notification, NotificationType } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
-import UserModel from '../models/user';
+import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

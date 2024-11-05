@@ -265,9 +265,9 @@ const questionController = (socket: FakeSOSocket) => {
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        res.status(500).send(`Error when fetching question asked by user: ${err.message}`);
+        res.status(500).send(`Error when fetching question answered by user: ${err.message}`);
       } else {
-        res.status(500).send(`Error when fetching question asked by user`);
+        res.status(500).send(`Error when fetching question answered by user`);
       }
     }
   };

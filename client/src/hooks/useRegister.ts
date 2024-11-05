@@ -6,9 +6,18 @@ import addUser from '../services/userService';
 /**
  * Custom hook to handle account registration/creation input and submission.
  *
+ * @returns firstName - The current value of the firstName input.
+ * @returns lastName - The current value of the lastName input.
+ * @returns email - The current value of the email input.
  * @returns username - The current value of the username input.
- * @returns handleInputChange - Function to handle changes in the input field.
- * @returns handleSubmit - Function to handle login submission
+ * @returns password - The current value of the password input.
+ * @returns textErr - The current error message to display.
+ * @returns handleFirstNameChange - Function to handle changes in the input field.
+ * @returns handleLastNameChange - Function to handle changes in the input field.
+ * @returns handleEmailChange - Function to handle changes in the input field.
+ * @returns handleUsernameChange - Function to handle changes in the input field.
+ * @returns handlePasswordChange - Function to handle changes in the input field.
+ * @returns handleSubmit - Function to handle account creation submission.
  */
 const useRegister = () => {
   const [firstName, setfirstName] = useState<string>('');

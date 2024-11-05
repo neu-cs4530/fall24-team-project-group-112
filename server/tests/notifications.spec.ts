@@ -3,10 +3,18 @@ import supertest from 'supertest';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
+import mongoose from 'mongoose';
 
 describe('POST /seen/:username', () => {
-  const username = 'receiver1';
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+  });
 
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  const username = 'receiver1';
   const notifications: Notification[] = [
     {
       _id: new ObjectId('65e9b58910afe6e94fc6e6de'),

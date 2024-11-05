@@ -984,39 +984,39 @@ describe('application module', () => {
   });
 
   describe('Notification model', () => {
+    const notifications: Notification[] = [
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver1',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver1',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver2',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+    ];
     describe('markNotificationsAsSeen', () => {
-      const notifications: Notification[] = [
-        {
-          _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
-          notificationType: NotificationType.ANSWER,
-          eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
-          receiverUsername: 'receiver1',
-          notificationDate: new Date('2023-11-19T09:24:00'),
-          seen: false,
-        },
-        {
-          _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-          notificationType: NotificationType.ANSWER,
-          eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-          receiverUsername: 'receiver1',
-          notificationDate: new Date('2023-11-19T09:24:00'),
-          seen: false,
-        },
-        {
-          _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-          notificationType: NotificationType.ANSWER,
-          eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-          receiverUsername: 'receiver2',
-          notificationDate: new Date('2023-11-19T09:24:00'),
-          seen: false,
-        },
-      ];
-
       test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
         const expectedResults = notifications
           .filter(notif => notif.receiverUsername === 'receiver1')
           .map(result => ({ ...result, seen: true }));
 
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
         mockingoose(NotificationModel).toReturn(expectedResults, 'find');
 
@@ -1028,7 +1028,23 @@ describe('application module', () => {
         expect(result[0].receiverUsername).toBe('receiver1');
         expect(result[1].receiverUsername).toBe('receiver1');
       });
+
+      test('markNotificationsAsSeen should return an error if the provided user is invalid', async () => {
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Invalid username',
+        });
+      });
+
+      test('markNotificationsAsSeen should return an error if the provided user is empty', async () => {
+        const result = await markNotificationsAsSeen('');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Invalid username',
+        });
+      });
+
       test('markNotificationsAsSeen should return an error if there is an error updating the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(NotificationModel).toReturn(new Error('Error performing update'), 'updateMany');
 
         const result = await markNotificationsAsSeen('invalidUser');
@@ -1038,6 +1054,7 @@ describe('application module', () => {
       });
 
       test('markNotificationsAsSeen should return an error if there is an error finding relevant notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(NotificationModel).toReturn(new Error('Error finding notifications'), 'find');
 
         const result = await markNotificationsAsSeen('invalidUser');

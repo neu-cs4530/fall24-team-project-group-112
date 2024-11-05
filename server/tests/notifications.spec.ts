@@ -6,14 +6,6 @@ import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
 
 describe('POST /seen/:username', () => {
-  afterEach(async () => {
-    await mongoose.connection.close(); // Ensure the connection is properly closed
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
-  });
-
   const username = 'receiver1';
 
   const notifications: Notification[] = [
@@ -70,19 +62,19 @@ describe('POST /seen/:username', () => {
     );
   });
 
-  test('markNotificationsAsSeen should return an empty array if no username is provided', async () => {
-    jest.spyOn(util, 'markNotificationsAsSeen').mockResolvedValueOnce([]);
-
+  test('markNotificationsAsSeen should return an error if no username is provided', async () => {
     const result = await supertest(app).patch(`/notification/seen/${undefined}`);
-    expect(result.status).toBe(200);
-    expect(result.body).toEqual([]);
+    expect(result.status).toBe(500);
+    expect(result.text).toEqual(
+      'Error when marking notifications as seen: Error when marking notifications as seen: Invalid username',
+    );
   });
 
-  test('markNotificationsAsSeen should return an empty array if an invalid username is provided', async () => {
-    jest.spyOn(util, 'markNotificationsAsSeen').mockResolvedValueOnce([]);
-
+  test('markNotificationsAsSeen should return an error if an invalid username is provided', async () => {
     const result = await supertest(app).patch(`/notification/seen/invalidUser`);
-    expect(result.status).toBe(200);
-    expect(result.body).toEqual([]);
+    expect(result.status).toBe(500);
+    expect(result.text).toEqual(
+      'Error when marking notifications as seen: Error when marking notifications as seen: Invalid username',
+    );
   });
 });

@@ -343,6 +343,16 @@ export interface CreateUserRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding questions asked by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAskedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Interface extending the request body when logging in an existing user, which contains:
  * - email - The email of the user.
  * - password - The password of the user.
@@ -352,4 +362,39 @@ export interface LoginUserRequest extends Request {
     email: string;
     password: string;
   };
+}
+
+/**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  Gold = 'gold',
+  Silver = 'silver',
+  Bronze = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FirstCommenter = 'First Commenter',
+  Voter = 'Voter',
+  DiscussionStarter = 'Discussion Starter',
+  CommunityHelper = 'Community Helper',
+  Influencer = 'Influencer',
+  Lifesaver = 'Lifesaver',
+}
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: ObjectId;
+  name: BadgeName;
+  description: string;
+  color: BadgeColor;
 }

@@ -1,0 +1,26 @@
+import { User } from '../types';
+import api from './config';
+
+const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
+
+/**
+ * Adds a new answer to a specific question.
+ *
+ * @param qid - The ID of the question to which the answer is being added.
+ * @param ans - The answer object containing the answer details.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ */
+const addUser = async (
+  user: User,
+  password: string,
+): Promise<User | { status: number; error: string }> => {
+  const data = { user, password };
+
+  const res = await api.post(`${USER_API_URL}`, data);
+  if (res.status !== 200) {
+    return { status: res.status, error: res.statusText };
+  }
+  return res.data;
+};
+
+export default addUser;

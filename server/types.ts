@@ -207,6 +207,21 @@ export interface AddCommentRequest extends Request {
 export type CommentResponse = Comment | { error: string };
 
 /**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: ObjectId;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+}
+
+/**
  * Interface representing the payload for a comment update event, which contains:
  * - result - The updated question or answer.
  * - type - The type of the updated item, either 'question' or 'answer'.
@@ -269,7 +284,7 @@ export enum NotificationType {
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
 export interface Notification {
-  _id: ObjectId;
+  _id?: ObjectId;
   notificationType: NotificationType;
   eventId: ObjectId;
   receiverUsername: string;
@@ -302,4 +317,51 @@ export interface FindQuestionsAskedByRequest extends Request {
   params: {
     username: string;
   };
+}
+
+/**
+ * Interface extending the request body when logging in an existing user, which contains:
+ * - email - The email of the user.
+ * - password - The password of the user.
+ */
+export interface LoginUserRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
+}
+
+/**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  Gold = 'gold',
+  Silver = 'silver',
+  Bronze = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FirstCommenter = 'First Commenter',
+  Voter = 'Voter',
+  DiscussionStarter = 'Discussion Starter',
+  CommunityHelper = 'Community Helper',
+  Influencer = 'Influencer',
+  Lifesaver = 'Lifesaver',
+}
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: ObjectId;
+  name: BadgeName;
+  description: string;
+  color: BadgeColor;
 }

@@ -1,15 +1,11 @@
 import { ObjectId } from 'mongodb';
 import supertest from 'supertest';
+import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
-import mongoose from 'mongoose';
 
 describe('POST /seen/:username', () => {
-  afterEach(async () => {
-    await mongoose.connection.close(); // Ensure the connection is properly closed
-  });
-
   afterAll(async () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });

@@ -1,9 +1,9 @@
 import { ObjectId } from 'mongodb';
 import supertest from 'supertest';
+import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
-import mongoose from 'mongoose';
 
 describe('POST /seen/:username', () => {
   afterEach(async () => {
@@ -45,10 +45,8 @@ describe('POST /seen/:username', () => {
 
   test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
     const expectedResults = notifications
-      .filter(notif => notif.receiverUsername == 'receiver1')
-      .map(result => {
-        return { ...result, seen: true };
-      });
+      .filter(notif => notif.receiverUsername === 'receiver1')
+      .map(result => ({ ...result, seen: true }));
 
     jest.spyOn(util, 'markNotificationsAsSeen').mockResolvedValueOnce(expectedResults);
 

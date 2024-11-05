@@ -1013,10 +1013,8 @@ describe('application module', () => {
 
       test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
         const expectedResults = notifications
-          .filter(notif => notif.receiverUsername == 'receiver1')
-          .map(result => {
-            return { ...result, seen: true };
-          });
+          .filter(notif => notif.receiverUsername === 'receiver1')
+          .map(result => ({ ...result, seen: true }));
 
         mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
         mockingoose(NotificationModel).toReturn(expectedResults, 'find');

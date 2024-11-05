@@ -310,6 +310,16 @@ export interface CreateUserRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding questions asked by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAskedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Interface extending the request body when logging in an existing user, which contains:
  * - email - The email of the user.
  * - password - The password of the user.

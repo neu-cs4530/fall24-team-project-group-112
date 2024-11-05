@@ -17,6 +17,7 @@ import {
   addVoteToQuestion,
   addUser,
   isUsernameUnique,
+  findQuestionAskedBy,
 } from '../models/application';
 import { Answer, Question, Tag, Comment, User } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
@@ -136,6 +137,19 @@ const QUESTIONS: Question[] = [
     downVotes: [],
     comments: [],
   },
+  {
+    _id: new ObjectId('65e9b716ff0e892116b2de08'),
+    title: 'Unanswered Question #3',
+    text: 'Does something like that even exist?',
+    tags: [],
+    answers: [],
+    askedBy: 'q_by4',
+    askDateTime: new Date('2023-11-21T09:24:00'),
+    views: [],
+    upVotes: [],
+    downVotes: [],
+    comments: [],
+  },
 ];
 
 const USERS: User[] = [
@@ -195,8 +209,9 @@ describe('application module', () => {
       test('filter question by one user', () => {
         const result = filterQuestionsByAskedBy(QUESTIONS, 'q_by4');
 
-        expect(result.length).toEqual(1);
+        expect(result.length).toEqual(2);
         expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
       });
 
       test('filter question by tag and then by user', () => {
@@ -284,9 +299,10 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('unanswered');
 
-        expect(result.length).toEqual(2);
-        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
-        expect(result[1]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result.length).toEqual(3);
+        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[2]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
       });
 
       test('get newest questions', async () => {
@@ -319,11 +335,12 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('mostViewed');
 
-        expect(result.length).toEqual(4);
+        expect(result.length).toEqual(5);
         expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
         expect(result[1]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
         expect(result[2]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
-        expect(result[3]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[3]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+        expect(result[4]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
       });
 
       test('getQuestionsByOrder should return empty list if find throws an error', async () => {
@@ -338,6 +355,39 @@ describe('application module', () => {
         mockingoose(QuestionModel).toReturn(null, 'find');
 
         const result = await getQuestionsByOrder('newest');
+
+        expect(result.length).toEqual(0);
+      });
+    });
+
+    describe('findQuestionAskedBy', () => {
+      test('findQuestionAskedBy should return all questions asked by user, only one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0]], 'find');
+        const result = await findQuestionAskedBy('q_by1');
+
+        expect(result.length).toEqual(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+      });
+
+      test('findQuestionAskedBy should return all questions asked by user, more than one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[3], QUESTIONS[4]], 'find');
+        const result = await findQuestionAskedBy('q_by4');
+
+        expect(result.length).toEqual(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+      });
+
+      test('findQuestionAskedBy should return empty list, no questions asked by username', async () => {
+        mockingoose(QuestionModel).toReturn([], 'find');
+        const result = await findQuestionAskedBy('q_by5');
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionAskedBy should return empty list if find returns an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+        const result = await findQuestionAskedBy('q_by1');
 
         expect(result.length).toEqual(0);
       });

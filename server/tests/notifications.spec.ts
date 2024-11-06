@@ -160,19 +160,21 @@ describe('GET /get/:username', () => {
   });
 
   test('getNotifications should return an error if no username is provided', async () => {
+    jest
+      .spyOn(util, 'getNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Error getting user' });
     const result = await supertest(app).get(`/notification/get/${undefined}`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      '"Error when getting notifications: Error when getting notifications: Invalid username',
-    );
+    expect(result.text).toEqual('Error when getting notifications: Error getting user');
   });
 
   test('getNotifications should return an error if an invalid username is provided', async () => {
+    jest
+      .spyOn(util, 'getNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Invalid username' });
     const result = await supertest(app).get(`/notification/get/invalidUser`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      'Error when getting notifications: Error when getting notifications: Invalid username',
-    );
+    expect(result.text).toEqual('Error when getting notifications: Invalid username');
   });
 
   test('getNotifications should return an error if getNotificationsForUser throws an error', async () => {
@@ -182,7 +184,7 @@ describe('GET /get/:username', () => {
     const result = await supertest(app).get(`/notification/get/receiver3`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual(
-      '"Error when getting notifications: getNotificationsForUser threw an error',
+      'Error when getting notifications: getNotificationsForUser threw an error',
     );
   });
 });

@@ -1165,13 +1165,8 @@ describe('application module', () => {
     });
     describe('deleteNotifications', () => {
       test('deleteNotifications should delete the notifications of the specified user', async () => {
-        const expectedResults = notifications
-          .filter(notif => notif.receiverUsername === 'receiver1')
-          .map(result => ({ ...result, seen: true }));
-
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-        mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
-        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+        mockingoose(NotificationModel).toReturn([], 'deleteMany');
 
         const result = await deleteNotificationsForUser('receiver1');
 

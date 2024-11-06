@@ -7,6 +7,8 @@ import {
   CommentResponse,
   Notification,
   NotificationType,
+  Follow,
+  FollowResponse,
   OrderType,
   Question,
   QuestionResponse,
@@ -21,6 +23,7 @@ import TagModel from './tags';
 import CommentModel from './comments';
 import NotificationModel from './notifications';
 import UserModel from './users';
+import FollowModel from './follows';
 
 /**
  * Parses tags from a search string.
@@ -773,5 +776,40 @@ export const markNotificationsAsSeen = async (
     return await NotificationModel.find({ receiverUsername: username });
   } catch (error) {
     return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Adds a new follow object to the database.
+ *
+ * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted.
+ *
+ * @returns {Promise<FollowResponse>} - A message if the follow obejct was created or deleted, or an error message if the creation or deletion failed.
+ */
+export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
+  try {
+    if (
+      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+    ) {
+      throw new Error('Follower or followee does not exist');
+    }
+
+    const existingFollow = await FollowModel.findOne({
+      followerUsername: follow.followerUsername,
+      followeeUsername: follow.followeeUsername,
+    });
+
+    if (existingFollow !== undefined) {
+      await FollowModel.deleteOne({
+        followerUsername: follow.followerUsername,
+        followeeUsername: follow.followeeUsername,
+      });
+      return { success: 'Follow request deleted' };
+    }
+    await FollowModel.create(follow);
+    return { success: 'Follow request created' };
+  } catch (error) {
+    return { error: 'Error when creating or deleting a follow request' };
   }
 };

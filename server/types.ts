@@ -398,3 +398,20 @@ export interface Badge {
   description: string;
   color: BadgeColor;
 }
+
+/**
+ * Interface extending the request body when creating a new follow request, which contains:
+ * - followerUsername - The username of the user following another user.
+ * - followeeUsername - The username of the user being followed.
+ */
+export interface FollowRequest extends Request {
+  body: {
+    followerUsername: string;
+    followeeUsername: string;
+  };
+}
+
+/**
+ * Type representing the possible responses for a Follow-related operation.
+ */
+export type FollowResponse = { success: string } | { error: string };

@@ -5,10 +5,11 @@ import {
   UpdateUserRequest,
   CreateUserRequest,
   LoginUserRequest,
+  FollowRequest,
   User,
   UpdateUserPayload,
 } from '../types';
-import { addUser, isUsernameUnique, updateUser } from '../models/application';
+import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
 import { auth } from '../firebaseConfig';
 
 const userController = (socket: FakeSOSocket) => {
@@ -34,6 +35,17 @@ const userController = (socket: FakeSOSocket) => {
    */
   function isLoginRequestValid(req: LoginUserRequest): boolean {
     return !!req.body.email && !!req.body.password;
+  }
+
+  /**
+   * Checks if the provided follow request contains the required data.
+   *
+   * @param req The request object containing the follow data.
+   *
+   * @returns `true` if the request is valid, otherwise `false`.
+   */
+  function isFollowRequestValid(req: FollowRequest): boolean {
+    return !!req.body.followerUsername && !!req.body.followeeUsername;
   }
 
   /**
@@ -156,10 +168,48 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Creates a new follow record with the given follower and followee if one does not already exist.
+   * If a follow record already exists, deletes it from the database.
+   *
+   * @param req The FollowRequest object containing the follower and followee username.
+   * @param res The HTTP response object with a message saying if the user was followed or unfollowed.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const createFollow = async (req: FollowRequest, res: Response): Promise<void> => {
+    if (!isFollowRequestValid(req)) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { followerUsername, followeeUsername } = req.body;
+
+    try {
+      const follow = {
+        followerUsername,
+        followeeUsername,
+        followDateTime: new Date(),
+      };
+      const response = await addFollow(follow);
+
+      if (response && 'error' in response) {
+        throw new Error(response.error);
+      }
+
+      res.json(response);
+    } catch (err) {
+      res
+        .status(500)
+        .send(`Error when creating/deleting follow request: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
   router.get('/login', loginUser);
   router.patch('/:username', updateProfile);
+  router.post('/follow', createFollow);
 
   return router;
 };

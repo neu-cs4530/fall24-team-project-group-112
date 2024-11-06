@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import UserModel from '../models/users';
+import FollowModel from '../models/follows';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -89,6 +90,15 @@ describe('GET /login', () => {
 });
 
 describe('PATCH /:username', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
   const username = 'dummyUser';
   const mockUser = {
     username,
@@ -191,5 +201,111 @@ describe('PATCH /:username', () => {
     // other updatable fields should not have changed
     expect(response.body.headline).toBe(mockUser.headline);
     expect(response.body.bio).toBe(mockUser.bio);
+  });
+});
+
+describe('POST /follow', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  const mockUser1 = {
+    username: 'user1',
+    firstName: 'User',
+    lastName: 'One',
+    email: 'user1@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-04'),
+  };
+
+  const mockUser2 = {
+    username: 'user2',
+    firstName: 'User',
+    lastName: 'Two',
+    email: 'userTwo@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
+  };
+
+  const mockFollow = {
+    followerUsername: 'user1',
+    followeeUsername: 'user2',
+    followDate: new Date('2024-06-04'),
+  };
+
+  it('should create a follow request if one does not already exist for the given follower and followee', async () => {
+    const mockReqBody = {
+      followerUsername: 'user1',
+      followeeUsername: 'user2',
+    };
+
+    mockingoose(UserModel).toReturn([mockUser1, mockUser2], 'findOne');
+    mockingoose(FollowModel).toReturn(undefined, 'findOne');
+
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toEqual('Follow request created');
+  });
+
+  it('should delete a follow request if one already exists for the given follower and followee', async () => {
+    const mockReqBody = {
+      followerUsername: 'user1',
+      followeeUsername: 'user2',
+    };
+
+    mockingoose(UserModel).toReturn([mockUser1, mockUser2], 'findOne');
+    mockingoose(FollowModel).toReturn(mockFollow, 'findOne');
+
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toEqual('Follow request deleted');
+  });
+
+  it('should return an error if an empty request is provided', async () => {
+    const mockReqBody = {};
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should return an error if request is missing a follower username', async () => {
+    const mockReqBody = {
+      followeeUsername: 'user2',
+    };
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should return an error if request is missing a followee username', async () => {
+    const mockReqBody = {
+      followerUsername: 'user1',
+    };
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('should return an error if provided user does not exist', async () => {
+    const mockReqBody = {
+      followerUsername: 'user1',
+      followeeUsername: 'fakeuser',
+    };
+
+    mockingoose(UserModel).toReturn(undefined, 'findOne');
+
+    const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain(
+      'Error when creating/deleting follow request: Error when creating or deleting a follow request',
+    );
   });
 });

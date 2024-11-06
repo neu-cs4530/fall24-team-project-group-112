@@ -10,6 +10,7 @@ import {
   saveQuestion,
   processTags,
   saveAnswer,
+  addFollow,
   addAnswerToQuestion,
   getTagCountMap,
   saveComment,
@@ -21,11 +22,22 @@ import {
   markNotificationsAsSeen,
   updateUser,
 } from '../models/application';
-import { Answer, Question, Tag, Comment, User, Notification, NotificationType } from '../types';
+import {
+  Answer,
+  Question,
+  Tag,
+  Comment,
+  User,
+  Notification,
+  NotificationType,
+  Follow,
+  FollowResponse,
+} from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
 import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
+import FollowModel from '../models/follows';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -161,6 +173,24 @@ const USERS: User[] = [
     firstName: 'Dummy',
     lastName: 'User',
     email: 'dummyUser@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
+  },
+
+  {
+    username: 'user1',
+    firstName: 'User',
+    lastName: 'One',
+    email: 'user1@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-04'),
+  },
+
+  {
+    username: 'user2',
+    firstName: 'User',
+    lastName: 'Two',
+    email: 'userTwo@email.com',
     badges: [],
     createdAt: new Date('2024-06-03'),
   },
@@ -1129,6 +1159,85 @@ describe('application module', () => {
         const result = await markNotificationsAsSeen('invalidUser');
         expect(result).toEqual({
           error: 'Error when marking notifications as seen: Error finding notifications',
+        });
+      });
+    });
+
+    describe('follow model', () => {
+      const follows: Follow[] = [
+        {
+          _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+        {
+          _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+          followerUsername: 'user2',
+          followeeUsername: 'user1',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+      ];
+      describe('addFollow', () => {
+        test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
+          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+          mockingoose(FollowModel).toReturn(undefined, 'findOne');
+
+          const result = (await addFollow({
+            followerUsername: 'user1',
+            followeeUsername: 'user2',
+            followDateTime: new Date('2023-11-19T09:24:00'),
+          })) as FollowResponse;
+
+          expect(result).toEqual({ success: 'Follow request created' });
+        });
+
+        test('addFollow should delete a new follow request if both users exist and the followeer is already following the followee.', async () => {
+          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+          mockingoose(FollowModel).toReturn(follows[0], 'findOne');
+
+          const result = (await addFollow({
+            followerUsername: 'user1',
+            followeeUsername: 'user2',
+            followDateTime: new Date('2023-11-19T09:24:00'),
+          })) as FollowResponse;
+
+          expect(result).toEqual({ success: 'Follow request deleted' });
+        });
+
+        test('addFollow should return an error if a given user does not exist.', async () => {
+          mockingoose(UserModel).toReturn(
+            new Error('Follower or followee does not exist'),
+            'findOne',
+          );
+
+          const result = (await addFollow({
+            followerUsername: 'user1',
+            followeeUsername: 'user2',
+            followDateTime: new Date('2023-11-19T09:24:00'),
+          })) as {
+            error: string;
+          };
+
+          expect(result.error).toEqual('Error when creating or deleting a follow request');
+        });
+
+        test('addFollow should return an error if there is an error finding a follow object.', async () => {
+          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+          mockingoose(FollowModel).toReturn(
+            new Error('Error retrieivng follow request'),
+            'findOne',
+          );
+
+          const result = (await addFollow({
+            followerUsername: 'user1',
+            followeeUsername: 'user2',
+            followDateTime: new Date('2023-11-19T09:24:00'),
+          })) as {
+            error: string;
+          };
+
+          expect(result.error).toEqual('Error when creating or deleting a follow request');
         });
       });
     });

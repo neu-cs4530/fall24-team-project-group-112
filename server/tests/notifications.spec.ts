@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import supertest from 'supertest';
+import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
@@ -32,9 +33,13 @@ const NOTIFICATIONS: Notification[] = [
   },
 ];
 describe('PATCH /seen/:username', () => {
-  // afterAll(async () => {
-  //   await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
-  // });
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
 
   test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
     const expectedResults = NOTIFICATIONS.filter(
@@ -81,9 +86,13 @@ describe('PATCH /seen/:username', () => {
 });
 
 describe('DELETE /:username', () => {
-  // afterAll(async () => {
-  //   await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
-  // });
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
 
   test('deleteNotifications should delete the notifications of the specified user', async () => {
     jest

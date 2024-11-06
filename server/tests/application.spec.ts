@@ -21,6 +21,7 @@ import {
   findQuestionAskedBy,
   markNotificationsAsSeen,
   updateUser,
+  deleteNotificationsForUser,
 } from '../models/application';
 import {
   Answer,
@@ -1162,83 +1163,114 @@ describe('application module', () => {
         });
       });
     });
+    describe('deleteNotifications', () => {
+      test('deleteNotifications should delete the notifications of the specified user', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn([], 'deleteMany');
 
-    describe('follow model', () => {
-      const follows: Follow[] = [
-        {
-          _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+        const result = await deleteNotificationsForUser('receiver1');
+
+        expect(result).toEqual({ success: 'Notifications deleted successfully' });
+      });
+
+      test('deleteNotifications should return an error if the provided user is invalid', async () => {
+        const result = await deleteNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Invalid username',
+        });
+      });
+
+      test('deleteNotifications should return an error if the provided user is empty', async () => {
+        const result = await deleteNotificationsForUser('');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Invalid username',
+        });
+      });
+
+      test('deleteNotifications should return an error if there is an error deleting the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error performing delete'), 'deleteMany');
+
+        const result = await deleteNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Error performing delete',
+        });
+      });
+    });
+  });
+
+  describe('Follow model', () => {
+    const follows: Follow[] = [
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+        followerUsername: 'user1',
+        followeeUsername: 'user2',
+        followDateTime: new Date('2023-11-19T09:24:00'),
+      },
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+        followerUsername: 'user2',
+        followeeUsername: 'user1',
+        followDateTime: new Date('2023-11-19T09:24:00'),
+      },
+    ];
+    describe('addFollow', () => {
+      test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(undefined, 'findOne');
+
+        const result = (await addFollow({
           followerUsername: 'user1',
           followeeUsername: 'user2',
           followDateTime: new Date('2023-11-19T09:24:00'),
-        },
-        {
-          _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
-          followerUsername: 'user2',
-          followeeUsername: 'user1',
+        })) as FollowResponse;
+
+        expect(result).toEqual({ success: 'Follow request created' });
+      });
+
+      test('addFollow should delete a new follow request if both users exist and the followeer is already following the followee.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(follows[0], 'findOne');
+
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
           followDateTime: new Date('2023-11-19T09:24:00'),
-        },
-      ];
-      describe('addFollow', () => {
-        test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
-          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
-          mockingoose(FollowModel).toReturn(undefined, 'findOne');
+        })) as FollowResponse;
 
-          const result = (await addFollow({
-            followerUsername: 'user1',
-            followeeUsername: 'user2',
-            followDateTime: new Date('2023-11-19T09:24:00'),
-          })) as FollowResponse;
+        expect(result).toEqual({ success: 'Follow request deleted' });
+      });
 
-          expect(result).toEqual({ success: 'Follow request created' });
-        });
+      test('addFollow should return an error if a given user does not exist.', async () => {
+        mockingoose(UserModel).toReturn(
+          new Error('Follower or followee does not exist'),
+          'findOne',
+        );
 
-        test('addFollow should delete a new follow request if both users exist and the followeer is already following the followee.', async () => {
-          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
-          mockingoose(FollowModel).toReturn(follows[0], 'findOne');
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as {
+          error: string;
+        };
 
-          const result = (await addFollow({
-            followerUsername: 'user1',
-            followeeUsername: 'user2',
-            followDateTime: new Date('2023-11-19T09:24:00'),
-          })) as FollowResponse;
+        expect(result.error).toEqual('Error when creating or deleting a follow request');
+      });
 
-          expect(result).toEqual({ success: 'Follow request deleted' });
-        });
+      test('addFollow should return an error if there is an error finding a follow object.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(new Error('Error retrieivng follow request'), 'findOne');
 
-        test('addFollow should return an error if a given user does not exist.', async () => {
-          mockingoose(UserModel).toReturn(
-            new Error('Follower or followee does not exist'),
-            'findOne',
-          );
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as {
+          error: string;
+        };
 
-          const result = (await addFollow({
-            followerUsername: 'user1',
-            followeeUsername: 'user2',
-            followDateTime: new Date('2023-11-19T09:24:00'),
-          })) as {
-            error: string;
-          };
-
-          expect(result.error).toEqual('Error when creating or deleting a follow request');
-        });
-
-        test('addFollow should return an error if there is an error finding a follow object.', async () => {
-          mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
-          mockingoose(FollowModel).toReturn(
-            new Error('Error retrieivng follow request'),
-            'findOne',
-          );
-
-          const result = (await addFollow({
-            followerUsername: 'user1',
-            followeeUsername: 'user2',
-            followDateTime: new Date('2023-11-19T09:24:00'),
-          })) as {
-            error: string;
-          };
-
-          expect(result.error).toEqual('Error when creating or deleting a follow request');
-        });
+        expect(result.error).toEqual('Error when creating or deleting a follow request');
       });
     });
   });

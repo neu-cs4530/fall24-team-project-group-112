@@ -795,7 +795,7 @@ export const deleteNotificationsForUser = async (
       throw new Error('Invalid username');
     }
     await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
-    return { success: 'Notifications deleted' };
+    return { success: 'Notifications deleted successfully' };
   } catch (error) {
     return { error: `Error when deleting notifications: ${(error as Error).message}` };
   }

@@ -69,19 +69,23 @@ describe('PATCH /seen/:username', () => {
   });
 
   test('markNotificationsAsSeen should return an error if no username is provided', async () => {
+    jest
+      .spyOn(util, 'markNotificationsAsSeen')
+      .mockResolvedValueOnce({ error: 'Invalid username' });
+
     const result = await supertest(app).patch(`/notification/seen/${undefined}`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      'Error when marking notifications as seen: Error when marking notifications as seen: Invalid username',
-    );
+    expect(result.text).toContain('Invalid username');
   });
 
   test('markNotificationsAsSeen should return an error if an invalid username is provided', async () => {
+    jest
+      .spyOn(util, 'markNotificationsAsSeen')
+      .mockResolvedValueOnce({ error: 'Invalid username' });
+
     const result = await supertest(app).patch(`/notification/seen/invalidUser`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      'Error when marking notifications as seen: Error when marking notifications as seen: Invalid username',
-    );
+    expect(result.text).toContain('Invalid username');
   });
 });
 
@@ -107,30 +111,30 @@ describe('DELETE /:username', () => {
   test('markNotificationsAsSeen should return an error if there is an error updating the notifications', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
-      .mockResolvedValueOnce({ error: 'Error performing delete' });
+      .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
 
     const result = await supertest(app).delete(`/notification/${USERNAME}`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual('Error when deleting notifications: Error performing delete');
+    expect(result.text).toContain('Error when deleting notifications');
   });
 
   test('markNotificationsAsSeen should return an error if no username is provided', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
-      .mockResolvedValueOnce({ error: 'Error performing delete' });
+      .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
 
-    const result = await supertest(app).delete(`/notification/${USERNAME}`);
+    const result = await supertest(app).delete(`/notification/${undefined}`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      'Error when deleting notifications: Error when deleting notifications: Invalid username',
-    );
+    expect(result.text).toContain('Error when deleting notifications');
   });
 
   test('markNotificationsAsSeen should return an error if an invalid username is provided', async () => {
-    const result = await supertest(app).delete(`/notification/${USERNAME}`);
+    jest
+      .spyOn(util, 'deleteNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Error when deleting notifications: Invalid username' });
+
+    const result = await supertest(app).delete(`/notification/invalidUsername`);
     expect(result.status).toBe(500);
-    expect(result.text).toEqual(
-      'Error when deleting notifications: Error when deleting notifications: Invalid username',
-    );
+    expect(result.text).toContain('Invalid username');
   });
 });

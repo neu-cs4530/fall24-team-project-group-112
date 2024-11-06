@@ -22,7 +22,9 @@ const notificationSchema: Schema = new Schema(
     eventId: {
       type: Schema.Types.ObjectId,
       required: true,
+      refPath: 'notificationType',
     },
+
     receiverUsername: {
       type: String,
       required: true,

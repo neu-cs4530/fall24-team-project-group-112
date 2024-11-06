@@ -813,3 +813,27 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
     return { error: 'Error when creating or deleting a follow request' };
   }
 };
+
+/**
+ * Retrieves all notifications for a given user.
+ * If the provided user is invalid, an error will be returned.
+ *
+ * @param username the username of the user whose notifications should be retrieved
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const getNotificationsForUser = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
+      'eventId',
+    );
+    return notifications;
+  } catch (error) {
+    return { error: `Error when getting notifications: ${(error as Error).message}` };
+  }
+};

@@ -20,6 +20,7 @@ import {
   isUsernameUnique,
   findQuestionAskedBy,
   markNotificationsAsSeen,
+  getNotificationsForUser,
   updateUser,
 } from '../models/application';
 import {
@@ -191,6 +192,15 @@ const USERS: User[] = [
     firstName: 'User',
     lastName: 'Two',
     email: 'userTwo@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
+  },
+
+  {
+    username: 'receiver3',
+    firstName: 'reciever',
+    lastName: 'three',
+    email: 'user3@email.com',
     badges: [],
     createdAt: new Date('2024-06-03'),
   },
@@ -1108,6 +1118,42 @@ describe('application module', () => {
         notificationDate: new Date('2023-11-19T09:24:00'),
         seen: false,
       },
+
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.BADGE,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.FOLLOW,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+        notificationType: NotificationType.COMMENT,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
     ];
     describe('markNotificationsAsSeen', () => {
       test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
@@ -1159,6 +1205,70 @@ describe('application module', () => {
         const result = await markNotificationsAsSeen('invalidUser');
         expect(result).toEqual({
           error: 'Error when marking notifications as seen: Error finding notifications',
+        });
+      });
+    });
+
+    describe('getNotificationsForUser', () => {
+      test('getNotificationsForUser should get all notifications for the specified user', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser('receiver3')) as Notification[];
+
+        expect(result).toHaveLength(4);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6de');
+        expect(result[1]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
+        expect(result[2]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
+        expect(result[3]._id?.toString()).toEqual('91e9c58910afe6e94fc6e6de');
+      });
+
+      test('getNotificationsForUser should return an empty list if the user does not have any notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[2], 'findOne');
+        mockingoose(NotificationModel).toReturn([], 'find');
+
+        const result = (await getNotificationsForUser('user2')) as Notification[];
+
+        expect(result).toHaveLength(0);
+        expect(result).toEqual([]);
+      });
+
+      test('getNotificationsForUser should return an error if the provided user is invalid', async () => {
+        const result = await getNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Invalid username',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if the provided user is empty', async () => {
+        const result = await getNotificationsForUser('');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Invalid username',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if there is an error retrieving the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error finding notifications'), 'find');
+
+        const result = await getNotificationsForUser('test1');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Error finding notifications',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if there is an error finding the user', async () => {
+        mockingoose(UserModel).toReturn(new Error('Error finding user'), 'findOne');
+
+        const result = await getNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Error finding user',
         });
       });
     });

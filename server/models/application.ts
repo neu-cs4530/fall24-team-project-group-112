@@ -753,3 +753,25 @@ export const updateUser = async (
 
   return existingUser as User;
 };
+
+/**
+ * Updates the notification collection to mark all notifications as seen for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are updated.
+ *
+ * @param username the username of the user whose notifications should be marked as seen
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const markNotificationsAsSeen = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
+    return await NotificationModel.find({ receiverUsername: username });
+  } catch (error) {
+    return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
+  }
+};

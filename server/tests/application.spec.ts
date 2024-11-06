@@ -1170,7 +1170,7 @@ describe('application module', () => {
 
         const result = await deleteNotificationsForUser('receiver1');
 
-        expect(result).toBeUndefined();
+        expect(result).toEqual({ success: 'Notifications deleted successfully' });
       });
 
       test('deleteNotifications should return an error if the provided user is invalid', async () => {

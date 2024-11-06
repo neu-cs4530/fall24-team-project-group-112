@@ -788,14 +788,14 @@ export const markNotificationsAsSeen = async (
  */
 export const deleteNotificationsForUser = async (
   username: string,
-): Promise<void | { error: string }> => {
+): Promise<{ success: string } | { error: string }> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
       throw new Error('Invalid username');
     }
     await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
-    return;
+    return { success: 'Notifications deleted' };
   } catch (error) {
     return { error: `Error when deleting notifications: ${(error as Error).message}` };
   }

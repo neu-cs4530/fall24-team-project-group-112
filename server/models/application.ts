@@ -756,7 +756,7 @@ export const updateUser = async (
 
 /**
  * Updates the notification collection to mark all notifications as seen for a given user.
- * If the provided user is invalid, no notifications will be marked as seen.
+ * If the provided user is invalid, an error will be returned and no notifications are updated.
  *
  * @param username the username of the user whose notifications should be marked as seen
  * @returns a Promise resolving to void, or an error message if the operation fails

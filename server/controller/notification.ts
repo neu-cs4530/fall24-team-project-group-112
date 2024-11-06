@@ -7,7 +7,7 @@ const notificationController = (socket: FakeSOSocket) => {
 
   /**
    * Marks all notifications as seen for a given user
-   * If the provided user is invalid, no records are updated and the resulting array is empty
+   * If the provided user is invalid, an error will be returned and no notifications are updated.
    *
    * @param req The request object containing the username as a parameter.
    * @param res The HTTP response object used to send back the user's notifications.

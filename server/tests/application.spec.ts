@@ -1242,7 +1242,7 @@ describe('application module', () => {
       test('getNotificationsForUser should return an error if the provided user is invalid', async () => {
         const result = await getNotificationsForUser('invalidUser');
         expect(result).toEqual({
-          error: 'Error when marking notifications as seen: Invalid username',
+          error: 'Error when getting notifications: Invalid username',
         });
       });
 

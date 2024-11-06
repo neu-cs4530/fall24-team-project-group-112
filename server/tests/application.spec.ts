@@ -18,6 +18,7 @@ import {
   addUser,
   isUsernameUnique,
   findQuestionAskedBy,
+  findQuestionAnsweredBy,
 } from '../models/application';
 import { Answer, Question, Tag, Comment, User } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
@@ -116,7 +117,7 @@ const QUESTIONS: Question[] = [
     title: 'Is there a language to write programmes by pictures?',
     text: 'Does something like that exist?',
     tags: [],
-    answers: [],
+    answers: [ans4],
     askedBy: 'q_by3',
     askDateTime: new Date('2023-11-19T09:24:00'),
     views: ['question1_user', 'question2_user', 'question3_user', 'question4_user'],
@@ -357,6 +358,45 @@ describe('application module', () => {
         const result = await getQuestionsByOrder('newest');
 
         expect(result.length).toEqual(0);
+      });
+    });
+
+    describe('findQuestionAnsweredBy', () => {
+      test('findQuestionAnsweredBy should return all questions answered by user, only one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS], 'find');
+        mockingoose(AnswerModel).toReturn(ans4, 'findById');
+
+        const result = await findQuestionAnsweredBy('ansBy4');
+
+        expect(result.length).toEqual(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result[0].answers).toHaveLength(1);
+      });
+
+      test('findQuestionAnsweredBy should return all questions answered by user, more than one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS], 'find');
+
+        const result = await findQuestionAnsweredBy('ansBy1');
+
+        expect(result).toHaveLength(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+        expect(result[1]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+      });
+
+      test('findQuestionAnsweredBy should return empty list, no questions answered by username', async () => {
+        mockingoose(QuestionModel).toReturn([], 'find');
+
+        const result = await findQuestionAnsweredBy('ansBy4');
+
+        expect(result).toHaveLength(0);
+      });
+
+      test('findQuestionAnsweredBy should return empty list if find returns an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+
+        const result = await findQuestionAnsweredBy('ansBy4');
+
+        expect(result).toHaveLength(0);
       });
     });
 

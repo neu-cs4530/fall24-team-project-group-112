@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { FakeSOSocket } from '../types';
-import { markNotificationsAsSeen, getNotificationsForUser } from '../models/application';
+import { markNotificationsAsSeen, deleteNotificationsForUser, getNotificationsForUser } from '../models/application';
 
 const notificationController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -26,7 +26,28 @@ const notificationController = (socket: FakeSOSocket) => {
       res.status(500).send(`Error when marking notifications as seen: ${(err as Error).message}`);
     }
   };
+  
+/**
+   * Deletes all notifications for the given user
+   * If the provided user is invalid, an error will be returned and no notifications are deleted.
+   *
+   * @param req The request object containing the username as a parameter.
+   * @param res The HTTP response object used to send back an empty result or an error
+   */
+  const deleteNotifications = async (req: Request, res: Response): Promise<void> => {
+    const { username } = req.params;
+    try {
+      const result = await deleteNotificationsForUser(username);
 
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when deleting notifications: ${(err as Error).message}`);
+    }
+    
   /**
    * Gets all notifications for a given user
    * If the provided user is invalid, an error will be returned.
@@ -51,6 +72,7 @@ const notificationController = (socket: FakeSOSocket) => {
 
   router.patch('/seen/:username', markNotificationsAsSeenRoute);
   router.get('/get/:username', getNotifications);
+  router.delete('/:username', deleteNotifications);
 
   return router;
 };

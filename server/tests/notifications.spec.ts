@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import supertest from 'supertest';
-import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, NotificationType } from '../types';
@@ -33,9 +32,9 @@ const NOTIFICATIONS: Notification[] = [
   },
 ];
 describe('PATCH /seen/:username', () => {
-  afterAll(async () => {
-    await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
-  });
+  // afterAll(async () => {
+  //   await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
+  // });
 
   test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
     const expectedResults = NOTIFICATIONS.filter(
@@ -82,9 +81,9 @@ describe('PATCH /seen/:username', () => {
 });
 
 describe('DELETE /:username', () => {
-  afterAll(async () => {
-    await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
-  });
+  // afterAll(async () => {
+  //   await mongoose.connection.close(); // Ensure mongoose is disconnected after all tests
+  // });
 
   test('deleteNotifications should delete the notifications of the specified user', async () => {
     jest
@@ -107,6 +106,10 @@ describe('DELETE /:username', () => {
   });
 
   test('markNotificationsAsSeen should return an error if no username is provided', async () => {
+    jest
+      .spyOn(util, 'deleteNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Error performing delete' });
+
     const result = await supertest(app).delete(`/notification/${USERNAME}`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual(

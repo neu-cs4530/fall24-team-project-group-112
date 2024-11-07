@@ -250,18 +250,36 @@ describe('POST /user', () => {
     it('should return a list of followers and people the user is following', async () => {
       const mockReqParams = { username: 'johnDoe' };
 
-      const mockFollowers = [{ followerUsername: 'follower1' }, { followerUsername: 'follower2' }];
-      const mockFollowing = [
-        { followeeUsername: 'following1' },
-        { followeeUsername: 'following2' },
+      const mockFollowers = [
+        {
+          followerUsername: 'follower1',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2024-06-01T00:00:00.000Z'),
+        },
+        {
+          followerUsername: 'follower2',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2024-06-02T00:00:00.000Z'),
+        },
       ];
 
-      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+      const mockFollowing = [
+        {
+          followerUsername: 'johnDoe',
+          followeeUsername: 'following1',
+          followDateTime: new Date('2024-06-01T00:00:00.000Z'),
+        },
+        {
+          followerUsername: 'johnDoe',
+          followeeUsername: 'following2',
+          followDateTime: new Date('2024-06-02T00:00:00.000Z'),
+        },
+      ];
 
-      jest
-        .spyOn(FollowModel, 'find')
-        .mockResolvedValueOnce(mockFollowers)
-        .mockResolvedValueOnce(mockFollowing);
+      jest.spyOn(util, 'getFollowersAndFollowingForUser').mockResolvedValue({
+        followers: mockFollowers,
+        following: mockFollowing,
+      });
 
       const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
 
@@ -285,8 +303,10 @@ describe('POST /user', () => {
 
       const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe('User with provided username is invalid');
+      expect(response.status).toBe(500);
+      expect(response.text).toBe(
+        'Error when fetching followers and following: Error when getting followers and following: Invalid username',
+      );
     });
 
     it('should return empty arrays if the user exists but has no followers or following', async () => {
@@ -294,7 +314,9 @@ describe('POST /user', () => {
 
       jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
 
-      jest.spyOn(FollowModel, 'find').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+      jest
+        .spyOn(util, 'getFollowersAndFollowingForUser')
+        .mockResolvedValue({ followers: [], following: [] });
 
       const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
 
@@ -305,7 +327,7 @@ describe('POST /user', () => {
       });
     });
 
-    it('should return a server error if there is an issue fetching data', async () => {
+    it('should return a server error if there is an issue fetching followers and following', async () => {
       const mockReqParams = { username: 'johnDoe' };
 
       jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);

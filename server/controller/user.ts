@@ -10,9 +10,14 @@ import {
   UpdateUserPayload,
   FindFollowersAndFollowingRequest,
 } from '../types';
-import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
+import {
+  addUser,
+  isUsernameUnique,
+  updateUser,
+  addFollow,
+  getFollowersAndFollowingForUser,
+} from '../models/application';
 import { auth } from '../firebaseConfig';
-import FollowModel from '../models/follows';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -207,35 +212,34 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets all followers and following for a given user
+   * If the provided user is invalid, an error will be returned.
+   *
+   * @param req The request object containing the username as a parameter.
+   * @param res The HTTP response object used to send back the user's followers and following.
+   */
   const getFollowersAndFollowing = async (
     req: FindFollowersAndFollowingRequest,
     res: Response,
   ): Promise<void> => {
     const { username } = req.params;
 
-    const usernameUnique = await isUsernameUnique(username);
-
-    if (!username || !usernameUnique) {
-      res.status(400).send('User with provided username is invalid');
-      return;
-    }
-
     try {
-      const followers = await FollowModel.find({ followeeUsername: username });
-      const following = await FollowModel.find({ followerUsername: username });
+      const result = await getFollowersAndFollowingForUser(username);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
 
       res.status(200).json({
-        followers: followers.map(f => f.followerUsername),
-        following: following.map(f => f.followeeUsername),
+        followers: result.followers.map(f => f.followerUsername),
+        following: result.following.map(f => f.followeeUsername),
       });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        res
-          .status(500)
-          .send(`Error when fetching followers and following: ${(err as Error).message}`);
-      } else {
-        res.status(500).send(`Error when fetching followers and following`);
-      }
+      res
+        .status(500)
+        .send(`Error when fetching followers and following: ${(err as Error).message}`);
     }
   };
 

@@ -23,6 +23,7 @@ import {
   getNotificationsForUser,
   updateUser,
   deleteNotificationsForUser,
+  getFollowersAndFollowingForUser,
 } from '../models/application';
 import {
   Answer,
@@ -1468,6 +1469,53 @@ describe('application module', () => {
         };
 
         expect(result.error).toEqual('Error when creating or deleting a follow request');
+      });
+    });
+  });
+
+  describe('getFollowersAndFollowingForUser', () => {
+    it('should return an error if the user does not exist', async () => {
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await getFollowersAndFollowingForUser('nonExistentUser');
+
+      expect(result).toEqual({
+        error: 'Error when getting followers and following: Invalid username',
+      });
+    });
+
+    it('should return followers and following for a valid user', async () => {
+      const mockFollowers = [{ followerUsername: 'follower1' }, { followerUsername: 'follower2' }];
+
+      const mockFollowing = [
+        { followeeUsername: 'following1' },
+        { followeeUsername: 'following2' },
+      ];
+
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ username: 'johnDoe' });
+
+      jest
+        .spyOn(FollowModel, 'find')
+        .mockResolvedValueOnce(mockFollowers)
+        .mockResolvedValueOnce(mockFollowing);
+
+      const result = await getFollowersAndFollowingForUser('johnDoe');
+
+      expect(result).toEqual({
+        followers: mockFollowers,
+        following: mockFollowing,
+      });
+    });
+
+    it('should return an error if there is a database issue', async () => {
+      jest.spyOn(UserModel, 'findOne').mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      const result = await getFollowersAndFollowingForUser('johnDoe');
+
+      expect(result).toEqual({
+        error: 'Error when getting followers and following: Database error',
       });
     });
   });

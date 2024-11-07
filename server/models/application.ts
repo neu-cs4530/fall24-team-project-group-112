@@ -871,3 +871,28 @@ export const getNotificationsForUser = async (
     return { error: `Error when getting notifications: ${(error as Error).message}` };
   }
 };
+
+/**
+ * Retrieves all followers and following for a given user.
+ * If the provided user is invalid, an error will be returned.
+ *
+ * @param username the username of the user whose followers and following should be retrieved
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const getFollowersAndFollowingForUser = async (
+  username: string,
+): Promise<{ followers: Follow[]; following: Follow[] } | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+
+    const followers = await FollowModel.find({ followeeUsername: username });
+    const following = await FollowModel.find({ followerUsername: username });
+
+    return { followers, following };
+  } catch (error) {
+    return { error: `Error when getting followers and following: ${(error as Error).message}` };
+  }
+};

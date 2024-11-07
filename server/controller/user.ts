@@ -7,7 +7,6 @@ import {
   LoginUserRequest,
   FollowRequest,
   User,
-  FindUserRequest,
   UpdateUserPayload,
 } from '../types';
 import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';

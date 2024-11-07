@@ -386,8 +386,7 @@ export interface FindQuestionsDownvotedByRequest extends Request {
   };
 }
 
-/** 
-
+/**
  * Interface for the request parameters when finding questions upvoted by a given user.
  * - username - The user's unique username.
  */

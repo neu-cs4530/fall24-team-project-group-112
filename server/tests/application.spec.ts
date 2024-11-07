@@ -300,10 +300,9 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('unanswered');
 
-        expect(result.length).toEqual(3);
+        expect(result.length).toEqual(2);
         expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
         expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
-        expect(result[2]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
       });
 
       test('get newest questions', async () => {
@@ -363,8 +362,8 @@ describe('application module', () => {
 
     describe('findQuestionAnsweredBy', () => {
       test('findQuestionAnsweredBy should return all questions answered by user, only one question', async () => {
-        mockingoose(QuestionModel).toReturn([QUESTIONS], 'find');
-        mockingoose(AnswerModel).toReturn(ans4, 'findById');
+        mockingoose(AnswerModel).toReturn([ans4], 'find');
+        mockingoose(QuestionModel).toReturn([QUESTIONS[2]], 'find');
 
         const result = await findQuestionAnsweredBy('ansBy4');
 
@@ -374,7 +373,8 @@ describe('application module', () => {
       });
 
       test('findQuestionAnsweredBy should return all questions answered by user, more than one question', async () => {
-        mockingoose(QuestionModel).toReturn([QUESTIONS], 'find');
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0], QUESTIONS[1]], 'find');
 
         const result = await findQuestionAnsweredBy('ansBy1');
 

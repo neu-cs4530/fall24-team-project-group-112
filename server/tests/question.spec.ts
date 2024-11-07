@@ -496,50 +496,42 @@ describe('GET /answeredBy/:username', () => {
     await mongoose.disconnect();
   });
 
-  // it('should return a list of questions answered by the specified username', async () => {
-  //   const mockReqParams = { username: 'answer4_user' };
-  //   const mockQuestions = MOCK_QUESTIONS.map(q => ({
-  //     ...q,
-  //     _id: q._id ? new mongoose.Types.ObjectId(q._id) : new mongoose.Types.ObjectId(),
-  //     tags: q.tags.map(tag => ({
-  //       ...tag,
-  //       _id: tag._id ? new mongoose.Types.ObjectId(tag._id) : new mongoose.Types.ObjectId(),
-  //     })),
-  //     answers: q.answers.map(answer => ({
-  //       ...answer,
-  //       _id: new mongoose.Types.ObjectId(answer._id),
-  //       ansDateTime: new Date(answer.ansDateTime),
-  //       comments: answer.comments || [],
-  //     })),
-  //     askDateTime: new Date(q.askDateTime),
-  //   }));
-  //   const mockPopulatedQuestions = mockQuestions.map(question => ({
-  //     ...question,
-  //     _id: new mongoose.Types.ObjectId(question._id),
-  //     views: ['question1_user', 'question2_user', 'question3_user'],
-  //     tags: [],
-  //     answers: [],
-  //     askDateTime: question.askDateTime,
-  //   }));
+  it('should return a list of questions answered by the specified username', async () => {
+    const mockReqParams = { username: 'answer4_user' };
+    const mockQuestions = MOCK_QUESTIONS.map(q => ({
+      ...q,
+      _id: new mongoose.Types.ObjectId(q._id),
+      tags: q.tags,
+      answers: q.answers,
+      askDateTime: new Date(q.askDateTime),
+    })).filter(q => q.answers.some(a => a.ansBy === mockReqParams.username));
+    const mockPopulatedQuestions = mockQuestions.map(question => ({
+      ...question,
+      _id: new mongoose.Types.ObjectId(question._id),
+      views: ['question1_user', 'question2_user', 'question3_user'],
+      tags: [],
+      answers: [],
+      askDateTime: question.askDateTime,
+    }));
 
-  //   jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
-  //   jest.spyOn(util, 'findQuestionAnsweredBy').mockResolvedValue(mockPopulatedQuestions);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+    jest.spyOn(util, 'findQuestionAnsweredBy').mockResolvedValue(mockPopulatedQuestions);
 
-  //   const response = await supertest(app).get(`/question/answeredBy/${mockReqParams.username}`);
+    const response = await supertest(app).get(`/question/answeredBy/${mockReqParams.username}`);
 
-  //   const expectedResponse = mockPopulatedQuestions.map(question => ({
-  //     ...question,
-  //     _id: question._id.toString(),
-  //     askDateTime: question.askDateTime.toISOString(),
-  //   }));
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toEqual(expectedResponse);
-  // });
+    const expectedResponse = mockPopulatedQuestions.map(question => ({
+      ...question,
+      _id: question._id.toString(),
+      askDateTime: question.askDateTime.toISOString(),
+    }));
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResponse);
+  });
 
   it('should return bad request error if username is not provided or invalid', async () => {
     const mockReqParams = { username: 'invalid_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
 
     const response = await supertest(app).get(`/question/answeredBy/${mockReqParams.username}`);
 
@@ -550,7 +542,7 @@ describe('GET /answeredBy/:username', () => {
   it('should return empty array if the username exists but has no questions answered', async () => {
     const mockReqParams = { username: 'no_questions_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
     jest.spyOn(util, 'findQuestionAnsweredBy').mockResolvedValue([]);
 
     const response = await supertest(app).get(`/question/answeredBy/${mockReqParams.username}`);
@@ -562,7 +554,7 @@ describe('GET /answeredBy/:username', () => {
   it('should return server error if an error occurs while fetching questions', async () => {
     const mockReqParams = { username: 'question3_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
     jest.spyOn(util, 'findQuestionAnsweredBy').mockImplementation(() => {
       throw new Error('Error while fetching question answered by user');
     });

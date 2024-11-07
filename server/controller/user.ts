@@ -231,7 +231,7 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   router.post('', createUser);
-  router.get('/login', loginUser);
+  router.post('/login', loginUser);
   router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);

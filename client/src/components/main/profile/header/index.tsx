@@ -56,19 +56,19 @@ const Header = ({
 }: HeaderProps) => (
   <div className=''>
     <div className='header'>
-      <div className='headerName'>{`${firstName} ${lastName}`}</div>
-      <div className='headerUsername'>{username}</div>
+      <div className='header-name'>{`${firstName} ${lastName}`}</div>
+      <div className='header-ussername'>{`@${username}`}</div>
       {github && (
-        <div className='headerGithub'>
+        <div className='header-github'>
           <a href={github} target='_blank' rel='noreferrer'>
             {github}
           </a>
         </div>
       )}
-      {school && <div className='headerSchool'>{school}</div>}
-      {city && state && <div className='headerLocation'>{`${city}, ${state}`}</div>}
-      {company && <div className='headerCompany'>{company}</div>}
-      {headline && <div className='headerHeadline'>{headline}</div>}
+      {school && <div className='header-school'>{school}</div>}
+      {city && state && <div className='header-location'>{`${city}, ${state}`}</div>}
+      {company && <div className='header-company'>{company}</div>}
+      {headline && <div className='header-headline'>{headline}</div>}
     </div>
   </div>
 );

@@ -30,7 +30,7 @@ const useLogin = () => {
    */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setUser({ username, firstName: '', lastName: '', email: '', createdAt: new Date() }); // TODO: Implement login logic, done in another ticket!!!
+    // setUser({ username, firstName: '', lastName: '', email: '', createdAt: new Date() }); // TODO: Implement login logic, done in another ticket!!!
     navigate('/home');
   };
 

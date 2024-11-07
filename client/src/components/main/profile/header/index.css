@@ -1,18 +1,57 @@
-/* All the CSS related to answers Page*/
-.answer {
+/* All the CSS related to profile header*/
+
+.header-name {
   display: flex;
-  flex-direction: row;
-  border-bottom: #000000 1px dashed;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
-.answerText {
-  width: 75%;
+.header-username {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
-.answerAuthor {
-  margin-left: 5%;
+.header-headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
-.answer_author {
-  color: green;
+.header-username {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.header-github {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.header-school {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.header-location {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.header-company {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }

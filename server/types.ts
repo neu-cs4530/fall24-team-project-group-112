@@ -363,6 +363,16 @@ export interface LoginUserRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding questions downvoted by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsDownvotedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Enum representing the possible colors for a badge.
  */
 export enum BadgeColor {

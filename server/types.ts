@@ -324,6 +324,20 @@ export interface Notification {
 }
 
 /**
+ * Interface extending the request body when retrieving a user's notification, which contains:
+ * - username - The username of the user whose notifications are being retrieved.
+ * - type - The type of notification to retrieve.
+ */
+export interface GetNotificationRequest extends Request {
+  params: {
+    username: string;
+  };
+  query: {
+    type: NotificationType;
+  };
+}
+
+/**
  * Type representing the possible responses for a User-related operation.
  */
 export type UserResponse = User | { error: string };

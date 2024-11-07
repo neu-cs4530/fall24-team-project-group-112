@@ -845,12 +845,24 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
  */
 export const getNotificationsForUser = async (
   username: string,
+  type?: NotificationType,
 ): Promise<Notification[] | { error: string }> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
       throw new Error('Invalid username');
     }
+
+    // if type is provided, filter notifications by type
+    if (type) {
+      const notifications = await NotificationModel.find({
+        receiverUsername: username,
+        notificationType: type,
+      }).populate('eventId');
+      return notifications;
+    }
+
+    // otherwise, find all notifications for the user
     const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
       'eventId',
     );

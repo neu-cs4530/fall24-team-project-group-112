@@ -719,8 +719,11 @@ export const addUser = async (user: User): Promise<UserResponse> => {
  */
 export const findQuestionAnsweredBy = async (username: string): Promise<Question[]> => {
   try {
-    let qlist = [];
-    qlist = await QuestionModel.find().populate([
+    const answers = await AnswerModel.find({ ansBy: username });
+
+    const answerIds = answers.map(answer => answer._id);
+
+    return await QuestionModel.find({ answers: { $in: answerIds } }).populate([
       {
         path: 'tags',
         model: TagModel,
@@ -728,26 +731,8 @@ export const findQuestionAnsweredBy = async (username: string): Promise<Question
       {
         path: 'answers',
         model: AnswerModel,
-        populate: { path: 'comments', model: CommentModel },
       },
     ]);
-    qlist = await Promise.all(
-      qlist.map(async q => {
-        const filteredAnswers = await Promise.all(
-          q.answers.map(async a => {
-            if (typeof a === 'object' && a !== null && 'ansBy' in a) {
-              return a.ansBy === username ? a : null;
-            }
-            const answer = await AnswerModel.findById(a);
-            return answer && answer.ansBy === username ? answer : null;
-          }),
-        );
-        q.answers = filteredAnswers.filter(a => a !== null);
-        return q.answers.length > 0 ? q : null;
-      }),
-    );
-    qlist = qlist.filter(q => q !== null);
-    return qlist;
   } catch (error) {
     return [];
   }

@@ -51,17 +51,6 @@ const userController = (socket: FakeSOSocket) => {
   }
 
   /**
-   * Checks if the provided follow request contains the required data.
-   *
-   * @param req The request object containing the follow data.
-   *
-   * @returns `true` if the request is valid, otherwise `false`.
-   */
-  function isFindUserRequestValid(req: FindUserRequest): boolean {
-    return !!req.body.username;
-  }
-
-  /**
    * Checks if the provided user request contains the required fields and if the email is valid.
    *
    * @param req The request object containing the user data.
@@ -138,11 +127,6 @@ const userController = (socket: FakeSOSocket) => {
    * @returns A Promise that resolves to void.
    */
   const getUserByUsername = async (req: FindUserRequest, res: Response): Promise<void> => {
-    if (!isFindUserRequestValid(req)) {
-      res.status(400).send('Invalid request');
-      return;
-    }
-
     try {
       const { username } = req.params;
       const user = await UserModel.findOne({ username });
@@ -249,7 +233,7 @@ const userController = (socket: FakeSOSocket) => {
   router.post('', createUser);
   router.get('/login', loginUser);
   router.post('', createUser);
-  router.get('/getUserByUsername/:username', getUserByUsername);
+  router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
 

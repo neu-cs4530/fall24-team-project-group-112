@@ -242,8 +242,8 @@ describe('POST /user', () => {
 
 describe('GET /getUserByName/:name', () => {
   afterEach(async () => {
-    await mongoose.connection.close(); // Ensure the connection is properly closed
-    findOneSpy.mockClear(); // Clear the mock after each test
+    await mongoose.connection.close(); // Ensure connection is properly closed
+    findOneSpy.mockClear(); // Clear mock after each test
   });
 
   afterAll(async () => {
@@ -251,50 +251,42 @@ describe('GET /getUserByName/:name', () => {
   });
 
   it('should return the user when found', async () => {
-    // Mock a user object to be returned by the findOne method
     const newUser = {
       username: 'dummyUser',
       lastName: 'User',
-      email: 'dummyUser@email.com',
+      email: 'dummy@example.com',
       createdAt: '2024-06-03T00:00:00.000Z',
     };
 
     findOneSpy.mockResolvedValueOnce(newUser);
 
-    const response = await supertest(app).get('/user/getUserByUsername/dummyUser');
+    const response = await supertest(app).get('/user/dummyUser');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(newUser);
   });
 
   it('should return 404 if the user is not found', async () => {
-    // Mock findOne to return null to simulate tag not found
     findOneSpy.mockResolvedValueOnce(null);
 
-    const response = await supertest(app).get('/user/getUserByUsername/nonExistentUser');
+    const response = await supertest(app).get('/user/nonExistentUser');
 
     expect(response.status).toBe(404);
     expect(response.text).toBe('User with the username "nonExistentUser" not found');
   });
 
   it('should return 500 if there is an error fetching the user', async () => {
-    // Mock findOne to throw an error
     findOneSpy.mockRejectedValueOnce(new Error('Error fetching user'));
 
-    const response = await supertest(app).get('/user/getUserByUsername/errorUser');
+    const response = await supertest(app).get('/user/errorUser');
 
     expect(response.status).toBe(500);
     expect(response.text).toContain('Error when fetching user: Error fetching user');
   });
 
-  it('should return 400 if the request is invalid', async () => {
-    const mockReqBodyError = {};
+  it('should return an error if the request is empty', async () => {
+    const response = await supertest(app).get('/user/');
 
-    const response = await supertest(app)
-      .get('/user/getUserByUsername/invalidName')
-      .send(mockReqBodyError);
-
-    expect(response.status).toBe(400);
-    expect(response.text).toBe('Invalid request');
+    expect(response.status).toBe(404);
   });
 });

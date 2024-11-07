@@ -380,7 +380,7 @@ export interface CreateUserRequest extends Request {
  * - password - The password for the user found.
  */
 export interface FindUserRequest extends Request {
-  body: {
+  params: {
     username: string;
   };
 }

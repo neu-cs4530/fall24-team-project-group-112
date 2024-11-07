@@ -72,9 +72,6 @@ export interface UpdateUserPayload {
   avatarName?: string;
 }
 
-// TODO: fill in interface details
-export interface Badge {}
-
 /**
  * Type representing the possible ordering options for questions.
  */
@@ -301,10 +298,10 @@ export interface ServerToClientEvents {
  * Enum representing the possible event types for notifications.
  */
 export enum NotificationType {
-  ANSWER = 'answer',
-  COMMENT = 'comment',
-  BADGE = 'badge',
-  FOLLOW = 'follow',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
 }
 
 /**
@@ -316,10 +313,11 @@ export enum NotificationType {
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
+
 export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
-  eventId: ObjectId;
+  eventId: ObjectId | Answer | Comment | Badge | Follow;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
@@ -368,21 +366,21 @@ export interface LoginUserRequest extends Request {
  * Enum representing the possible colors for a badge.
  */
 export enum BadgeColor {
-  Gold = 'gold',
-  Silver = 'silver',
-  Bronze = 'bronze',
+  GOLD = 'gold',
+  SILVER = 'silver',
+  BRONZE = 'bronze',
 }
 
 /**
  * Enum representing the possible types of badges.
  */
 export enum BadgeName {
-  FirstCommenter = 'First Commenter',
-  Voter = 'Voter',
-  DiscussionStarter = 'Discussion Starter',
-  CommunityHelper = 'Community Helper',
-  Influencer = 'Influencer',
-  Lifesaver = 'Lifesaver',
+  FIRST_COMMENTER = 'First Commenter',
+  VOTER = 'Voter',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
+  INFLUENCER = 'Influencer',
+  LIFESAVER = 'Lifesaver',
 }
 
 /**

@@ -40,26 +40,37 @@ export interface User {
 }
 
 /**
- * Interface for the request query to find questions using a search string, which contains:
- * - order - The order in which to sort the questions
- * - search - The search string used to find questions
- * - askedBy - The username of the user who asked the question
+ * Interface extending the request body when updating a user's profile, which contains a
+ * username parameter and UpdateUserPayload body containing updated profile information.
  */
 export interface UpdateUserRequest extends Request {
-  body: {
-    headline?: string;
-    bio?: string;
-    githubUrl?: string;
-    company?: string;
-    school?: string;
-    city?: string;
-    state?: string;
-    avatarName?: string;
+  params: {
+    username: string;
   };
+  body: UpdateUserPayload;
 }
 
-// TODO: fill in interface details
-export interface Badge {}
+/**
+ * Interface for updating a user's profile, which contains:
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
+}
 
 /**
  * Type representing the possible ordering options for questions.
@@ -226,6 +237,21 @@ export interface AddCommentRequest extends Request {
 export type CommentResponse = Comment | { error: string };
 
 /**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: ObjectId;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+}
+
+/**
  * Interface representing the payload for a comment update event, which contains:
  * - result - The updated question or answer.
  * - type - The type of the updated item, either 'question' or 'answer'.
@@ -272,10 +298,10 @@ export interface ServerToClientEvents {
  * Enum representing the possible event types for notifications.
  */
 export enum NotificationType {
-  ANSWER = 'answer',
-  COMMENT = 'comment',
-  BADGE = 'badge',
-  FOLLOW = 'follow',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
 }
 
 /**
@@ -287,11 +313,103 @@ export enum NotificationType {
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
+
 export interface Notification {
-  _id: ObjectId;
+  _id?: ObjectId;
   notificationType: NotificationType;
-  eventId: ObjectId;
+  eventId: ObjectId | Answer | Comment | Badge | Follow;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
 }
+
+/**
+ * Type representing the possible responses for a User-related operation.
+ */
+export type UserResponse = User | { error: string };
+
+/**
+ * Interface extending the request body when creating a new user, which contains:
+ * - user - The user being created.
+ * - password - The password for the user (to be used to create a Firebase user object only).
+ */
+export interface CreateUserRequest extends Request {
+  body: {
+    user: User;
+    password: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding questions asked by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAskedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
+ * Interface extending the request body when logging in an existing user, which contains:
+ * - email - The email of the user.
+ * - password - The password of the user.
+ */
+export interface LoginUserRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
+}
+
+/**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  GOLD = 'gold',
+  SILVER = 'silver',
+  BRONZE = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FIRST_COMMENTER = 'First Commenter',
+  VOTER = 'Voter',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
+  INFLUENCER = 'Influencer',
+  LIFESAVER = 'Lifesaver',
+}
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: ObjectId;
+  name: BadgeName;
+  description: string;
+  color: BadgeColor;
+}
+
+/**
+ * Interface extending the request body when creating a new follow request, which contains:
+ * - followerUsername - The username of the user following another user.
+ * - followeeUsername - The username of the user being followed.
+ */
+export interface FollowRequest extends Request {
+  body: {
+    followerUsername: string;
+    followeeUsername: string;
+  };
+}
+
+/**
+ * Type representing the possible responses for a Follow-related operation.
+ */
+export type FollowResponse = { success: string } | { error: string };

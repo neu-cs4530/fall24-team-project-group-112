@@ -6,6 +6,7 @@ import {
   FindQuestionByIdRequest,
   AddQuestionRequest,
   VoteRequest,
+  FindQuestionsAskedByRequest,
   FakeSOSocket,
 } from '../types';
 import {
@@ -17,6 +18,8 @@ import {
   processTags,
   populateDocument,
   saveQuestion,
+  isUsernameUnique,
+  findQuestionAskedBy,
 } from '../models/application';
 
 const questionController = (socket: FakeSOSocket) => {
@@ -227,12 +230,55 @@ const questionController = (socket: FakeSOSocket) => {
     voteQuestion(req, res, 'downvote');
   };
 
+  /**
+   * Retrieves questions asked by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionByIdRequest object containing the question ID as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsAskedBy = async (
+    req: FindQuestionsAskedByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    const usernameUnique = await isUsernameUnique(username);
+
+    if (!usernameUnique) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionAskedBy(username);
+
+      if (qlist && !('error' in qlist)) {
+        res.json(qlist);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question asked by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question asked by user`);
+      }
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
+  router.get('/askedBy/:username', getQuestionsAskedBy);
 
   return router;
 };

@@ -5,15 +5,25 @@ import {
   AnswerResponse,
   Comment,
   CommentResponse,
+  Notification,
+  NotificationType,
+  Follow,
+  FollowResponse,
   OrderType,
   Question,
   QuestionResponse,
   Tag,
+  UpdateUserPayload,
+  User,
+  UserResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
+import NotificationModel from './notifications';
+import UserModel from './users';
+import FollowModel from './follows';
 
 /**
  * Parses tags from a search string.
@@ -189,6 +199,40 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
     return savedTag as Tag;
   } catch (error) {
     return null;
+  }
+};
+
+/**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
+ */
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification | { error: string }> => {
+  try {
+    if (!eventId || !type || !receiverUsername) {
+      throw new Error('Invalid request');
+    }
+
+    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+    const notif: Notification = {
+      notificationType: type,
+      eventId,
+      receiverUsername,
+      notificationDate: new Date(),
+      seen: false,
+    };
+
+    return await NotificationModel.create(notif);
+  } catch (error) {
+    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };
 
@@ -374,6 +418,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
 export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
+    await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
     return result;
   } catch (error) {
     return { error: 'Error when saving an answer' };
@@ -640,5 +685,177 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
     return tmap;
   } catch (error) {
     return { error: 'Error when construction tag map' };
+  }
+};
+
+/**
+ * Checks if a user with the given username already exists in the database.
+ * @param {string} username - username to check.
+ * @returns true if the username is unique, false otherwise.
+ */
+export const isUsernameUnique = async (username: string): Promise<boolean> => {
+  const existingUser = await UserModel.findOne({ username });
+  return !existingUser;
+};
+
+/**
+ * Adds a new user to the database.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<UserResponse>} - The added user, or an error message if the addition failed.
+ */
+export const addUser = async (user: User): Promise<UserResponse> => {
+  try {
+    const result = await UserModel.create(user);
+    return result;
+  } catch (error) {
+    return { error: 'Error when saving a new user' };
+  }
+};
+
+/**
+ * Finds all questions asked by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ */
+export const findQuestionAskedBy = async (username: string): Promise<Question[]> => {
+  try {
+    let qlist = [];
+    qlist = await QuestionModel.find({ askedBy: username }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
+    ]);
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const updateUser = async (
+  username: string,
+  userUpdate: UpdateUserPayload,
+): Promise<UserResponse> => {
+  const existingUser = await UserModel.findOne({ username });
+  if (!existingUser) {
+    return { error: 'User does not exist' };
+  }
+
+  Object.assign(existingUser, userUpdate);
+  await existingUser.save();
+
+  return existingUser as User;
+};
+
+/**
+ * Updates the notification collection to mark all notifications as seen for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are updated.
+ *
+ * @param username the username of the user whose notifications should be marked as seen
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const markNotificationsAsSeen = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
+    return await NotificationModel.find({ receiverUsername: username });
+  } catch (error) {
+    return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Deletes notifications for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are deleted.
+ *
+ * @param username the username of the user whose notifications should be deleted
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const deleteNotificationsForUser = async (
+  username: string,
+): Promise<{ success: string } | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
+    return { success: 'Notifications deleted successfully' };
+  } catch (error) {
+    return { error: `Error when deleting notifications: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Adds a new follow object to the database.
+ *
+ * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted.
+ *
+ * @returns {Promise<FollowResponse>} - A message if the follow obejct was created or deleted, or an error message if the creation or deletion failed.
+ */
+export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
+  try {
+    if (
+      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+    ) {
+      throw new Error('Follower or followee does not exist');
+    }
+
+    const existingFollow = await FollowModel.findOne({
+      followerUsername: follow.followerUsername,
+      followeeUsername: follow.followeeUsername,
+    });
+
+    if (existingFollow !== undefined) {
+      await FollowModel.deleteOne({
+        followerUsername: follow.followerUsername,
+        followeeUsername: follow.followeeUsername,
+      });
+      return { success: 'Follow request deleted' };
+    }
+    await FollowModel.create(follow);
+    return { success: 'Follow request created' };
+  } catch (error) {
+    return { error: 'Error when creating or deleting a follow request' };
+  }
+};
+
+/**
+ * Retrieves all notifications for a given user.
+ * If the provided user is invalid, an error will be returned.
+ *
+ * @param username the username of the user whose notifications should be retrieved
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const getNotificationsForUser = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
+      'eventId',
+    );
+    return notifications;
+  } catch (error) {
+    return { error: `Error when getting notifications: ${(error as Error).message}` };
   }
 };

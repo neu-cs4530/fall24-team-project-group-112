@@ -743,6 +743,43 @@ export const findQuestionAskedBy = async (username: string): Promise<Question[]>
 };
 
 /**
+
+ * Finds all questions downvoted by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions downvoted by the provided user,
+ */
+export const findQuestionDownvotedBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
+  try {
+    const existingUser = await UserModel.findOne({ username });
+    if (!existingUser) {
+      return { error: 'User does not exist' };
+    }
+
+    let qlist = [];
+    qlist = await QuestionModel.find().populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
+    ]);
+    qlist = qlist.filter(q => q.downVotes.includes(username));
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
  * Finds all questions upvoted by a given user.
  *
  * @param {User} user - The user to add

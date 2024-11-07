@@ -7,6 +7,7 @@ import {
   AddQuestionRequest,
   VoteRequest,
   FindQuestionsAskedByRequest,
+  FindQuestionsDownvotedByRequest,
   FindQuestionsUpvotedByRequest,
   FakeSOSocket,
 } from '../types';
@@ -21,6 +22,7 @@ import {
   saveQuestion,
   isUsernameUnique,
   findQuestionAskedBy,
+  findQuestionDownvotedBy,
   findQuestionUpvotedBy,
 } from '../models/application';
 
@@ -275,6 +277,43 @@ const questionController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Retrieves questions downvoted by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionsDownvotedByRequest object containing the question ID as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsDownvotedBy = async (
+    req: FindQuestionsDownvotedByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionDownvotedBy(username);
+
+      if (qlist && 'error' in qlist) {
+        throw new Error(qlist.error);
+      }
+
+      res.json(qlist);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question downvoted by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question downvoted by user`);
+      }
+    }
+  };
+
+  /**
    * Retrieves questions upvoted by a specific user.
    * If there is an error, the HTTP response's status is updated.
    *
@@ -318,6 +357,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/askedBy/:username', getQuestionsAskedBy);
+  router.get('/downvotedBy/:username', getQuestionsDownvotedBy);
   router.get('/upvotedBy/:username', getQuestionsUpvotedBy);
 
   return router;

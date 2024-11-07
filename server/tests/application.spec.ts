@@ -24,6 +24,7 @@ import {
   updateUser,
   findQuestionUpvotedBy,
   deleteNotificationsForUser,
+  findQuestionDownvotedBy,
 } from '../models/application';
 import {
   Answer,
@@ -113,7 +114,7 @@ const QUESTIONS: Question[] = [
     askDateTime: new Date('2023-11-16T09:24:00'),
     views: ['question1_user', 'question2_user'],
     upVotes: ['dummyUser'],
-    downVotes: [],
+    downVotes: ['user1'],
     comments: [],
   },
   {
@@ -126,7 +127,7 @@ const QUESTIONS: Question[] = [
     askDateTime: new Date('2023-11-17T09:24:00'),
     views: ['question2_user'],
     upVotes: ['user1'],
-    downVotes: [],
+    downVotes: ['dummyUser'],
     comments: [],
   },
   {
@@ -139,7 +140,7 @@ const QUESTIONS: Question[] = [
     askDateTime: new Date('2023-11-19T09:24:00'),
     views: ['question1_user', 'question2_user', 'question3_user', 'question4_user'],
     upVotes: ['user1'],
-    downVotes: [],
+    downVotes: ['dummyUser'],
     comments: [],
   },
   {
@@ -435,6 +436,53 @@ describe('application module', () => {
         const result = await findQuestionAskedBy('q_by1');
 
         expect(result.length).toEqual(0);
+      });
+    });
+
+    describe('findQuestionDownvotedBy', () => {
+      it('findQuestionDownvotedBy should return all questions downvoted by user, only one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0]], 'find');
+        mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+
+        const result = (await findQuestionDownvotedBy('user1')) as Question[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+      });
+
+      test('findQuestionDownvotedBy should return all questions downvoted by user, more than one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[1], QUESTIONS[2]], 'find');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+
+        const result = (await findQuestionDownvotedBy('dummyUser')) as Question[];
+
+        expect(result.length).toEqual(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+        expect(result[1]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+      });
+
+      test('findQuestionDownvotedBy should return empty list, no questions downvoted by username', async () => {
+        mockingoose(QuestionModel).toReturn([], 'find');
+        mockingoose(UserModel).toReturn(USERS[2], 'findOne');
+
+        const result = (await findQuestionDownvotedBy('user2')) as Question[];
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionDownvotedBy should return empty list if find returns an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+        mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+
+        const result = (await findQuestionDownvotedBy('user1')) as Question[];
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionDownvotedBy should return an error when the provided username is invalid', async () => {
+        const result = (await findQuestionDownvotedBy('notARealUser')) as Question[];
+
+        expect(result).toEqual({ error: 'User does not exist' });
       });
     });
 

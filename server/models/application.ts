@@ -743,6 +743,7 @@ export const findQuestionAskedBy = async (username: string): Promise<Question[]>
 };
 
 /**
+
  * Finds all questions downvoted by a given user.
  *
  * @param {User} user - The user to add
@@ -772,6 +773,42 @@ export const findQuestionDownvotedBy = async (
       { path: 'comments', model: CommentModel },
     ]);
     qlist = qlist.filter(q => q.downVotes.includes(username));
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Finds all questions upvoted by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions upvoted by the provided user,
+ */
+export const findQuestionUpvotedBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
+  try {
+    const existingUser = await UserModel.findOne({ username });
+    if (!existingUser) {
+      return { error: 'User does not exist' };
+    }
+
+    let qlist = [];
+    qlist = await QuestionModel.find().populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
+    ]);
+    qlist = qlist.filter(q => q.upVotes.includes(username));
     return qlist;
   } catch (error) {
     return [];
@@ -881,12 +918,24 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
  */
 export const getNotificationsForUser = async (
   username: string,
+  type?: NotificationType,
 ): Promise<Notification[] | { error: string }> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
       throw new Error('Invalid username');
     }
+
+    // if type is provided, filter notifications by type
+    if (type) {
+      const notifications = await NotificationModel.find({
+        receiverUsername: username,
+        notificationType: type,
+      }).populate('eventId');
+      return notifications;
+    }
+
+    // otherwise, find all notifications for the user
     const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
       'eventId',
     );

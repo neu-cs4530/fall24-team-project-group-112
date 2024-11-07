@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { FakeSOSocket } from '../types';
+import { FakeSOSocket, GetNotificationRequest } from '../types';
 import {
   markNotificationsAsSeen,
   deleteNotificationsForUser,
@@ -60,10 +60,11 @@ const notificationController = (socket: FakeSOSocket) => {
    * @param req The request object containing the username as a parameter.
    * @param res The HTTP response object used to send back the user's notifications.
    */
-  const getNotifications = async (req: Request, res: Response): Promise<void> => {
+  const getNotifications = async (req: GetNotificationRequest, res: Response): Promise<void> => {
     const { username } = req.params;
+    const { type } = req.query;
     try {
-      const result = await getNotificationsForUser(username);
+      const result = await getNotificationsForUser(username, type);
 
       if (result && 'error' in result) {
         throw new Error(result.error);

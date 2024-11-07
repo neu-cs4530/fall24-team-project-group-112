@@ -22,6 +22,7 @@ import {
   markNotificationsAsSeen,
   getNotificationsForUser,
   updateUser,
+  findQuestionUpvotedBy,
   deleteNotificationsForUser,
   findQuestionDownvotedBy,
 } from '../models/application';
@@ -112,7 +113,7 @@ const QUESTIONS: Question[] = [
     askedBy: 'q_by1',
     askDateTime: new Date('2023-11-16T09:24:00'),
     views: ['question1_user', 'question2_user'],
-    upVotes: [],
+    upVotes: ['dummyUser'],
     downVotes: ['user1'],
     comments: [],
   },
@@ -125,7 +126,7 @@ const QUESTIONS: Question[] = [
     askedBy: 'q_by2',
     askDateTime: new Date('2023-11-17T09:24:00'),
     views: ['question2_user'],
-    upVotes: [],
+    upVotes: ['user1'],
     downVotes: ['dummyUser'],
     comments: [],
   },
@@ -138,7 +139,7 @@ const QUESTIONS: Question[] = [
     askedBy: 'q_by3',
     askDateTime: new Date('2023-11-19T09:24:00'),
     views: ['question1_user', 'question2_user', 'question3_user', 'question4_user'],
-    upVotes: [],
+    upVotes: ['user1'],
     downVotes: ['dummyUser'],
     comments: [],
   },
@@ -480,6 +481,53 @@ describe('application module', () => {
 
       test('findQuestionDownvotedBy should return an error when the provided username is invalid', async () => {
         const result = (await findQuestionDownvotedBy('notARealUser')) as Question[];
+
+        expect(result).toEqual({ error: 'User does not exist' });
+      });
+    });
+
+    describe('findQuestionUpvotedBy', () => {
+      it('findQuestionUpvotedBy should return all questions upvoted by user, only one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0]], 'find');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+
+        const result = (await findQuestionUpvotedBy('dummyUser')) as Question[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+      });
+
+      test('findQuestionUpvotedBy should return all questions upvoted by user, more than one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[1], QUESTIONS[2]], 'find');
+        mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+
+        const result = (await findQuestionUpvotedBy('user1')) as Question[];
+
+        expect(result.length).toEqual(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+        expect(result[1]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+      });
+
+      test('findQuestionUpvotedBy should return empty list, no questions upvoted by username', async () => {
+        mockingoose(QuestionModel).toReturn([], 'find');
+        mockingoose(UserModel).toReturn(USERS[2], 'findOne');
+
+        const result = (await findQuestionUpvotedBy('user2')) as Question[];
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionUpvotedBy should return empty list if find returns an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+        mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+
+        const result = (await findQuestionUpvotedBy('user1')) as Question[];
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionUpvotedBy should return an error when the provided username is invalid', async () => {
+        const result = (await findQuestionUpvotedBy('notARealUser')) as Question[];
 
         expect(result).toEqual({ error: 'User does not exist' });
       });
@@ -1194,12 +1242,19 @@ describe('application module', () => {
         notificationDate: new Date('2023-11-19T09:24:00'),
         seen: false,
       },
-
       {
         _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
         notificationType: NotificationType.COMMENT,
         eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
         receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+      {
+        _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+        notificationType: NotificationType.COMMENT,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver4',
         notificationDate: new Date('2023-11-19T09:24:00'),
         seen: false,
       },
@@ -1258,7 +1313,7 @@ describe('application module', () => {
       });
     });
     describe('getNotificationsForUser', () => {
-      test('getNotificationsForUser should get all notifications for the specified user', async () => {
+      test('getNotificationsForUser should get all notifications for the specified user when no filter is provided', async () => {
         const expectedResults = notifications.filter(
           notif => notif.receiverUsername === 'receiver3',
         );
@@ -1275,6 +1330,87 @@ describe('application module', () => {
         expect(result[1]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
         expect(result[2]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
         expect(result[3]._id?.toString()).toEqual('91e9c58910afe6e94fc6e6de');
+      });
+
+      test('getNotificationsForUser should get filtered notifications for the specified user when the Answer filter is provided', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Answer',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser(
+          'receiver3',
+          NotificationType.ANSWER,
+        )) as Notification[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6de');
+        expect(result[0].notificationType).toEqual('Answer');
+        expect(result[0].receiverUsername).toEqual('receiver3');
+      });
+
+      test('getNotificationsForUser should get filtered notifications for the specified user when the Comment filter is provided', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Comment',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser(
+          'receiver3',
+          NotificationType.COMMENT,
+        )) as Notification[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0].notificationType).toEqual('Comment');
+        expect(result[0].receiverUsername).toEqual('receiver3');
+      });
+
+      test('getNotificationsForUser should get filtered notifications for the specified user when the Badge filter is provided', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Badge',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser(
+          'receiver3',
+          NotificationType.BADGE,
+        )) as Notification[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0].notificationType).toEqual('Badge');
+        expect(result[0].receiverUsername).toEqual('receiver3');
+      });
+
+      test('getNotificationsForUser should get filtered notifications for the specified user when the Follow filter is provided', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Follow',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser(
+          'receiver3',
+          NotificationType.FOLLOW,
+        )) as Notification[];
+
+        expect(result).toHaveLength(1);
+        expect(result[0].notificationType).toEqual('Follow');
+        expect(result[0].receiverUsername).toEqual('receiver3');
       });
 
       test('getNotificationsForUser should return an empty list if the user does not have any notifications', async () => {

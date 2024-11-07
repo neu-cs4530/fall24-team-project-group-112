@@ -619,7 +619,7 @@ describe('GET /downvotedBy/:username', () => {
     const mockReqParams = { username: 'question2_user' };
 
     jest.spyOn(util, 'findQuestionDownvotedBy').mockImplementation(() => {
-      throw new Error('Error while fetching question upvoted by user');
+      throw new Error('Error while fetching question downvoted by user');
     });
 
     const response = await supertest(app).get(`/question/downvotedBy/${mockReqParams.username}`);

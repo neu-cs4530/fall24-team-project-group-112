@@ -98,7 +98,7 @@ describe('DELETE /:username', () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
 
-  test('deleteNotifications should delete the notifications of the specified user', async () => {
+  test('deleteNotificationsForUser should delete the notifications of the specified user', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
       .mockResolvedValueOnce({ success: 'Notifications deleted' });
@@ -108,7 +108,7 @@ describe('DELETE /:username', () => {
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ success: 'Notifications deleted' });
   });
-  test('markNotificationsAsSeen should return an error if there is an error updating the notifications', async () => {
+  test('deleteNotificationsForUser should return an error if there is an error updating the notifications', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
@@ -118,7 +118,7 @@ describe('DELETE /:username', () => {
     expect(result.text).toContain('Error when deleting notifications');
   });
 
-  test('markNotificationsAsSeen should return an error if no username is provided', async () => {
+  test('deleteNotificationsForUser should return an error if no username is provided', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
@@ -128,7 +128,7 @@ describe('DELETE /:username', () => {
     expect(result.text).toContain('Error when deleting notifications');
   });
 
-  test('markNotificationsAsSeen should return an error if an invalid username is provided', async () => {
+  test('deleteNotificationsForUser should return an error if an invalid username is provided', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error when deleting notifications: Invalid username' });
@@ -139,7 +139,11 @@ describe('DELETE /:username', () => {
   });
 });
 
-describe('GET /get/:username', () => {
+describe('GET /:username', () => {
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+  });
+
   afterAll(async () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
@@ -188,7 +192,7 @@ describe('GET /get/:username', () => {
 
     jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
 
-    const result = await supertest(app).get(`/notification/get/receiver3`);
+    const result = await supertest(app).get(`/notification/receiver3`);
 
     expect(result.status).toBe(200);
     expect(result.body[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6de');
@@ -200,7 +204,7 @@ describe('GET /get/:username', () => {
   test('getNotifications should return an empty list if no notifications exist for the user', async () => {
     jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce([]);
 
-    const result = await supertest(app).get(`/notification/get/${username}`);
+    const result = await supertest(app).get(`/notification/${username}`);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual([]);
@@ -211,7 +215,7 @@ describe('GET /get/:username', () => {
       .spyOn(util, 'getNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error getting notifications' });
 
-    const result = await supertest(app).get(`/notification/get/${username}`);
+    const result = await supertest(app).get(`/notification/${username}`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual('Error when getting notifications: Error getting notifications');
   });
@@ -220,7 +224,7 @@ describe('GET /get/:username', () => {
     jest
       .spyOn(util, 'getNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error getting user' });
-    const result = await supertest(app).get(`/notification/get/${undefined}`);
+    const result = await supertest(app).get(`/notification/${undefined}`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual('Error when getting notifications: Error getting user');
   });
@@ -229,7 +233,7 @@ describe('GET /get/:username', () => {
     jest
       .spyOn(util, 'getNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Invalid username' });
-    const result = await supertest(app).get(`/notification/get/invalidUser`);
+    const result = await supertest(app).get(`/notification/invalidUser`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual('Error when getting notifications: Invalid username');
   });
@@ -238,7 +242,7 @@ describe('GET /get/:username', () => {
     jest
       .spyOn(util, 'getNotificationsForUser')
       .mockResolvedValueOnce({ error: 'getNotificationsForUser threw an error' });
-    const result = await supertest(app).get(`/notification/get/receiver3`);
+    const result = await supertest(app).get(`/notification/receiver3`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual(
       'Error when getting notifications: getNotificationsForUser threw an error',

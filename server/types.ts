@@ -375,10 +375,10 @@ export enum BadgeColor {
  * Enum representing the possible types of badges.
  */
 export enum BadgeName {
-  FIRSTCOMMENTER = 'First Commenter',
+  FIRST_COMMENTER = 'First Commenter',
   VOTER = 'Voter',
-  DISCUSSIONSTARTER = 'Discussion Starter',
-  COMMUNITYHELPER = 'Community Helper',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
   INFLUENCER = 'Influencer',
   LIFESAVER = 'Lifesaver',
 }

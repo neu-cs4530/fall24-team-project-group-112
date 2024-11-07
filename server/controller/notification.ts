@@ -76,7 +76,7 @@ const notificationController = (socket: FakeSOSocket) => {
   };
 
   router.patch('/seen/:username', markNotificationsAsSeenRoute);
-  router.get('/get/:username', getNotifications);
+  router.get('/:username', getNotifications);
   router.delete('/:username', deleteNotifications);
   return router;
 };

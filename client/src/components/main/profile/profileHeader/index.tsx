@@ -15,7 +15,7 @@ import { User } from '../../../../types';
  * - state? The state of the user. This is optional.
  * - company? The company of the user. This is optional.
  */
-interface HeaderProps {
+interface ProfileHeaderProps {
   firstName: string;
   lastName: string;
   username: string;
@@ -28,7 +28,7 @@ interface HeaderProps {
 }
 
 /**
- * Header component that displays the users "header" information - their username, first name and last name,
+ * Profile header component that displays the users "header" information - their username, first name and last name,
  * and optional information - their github link, school, city, state, company, and profile headline.
  *
  * @param firstName The first name of the user.
@@ -43,7 +43,7 @@ interface HeaderProps {
  *
  * @returns A React component that displays the user's header information.
  */
-const Header = ({
+const ProfileHeader = ({
   firstName,
   lastName,
   username,
@@ -53,7 +53,7 @@ const Header = ({
   city,
   state,
   company,
-}: HeaderProps) => (
+}: ProfileHeaderProps) => (
   <div className=''>
     <div className='header'>
       <div className='header-name'>{`${firstName} ${lastName}`}</div>
@@ -73,4 +73,4 @@ const Header = ({
   </div>
 );
 
-export default Header;
+export default ProfileHeader;

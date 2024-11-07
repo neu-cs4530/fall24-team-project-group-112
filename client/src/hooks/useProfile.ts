@@ -17,18 +17,9 @@ const useProfile = () => {
     const fetchUser = async () => {
       if (username) {
         try {
-          const ex: User = {
-            firstName: 'John',
-            lastName: 'Doe',
-            username: 'johndoe',
-            githubUrl: 'hello',
-            email: 'john.doe@example.com',
-            badges: [],
-            createdAt: new Date(),
-          };
-          // const user = await getUser(username);
+          const user = await getUser(username);
 
-          setUser(ex);
+          setUser(user);
         } catch (err) {
           // eslint-disable-next-line no-console
           setError('An error occurred while fetching the user.');

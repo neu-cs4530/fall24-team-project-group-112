@@ -11,23 +11,48 @@ const NOTIFICATIONS: Notification[] = [
     _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
     notificationType: NotificationType.ANSWER,
     eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
-    receiverUsername: USERNAME,
+    receiverUsername: 'receiver3',
     notificationDate: new Date('2023-11-19T09:24:00'),
     seen: false,
   },
   {
     _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-    notificationType: NotificationType.ANSWER,
+    notificationType: NotificationType.BADGE,
     eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-    receiverUsername: USERNAME,
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+
+  {
+    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.FOLLOW,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
     notificationDate: new Date('2023-11-19T09:24:00'),
     seen: false,
   },
   {
-    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+    notificationType: NotificationType.COMMENT,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+    notificationType: NotificationType.BADGE,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver1',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('72e9c58910afe6e94fc6e6ab'),
     notificationType: NotificationType.ANSWER,
     eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-    receiverUsername: 'receiver2',
+    receiverUsername: 'receiver1',
     notificationDate: new Date('2023-11-19T09:24:00'),
     seen: false,
   },
@@ -148,47 +173,8 @@ describe('GET /:username', () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
 
-  const username = 'receiver1';
-  const notifications: Notification[] = [
-    {
-      _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
-      notificationType: NotificationType.ANSWER,
-      eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
-      receiverUsername: 'receiver3',
-      notificationDate: new Date('2023-11-19T09:24:00'),
-      seen: false,
-    },
-
-    {
-      _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-      notificationType: NotificationType.BADGE,
-      eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-      receiverUsername: 'receiver3',
-      notificationDate: new Date('2023-11-19T09:24:00'),
-      seen: false,
-    },
-
-    {
-      _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-      notificationType: NotificationType.FOLLOW,
-      eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-      receiverUsername: 'receiver3',
-      notificationDate: new Date('2023-11-19T09:24:00'),
-      seen: false,
-    },
-
-    {
-      _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
-      notificationType: NotificationType.COMMENT,
-      eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-      receiverUsername: 'receiver3',
-      notificationDate: new Date('2023-11-19T09:24:00'),
-      seen: false,
-    },
-  ];
-
-  test('getNotifications should get all the notifications for the specified user', async () => {
-    const expectedResults = notifications.filter(notif => notif.receiverUsername === 'receiver3');
+  test('getNotifications should get all the notifications for the specified user when no filter is provided', async () => {
+    const expectedResults = NOTIFICATIONS.filter(notif => notif.receiverUsername === 'receiver3');
 
     jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
 
@@ -201,10 +187,77 @@ describe('GET /:username', () => {
     expect(result.body[3]._id?.toString()).toEqual('91e9c58910afe6e94fc6e6de');
   });
 
+  test('getNotifications should get only Comment notifications for the specified user when the Comment filter is provided', async () => {
+    const expectedResults = NOTIFICATIONS.filter(
+      notif =>
+        notif.receiverUsername === 'receiver3' &&
+        notif.notificationType === NotificationType.COMMENT,
+    );
+
+    jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
+
+    const result = await supertest(app).get(`/notification/receiver3?type=Comment`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.length).toBe(1);
+    expect(result.body[0].receiverUsername).toEqual('receiver3');
+    expect(result.body[0].notificationType).toEqual(NotificationType.COMMENT);
+  });
+
+  test('getNotifications should get only Answer notifications for the specified user when the Answer filter is provided', async () => {
+    const expectedResults = NOTIFICATIONS.filter(
+      notif =>
+        notif.receiverUsername === 'receiver3' &&
+        notif.notificationType === NotificationType.ANSWER,
+    );
+
+    jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
+
+    const result = await supertest(app).get(`/notification/receiver3?type=Answer`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.length).toBe(1);
+    expect(result.body[0].receiverUsername).toEqual('receiver3');
+    expect(result.body[0].notificationType).toEqual(NotificationType.ANSWER);
+  });
+
+  test('getNotifications should get only Badge notifications for the specified user when the Badge filter is provided', async () => {
+    const expectedResults = NOTIFICATIONS.filter(
+      notif =>
+        notif.receiverUsername === 'receiver3' && notif.notificationType === NotificationType.BADGE,
+    );
+
+    jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
+
+    const result = await supertest(app).get(`/notification/receiver3?type=Badge`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.length).toBe(1);
+    expect(result.body[0].receiverUsername).toEqual('receiver3');
+    expect(result.body[0].notificationType).toEqual(NotificationType.BADGE);
+  });
+
+  test('getNotifications should get only Follow notifications for the specified user when the Follow filter is provided', async () => {
+    const expectedResults = NOTIFICATIONS.filter(
+      notif =>
+        notif.receiverUsername === 'receiver3' &&
+        notif.notificationType === NotificationType.FOLLOW,
+    );
+
+    jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce(expectedResults);
+
+    const result = await supertest(app).get(`/notification/receiver3?type=Follow`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.length).toBe(1);
+    expect(result.body[0].receiverUsername).toEqual('receiver3');
+    expect(result.body[0].notificationType).toEqual(NotificationType.FOLLOW);
+  });
+
   test('getNotifications should return an empty list if no notifications exist for the user', async () => {
     jest.spyOn(util, 'getNotificationsForUser').mockResolvedValueOnce([]);
 
-    const result = await supertest(app).get(`/notification/${username}`);
+    const result = await supertest(app).get(`/notification/${USERNAME}`);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual([]);
@@ -215,7 +268,7 @@ describe('GET /:username', () => {
       .spyOn(util, 'getNotificationsForUser')
       .mockResolvedValueOnce({ error: 'Error getting notifications' });
 
-    const result = await supertest(app).get(`/notification/${username}`);
+    const result = await supertest(app).get(`/notification/${USERNAME}`);
     expect(result.status).toBe(500);
     expect(result.text).toEqual('Error when getting notifications: Error getting notifications');
   });

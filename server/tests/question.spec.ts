@@ -63,8 +63,8 @@ const MOCK_QUESTIONS = [
     askedBy: 'question1_user',
     askDateTime: new Date('2024-06-03'),
     views: ['question1_user'],
-    upVotes: [],
-    downVotes: [],
+    upVotes: ['question2_user'],
+    downVotes: ['question3_user'],
     comments: [],
   },
   {
@@ -76,8 +76,8 @@ const MOCK_QUESTIONS = [
     askedBy: 'question2_user',
     askDateTime: new Date('2024-06-04'),
     views: ['question1_user', 'question2_user'],
-    upVotes: [],
-    downVotes: [],
+    upVotes: ['question1_user'],
+    downVotes: ['question3_user'],
     comments: [],
   },
   {
@@ -89,8 +89,8 @@ const MOCK_QUESTIONS = [
     askedBy: 'question3_user',
     askDateTime: new Date('2024-06-03'),
     views: ['question1_user', 'question3_user'],
-    upVotes: [],
-    downVotes: [],
+    upVotes: ['question1_user'],
+    downVotes: ['question2_user'],
     comments: [],
   },
 ];
@@ -548,5 +548,171 @@ describe('GET /askedBy/:username', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toContain('Error when fetching question asked by user');
+  });
+});
+
+describe('GET /downvotedBy/:username', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+    await mongoose.disconnect();
+  });
+
+  it('should return a list of questions downvoted by the specified username', async () => {
+    const mockReqParams = { username: 'question2_user' };
+    const mockQuestions = MOCK_QUESTIONS.filter(q => q.downVotes.includes(mockReqParams.username));
+
+    const mockPopulatedQuestions = mockQuestions.map(question => ({
+      ...question,
+      _id: new mongoose.Types.ObjectId(question._id),
+      tags: [],
+      answers: [],
+      askDateTime: question.askDateTime,
+    }));
+
+    jest.spyOn(util, 'findQuestionDownvotedBy').mockResolvedValue(mockPopulatedQuestions);
+
+    const response = await supertest(app).get(`/question/downvotedBy/${mockReqParams.username}`);
+
+    const expectedResponse = mockPopulatedQuestions.map(question => ({
+      ...question,
+      _id: question._id.toString(),
+      askDateTime: question.askDateTime.toISOString(),
+    }));
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResponse);
+    expect(response.body.length).toBe(mockPopulatedQuestions.length);
+  });
+
+  it('should return bad request error if username is not provided or invalid', async () => {
+    const mockReqParams = { username: 'fake_user' };
+
+    jest.spyOn(util, 'findQuestionDownvotedBy').mockResolvedValue({ error: 'User does not exist' });
+
+    const response = await supertest(app).get(`/question/downvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toBe(
+      'Error when fetching question downvoted by user: User does not exist',
+    );
+  });
+
+  it('should return empty array if the username exists but has no questions downvoted', async () => {
+    const mockReqParams = { username: 'question1_user' };
+
+    jest.spyOn(util, 'findQuestionDownvotedBy').mockResolvedValue([]);
+
+    const response = await supertest(app).get(`/question/downvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
+  it('should return server error if an error occurs while fetching questions', async () => {
+    const mockReqParams = { username: 'question2_user' };
+
+    jest.spyOn(util, 'findQuestionDownvotedBy').mockImplementation(() => {
+      throw new Error('Error while fetching question downvoted by user');
+    });
+
+    const response = await supertest(app).get(`/question/downvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching question downvoted by user');
+  });
+
+  it('should return an error if no user is provided', async () => {
+    const response = await supertest(app).get(`/question/downvotedBy/`);
+
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('GET /upvotedBy/:username', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+    await mongoose.disconnect();
+  });
+
+  it('should return a list of questions upvoted by the specified username', async () => {
+    const mockReqParams = { username: 'question2_user' };
+    const mockQuestions = MOCK_QUESTIONS.filter(q => q.upVotes.includes(mockReqParams.username));
+
+    const mockPopulatedQuestions = mockQuestions.map(question => ({
+      ...question,
+      _id: new mongoose.Types.ObjectId(question._id),
+      tags: [],
+      answers: [],
+      askDateTime: question.askDateTime,
+    }));
+
+    jest.spyOn(util, 'findQuestionUpvotedBy').mockResolvedValue(mockPopulatedQuestions);
+
+    const response = await supertest(app).get(`/question/upvotedBy/${mockReqParams.username}`);
+
+    const expectedResponse = mockPopulatedQuestions.map(question => ({
+      ...question,
+      _id: question._id.toString(),
+      askDateTime: question.askDateTime.toISOString(),
+    }));
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResponse);
+    expect(response.body.length).toBe(mockPopulatedQuestions.length);
+  });
+
+  it('should return bad request error if username is not provided or invalid', async () => {
+    const mockReqParams = { username: 'fake_user' };
+
+    jest.spyOn(util, 'findQuestionUpvotedBy').mockResolvedValue({ error: 'User does not exist' });
+
+    const response = await supertest(app).get(`/question/upvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Error when fetching question upvoted by user: User does not exist');
+  });
+
+  it('should return empty array if the username exists but has no questions upvoted', async () => {
+    const mockReqParams = { username: 'question3_user' };
+
+    jest.spyOn(util, 'findQuestionUpvotedBy').mockResolvedValue([]);
+
+    const response = await supertest(app).get(`/question/upvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
+  it('should return server error if an error occurs while fetching questions', async () => {
+    const mockReqParams = { username: 'question2_user' };
+
+    jest.spyOn(util, 'findQuestionUpvotedBy').mockImplementation(() => {
+      throw new Error('Error while fetching question upvoted by user');
+    });
+
+    const response = await supertest(app).get(`/question/upvotedBy/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching question upvoted by user');
+  });
+
+  it('should return an error if no user is provided', async () => {
+    const response = await supertest(app).get(`/question/upvotedBy/`);
+
+    expect(response.status).toBe(404);
   });
 });

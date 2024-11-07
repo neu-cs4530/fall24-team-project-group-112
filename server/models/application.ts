@@ -7,10 +7,13 @@ import {
   CommentResponse,
   Notification,
   NotificationType,
+  Follow,
+  FollowResponse,
   OrderType,
   Question,
   QuestionResponse,
   Tag,
+  UpdateUserPayload,
   User,
   UserResponse,
 } from '../types';
@@ -19,7 +22,8 @@ import QuestionModel from './questions';
 import TagModel from './tags';
 import CommentModel from './comments';
 import NotificationModel from './notifications';
-import UserModel from './user';
+import UserModel from './users';
+import FollowModel from './follows';
 
 /**
  * Parses tags from a search string.
@@ -707,5 +711,151 @@ export const addUser = async (user: User): Promise<UserResponse> => {
     return result;
   } catch (error) {
     return { error: 'Error when saving a new user' };
+  }
+};
+
+/**
+ * Finds all questions asked by a given user.
+ *
+ * @param {User} user - The user to add
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ */
+export const findQuestionAskedBy = async (username: string): Promise<Question[]> => {
+  try {
+    let qlist = [];
+    qlist = await QuestionModel.find({ askedBy: username }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      { path: 'comments', model: CommentModel },
+    ]);
+    return qlist;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const updateUser = async (
+  username: string,
+  userUpdate: UpdateUserPayload,
+): Promise<UserResponse> => {
+  const existingUser = await UserModel.findOne({ username });
+  if (!existingUser) {
+    return { error: 'User does not exist' };
+  }
+
+  Object.assign(existingUser, userUpdate);
+  await existingUser.save();
+
+  return existingUser as User;
+};
+
+/**
+ * Updates the notification collection to mark all notifications as seen for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are updated.
+ *
+ * @param username the username of the user whose notifications should be marked as seen
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const markNotificationsAsSeen = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
+    return await NotificationModel.find({ receiverUsername: username });
+  } catch (error) {
+    return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Deletes notifications for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are deleted.
+ *
+ * @param username the username of the user whose notifications should be deleted
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const deleteNotificationsForUser = async (
+  username: string,
+): Promise<{ success: string } | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
+    return { success: 'Notifications deleted successfully' };
+  } catch (error) {
+    return { error: `Error when deleting notifications: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Adds a new follow object to the database.
+ *
+ * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted.
+ *
+ * @returns {Promise<FollowResponse>} - A message if the follow obejct was created or deleted, or an error message if the creation or deletion failed.
+ */
+export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
+  try {
+    if (
+      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+    ) {
+      throw new Error('Follower or followee does not exist');
+    }
+
+    const existingFollow = await FollowModel.findOne({
+      followerUsername: follow.followerUsername,
+      followeeUsername: follow.followeeUsername,
+    });
+
+    if (existingFollow !== undefined) {
+      await FollowModel.deleteOne({
+        followerUsername: follow.followerUsername,
+        followeeUsername: follow.followeeUsername,
+      });
+      return { success: 'Follow request deleted' };
+    }
+    await FollowModel.create(follow);
+    return { success: 'Follow request created' };
+  } catch (error) {
+    return { error: 'Error when creating or deleting a follow request' };
+  }
+};
+
+/**
+ * Retrieves all notifications for a given user.
+ * If the provided user is invalid, an error will be returned.
+ *
+ * @param username the username of the user whose notifications should be retrieved
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const getNotificationsForUser = async (
+  username: string,
+): Promise<Notification[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
+      'eventId',
+    );
+    return notifications;
+  } catch (error) {
+    return { error: `Error when getting notifications: ${(error as Error).message}` };
   }
 };

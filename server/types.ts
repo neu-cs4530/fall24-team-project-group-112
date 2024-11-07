@@ -40,6 +40,39 @@ export interface User {
 }
 
 /**
+ * Interface extending the request body when updating a user's profile, which contains a
+ * username parameter and UpdateUserPayload body containing updated profile information.
+ */
+export interface UpdateUserRequest extends Request {
+  params: {
+    username: string;
+  };
+  body: UpdateUserPayload;
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
+}
+
+/**
  * Type representing the possible ordering options for questions.
  */
 export type OrderType = 'newest' | 'unanswered' | 'active' | 'mostViewed';
@@ -300,10 +333,10 @@ export interface Badge {
  * Enum representing the possible colors for a badge.
  */
 export enum NotificationType {
-  ANSWER = 'answer',
-  COMMENT = 'comment',
-  BADGE = 'badge',
-  FOLLOW = 'follow',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
 }
 
 /**
@@ -314,10 +347,11 @@ export enum NotificationType {
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
+
 export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
-  eventId: ObjectId;
+  eventId: ObjectId | Answer | Comment | Badge | Follow;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
@@ -352,6 +386,16 @@ export interface FindUserRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding questions asked by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAskedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Interface extending the request body when logging in an existing user, which contains:
  * - email - The email of the user.
  * - password - The password of the user.
@@ -362,3 +406,55 @@ export interface LoginUserRequest extends Request {
     password: string;
   };
 }
+
+/**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  GOLD = 'gold',
+  SILVER = 'silver',
+  BRONZE = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FIRST_COMMENTER = 'First Commenter',
+  VOTER = 'Voter',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
+  INFLUENCER = 'Influencer',
+  LIFESAVER = 'Lifesaver',
+}
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: ObjectId;
+  name: BadgeName;
+  description: string;
+  color: BadgeColor;
+}
+
+/**
+ * Interface extending the request body when creating a new follow request, which contains:
+ * - followerUsername - The username of the user following another user.
+ * - followeeUsername - The username of the user being followed.
+ */
+export interface FollowRequest extends Request {
+  body: {
+    followerUsername: string;
+    followeeUsername: string;
+  };
+}
+
+/**
+ * Type representing the possible responses for a Follow-related operation.
+ */
+export type FollowResponse = { success: string } | { error: string };

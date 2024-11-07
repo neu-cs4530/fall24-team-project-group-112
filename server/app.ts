@@ -14,6 +14,8 @@ import questionController from './controller/question';
 import tagController from './controller/tag';
 import commentController from './controller/comment';
 import userController from './controller/user';
+import notificationController from './controller/notification';
+
 import { FakeSOSocket } from './types';
 
 dotenv.config();
@@ -71,7 +73,8 @@ app.use('/question', questionController(socket));
 app.use('/tag', tagController());
 app.use('/answer', answerController(socket));
 app.use('/comment', commentController(socket));
-app.use('/user', userController());
+app.use('/notification', notificationController(socket));
+app.use('/user', userController(socket));
 
 // Export the app instance
 export { app, server, startServer };

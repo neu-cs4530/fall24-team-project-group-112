@@ -10,6 +10,7 @@ import {
   saveQuestion,
   processTags,
   saveAnswer,
+  addFollow,
   addAnswerToQuestion,
   getTagCountMap,
   saveComment,
@@ -17,11 +18,28 @@ import {
   addVoteToQuestion,
   addUser,
   isUsernameUnique,
+  findQuestionAskedBy,
+  markNotificationsAsSeen,
+  getNotificationsForUser,
+  updateUser,
+  deleteNotificationsForUser,
 } from '../models/application';
-import { Answer, Question, Tag, Comment, User } from '../types';
+import {
+  Answer,
+  Question,
+  Tag,
+  Comment,
+  User,
+  Notification,
+  NotificationType,
+  Follow,
+  FollowResponse,
+} from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
-import UserModel from '../models/user';
+import UserModel from '../models/users';
+import NotificationModel from '../models/notifications';
+import FollowModel from '../models/follows';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -136,6 +154,19 @@ const QUESTIONS: Question[] = [
     downVotes: [],
     comments: [],
   },
+  {
+    _id: new ObjectId('65e9b716ff0e892116b2de08'),
+    title: 'Unanswered Question #3',
+    text: 'Does something like that even exist?',
+    tags: [],
+    answers: [],
+    askedBy: 'q_by4',
+    askDateTime: new Date('2023-11-21T09:24:00'),
+    views: [],
+    upVotes: [],
+    downVotes: [],
+    comments: [],
+  },
 ];
 
 const USERS: User[] = [
@@ -144,6 +175,33 @@ const USERS: User[] = [
     firstName: 'Dummy',
     lastName: 'User',
     email: 'dummyUser@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
+  },
+
+  {
+    username: 'user1',
+    firstName: 'User',
+    lastName: 'One',
+    email: 'user1@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-04'),
+  },
+
+  {
+    username: 'user2',
+    firstName: 'User',
+    lastName: 'Two',
+    email: 'userTwo@email.com',
+    badges: [],
+    createdAt: new Date('2024-06-03'),
+  },
+
+  {
+    username: 'receiver3',
+    firstName: 'reciever',
+    lastName: 'three',
+    email: 'user3@email.com',
     badges: [],
     createdAt: new Date('2024-06-03'),
   },
@@ -195,8 +253,9 @@ describe('application module', () => {
       test('filter question by one user', () => {
         const result = filterQuestionsByAskedBy(QUESTIONS, 'q_by4');
 
-        expect(result.length).toEqual(1);
+        expect(result.length).toEqual(2);
         expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
       });
 
       test('filter question by tag and then by user', () => {
@@ -284,9 +343,10 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('unanswered');
 
-        expect(result.length).toEqual(2);
-        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
-        expect(result[1]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result.length).toEqual(3);
+        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[2]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
       });
 
       test('get newest questions', async () => {
@@ -319,11 +379,12 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('mostViewed');
 
-        expect(result.length).toEqual(4);
+        expect(result.length).toEqual(5);
         expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
         expect(result[1]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
         expect(result[2]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
-        expect(result[3]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[3]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+        expect(result[4]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
       });
 
       test('getQuestionsByOrder should return empty list if find throws an error', async () => {
@@ -338,6 +399,39 @@ describe('application module', () => {
         mockingoose(QuestionModel).toReturn(null, 'find');
 
         const result = await getQuestionsByOrder('newest');
+
+        expect(result.length).toEqual(0);
+      });
+    });
+
+    describe('findQuestionAskedBy', () => {
+      test('findQuestionAskedBy should return all questions asked by user, only one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0]], 'find');
+        const result = await findQuestionAskedBy('q_by1');
+
+        expect(result.length).toEqual(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+      });
+
+      test('findQuestionAskedBy should return all questions asked by user, more than one question', async () => {
+        mockingoose(QuestionModel).toReturn([QUESTIONS[3], QUESTIONS[4]], 'find');
+        const result = await findQuestionAskedBy('q_by4');
+
+        expect(result.length).toEqual(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
+        expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
+      });
+
+      test('findQuestionAskedBy should return empty list, no questions asked by username', async () => {
+        mockingoose(QuestionModel).toReturn([], 'find');
+        const result = await findQuestionAskedBy('q_by5');
+
+        expect(result.length).toEqual(0);
+      });
+
+      test('findQuestionAskedBy should return empty list if find returns an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+        const result = await findQuestionAskedBy('q_by1');
 
         expect(result.length).toEqual(0);
       });
@@ -926,6 +1020,366 @@ describe('application module', () => {
         const unique = await isUsernameUnique(USERS[0].username);
 
         expect(unique).toEqual(true);
+      });
+    });
+
+    describe('updateUser', () => {
+      const username = 'dummyUser';
+      const mockUser = {
+        username,
+        firstName: 'Dummy',
+        lastName: 'User',
+        email: 'dummy@gmail.com',
+        createdAt: new Date('2024-06-03').toISOString(),
+        headline: 'Software engineer',
+        bio: 'Software engineer in Boston',
+      };
+
+      it('updateUser should return the updated user', async () => {
+        const mockReqBody = {
+          headline: 'Aspiring software engineer',
+          bio: 'Software engineer in Boston looking to connect with other engineers',
+          githubUrl: 'www.github.com',
+          company: 'Google',
+          school: 'Northeastern University',
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = await updateUser(username, mockReqBody);
+        expect(result).toMatchObject(mockReqBody);
+      });
+
+      it('updateUser should handle partial updates properly', async () => {
+        const mockReqBody = {
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = (await updateUser(username, mockReqBody)) as User;
+        expect(result).toMatchObject(mockReqBody);
+        expect(result.headline).toEqual(mockUser.headline);
+        expect(result.bio).toEqual(mockUser.bio);
+      });
+
+      it('updateUser should return an error when the provided username is invalid', async () => {
+        const mockReqBody = {
+          headline: 'Aspiring software engineer',
+          bio: 'Software engineer in Boston looking to connect with other engineers',
+          githubUrl: 'www.github.com',
+          company: 'Google',
+          school: 'Northeastern University',
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        const expectedResult = { ...mockUser, ...mockReqBody };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+
+        const result = await updateUser('notARealUser', mockReqBody);
+        expect(result).toEqual({ error: 'User does not exist' });
+      });
+    });
+  });
+
+  describe('Notification model', () => {
+    const notifications: Notification[] = [
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver1',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver1',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver2',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.ANSWER,
+        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.BADGE,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+        notificationType: NotificationType.FOLLOW,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+
+      {
+        _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+        notificationType: NotificationType.COMMENT,
+        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+        receiverUsername: 'receiver3',
+        notificationDate: new Date('2023-11-19T09:24:00'),
+        seen: false,
+      },
+    ];
+    describe('markNotificationsAsSeen', () => {
+      test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
+        const expectedResults = notifications
+          .filter(notif => notif.receiverUsername === 'receiver1')
+          .map(result => ({ ...result, seen: true }));
+
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        const result = (await markNotificationsAsSeen('receiver1')) as Notification[];
+
+        expect(result).toHaveLength(2);
+        expect(result[0].seen).toBe(true);
+        expect(result[1].seen).toBe(true);
+        expect(result[0].receiverUsername).toBe('receiver1');
+        expect(result[1].receiverUsername).toBe('receiver1');
+      });
+
+      test('markNotificationsAsSeen should return an error if the provided user is invalid', async () => {
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Invalid username',
+        });
+      });
+
+      test('markNotificationsAsSeen should return an error if the provided user is empty', async () => {
+        const result = await markNotificationsAsSeen('');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Invalid username',
+        });
+      });
+
+      test('markNotificationsAsSeen should return an error if there is an error updating the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error performing update'), 'updateMany');
+
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Error performing update',
+        });
+      });
+
+      test('markNotificationsAsSeen should return an error if there is an error finding relevant notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error finding notifications'), 'find');
+
+        const result = await markNotificationsAsSeen('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when marking notifications as seen: Error finding notifications',
+        });
+      });
+    });
+    describe('getNotificationsForUser', () => {
+      test('getNotificationsForUser should get all notifications for the specified user', async () => {
+        const expectedResults = notifications.filter(
+          notif => notif.receiverUsername === 'receiver3',
+        );
+
+        mockingoose(UserModel).toReturn(USERS[3], 'findOne');
+        mockingoose(NotificationModel).toReturn(expectedResults, 'find');
+
+        NotificationModel.schema.path('eventId', Object);
+
+        const result = (await getNotificationsForUser('receiver3')) as Notification[];
+
+        expect(result).toHaveLength(4);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6de');
+        expect(result[1]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
+        expect(result[2]._id?.toString()).toEqual('91e9b58910afe6e94fc6e6de');
+        expect(result[3]._id?.toString()).toEqual('91e9c58910afe6e94fc6e6de');
+      });
+
+      test('getNotificationsForUser should return an empty list if the user does not have any notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[2], 'findOne');
+        mockingoose(NotificationModel).toReturn([], 'find');
+
+        const result = (await getNotificationsForUser('user2')) as Notification[];
+
+        expect(result).toHaveLength(0);
+        expect(result).toEqual([]);
+      });
+
+      test('getNotificationsForUser should return an error if the provided user is invalid', async () => {
+        const result = await getNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Invalid username',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if the provided user is empty', async () => {
+        const result = await getNotificationsForUser('');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Invalid username',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if there is an error retrieving the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error finding notifications'), 'find');
+
+        const result = await getNotificationsForUser('test1');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Error finding notifications',
+        });
+      });
+
+      test('getNotificationsForUser should return an error if there is an error finding the user', async () => {
+        mockingoose(UserModel).toReturn(new Error('Error finding user'), 'findOne');
+
+        const result = await getNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when getting notifications: Error finding user',
+        });
+      });
+    });
+
+    describe('deleteNotifications', () => {
+      test('deleteNotifications should delete the notifications of the specified user', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn([], 'deleteMany');
+
+        const result = await deleteNotificationsForUser('receiver1');
+
+        expect(result).toEqual({ success: 'Notifications deleted successfully' });
+      });
+
+      test('deleteNotifications should return an error if the provided user is invalid', async () => {
+        const result = await deleteNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Invalid username',
+        });
+      });
+
+      test('deleteNotifications should return an error if the provided user is empty', async () => {
+        const result = await deleteNotificationsForUser('');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Invalid username',
+        });
+      });
+
+      test('deleteNotifications should return an error if there is an error deleting the notifications', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error performing delete'), 'deleteMany');
+
+        const result = await deleteNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Error performing delete',
+        });
+      });
+    });
+  });
+
+  describe('Follow model', () => {
+    const follows: Follow[] = [
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+        followerUsername: 'user1',
+        followeeUsername: 'user2',
+        followDateTime: new Date('2023-11-19T09:24:00'),
+      },
+      {
+        _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+        followerUsername: 'user2',
+        followeeUsername: 'user1',
+        followDateTime: new Date('2023-11-19T09:24:00'),
+      },
+    ];
+    describe('addFollow', () => {
+      test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(undefined, 'findOne');
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as FollowResponse;
+
+        expect(result).toEqual({ success: 'Follow request created' });
+      });
+
+      test('addFollow should delete a new follow request if both users exist and the followeer is already following the followee.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(follows[0], 'findOne');
+
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as FollowResponse;
+
+        expect(result).toEqual({ success: 'Follow request deleted' });
+      });
+
+      test('addFollow should return an error if a given user does not exist.', async () => {
+        mockingoose(UserModel).toReturn(
+          new Error('Follower or followee does not exist'),
+          'findOne',
+        );
+
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as {
+          error: string;
+        };
+
+        expect(result.error).toEqual('Error when creating or deleting a follow request');
+      });
+
+      test('addFollow should return an error if there is an error finding a follow object.', async () => {
+        mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
+        mockingoose(FollowModel).toReturn(new Error('Error retrieivng follow request'), 'findOne');
+
+        const result = (await addFollow({
+          followerUsername: 'user1',
+          followeeUsername: 'user2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        })) as {
+          error: string;
+        };
+
+        expect(result.error).toEqual('Error when creating or deleting a follow request');
       });
     });
   });

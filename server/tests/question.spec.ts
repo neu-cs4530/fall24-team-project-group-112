@@ -653,7 +653,6 @@ describe('GET /upvotedBy/:username', () => {
     const mockReqParams = { username: 'question2_user' };
     const mockQuestions = MOCK_QUESTIONS.filter(q => q.upVotes.includes(mockReqParams.username));
 
-
     const mockPopulatedQuestions = mockQuestions.map(question => ({
       ...question,
       _id: new mongoose.Types.ObjectId(question._id),

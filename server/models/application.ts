@@ -816,6 +816,28 @@ export const markNotificationsAsSeen = async (
 };
 
 /**
+ * Deletes notifications for a given user.
+ * If the provided user is invalid, an error will be returned and no notifications are deleted.
+ *
+ * @param username the username of the user whose notifications should be deleted
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const deleteNotificationsForUser = async (
+  username: string,
+): Promise<{ success: string } | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
+    return { success: 'Notifications deleted successfully' };
+  } catch (error) {
+    return { error: `Error when deleting notifications: ${(error as Error).message}` };
+  }
+};
+
+/**
  * Adds a new follow object to the database.
  *
  * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted.

@@ -1209,7 +1209,7 @@ describe('application module', () => {
         });
       });
     });
-        describe('getNotificationsForUser', () => {
+    describe('getNotificationsForUser', () => {
       test('getNotificationsForUser should get all notifications for the specified user', async () => {
         const expectedResults = notifications.filter(
           notif => notif.receiverUsername === 'receiver3',
@@ -1272,7 +1272,7 @@ describe('application module', () => {
         });
       });
     });
-    
+
     describe('deleteNotifications', () => {
       test('deleteNotifications should delete the notifications of the specified user', async () => {
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');

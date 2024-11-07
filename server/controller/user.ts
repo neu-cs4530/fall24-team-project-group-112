@@ -8,9 +8,11 @@ import {
   FollowRequest,
   User,
   UpdateUserPayload,
+  FindFollowersAndFollowingRequest,
 } from '../types';
 import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
 import { auth } from '../firebaseConfig';
+import FollowModel from '../models/follows';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -205,11 +207,44 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getFollowersAndFollowing = async (
+    req: FindFollowersAndFollowingRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    const usernameUnique = await isUsernameUnique(username);
+
+    if (!username || !usernameUnique) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const followers = await FollowModel.find({ followeeUsername: username });
+      const following = await FollowModel.find({ followerUsername: username });
+
+      res.status(200).json({
+        followers: followers.map(f => f.followerUsername),
+        following: following.map(f => f.followeeUsername),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res
+          .status(500)
+          .send(`Error when fetching followers and following: ${(err as Error).message}`);
+      } else {
+        res.status(500).send(`Error when fetching followers and following`);
+      }
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
   router.get('/login', loginUser);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
+  router.get('/follow/:username', getFollowersAndFollowing);
 
   return router;
 };

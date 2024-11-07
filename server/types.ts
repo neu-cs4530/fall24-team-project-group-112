@@ -424,6 +424,16 @@ export interface FollowRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding followers and following for a given user.
+ * - username - The user's unique username.
+ */
+export interface FindFollowersAndFollowingRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Type representing the possible responses for a Follow-related operation.
  */
 export type FollowResponse = { success: string } | { error: string };

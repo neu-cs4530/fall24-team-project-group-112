@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
+import FollowModel from '../models/follows';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
@@ -235,5 +236,88 @@ describe('POST /user', () => {
     const response = await supertest(app).post('/user').send(mockReqBody);
 
     expect(response.status).toBe(500);
+  });
+
+  describe('GET /follow/:username', () => {
+    afterEach(async () => {
+      await mongoose.connection.close();
+    });
+
+    afterAll(async () => {
+      await mongoose.disconnect();
+    });
+
+    it('should return a list of followers and people the user is following', async () => {
+      const mockReqParams = { username: 'johnDoe' };
+
+      const mockFollowers = [{ followerUsername: 'follower1' }, { followerUsername: 'follower2' }];
+      const mockFollowing = [
+        { followeeUsername: 'following1' },
+        { followeeUsername: 'following2' },
+      ];
+
+      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+
+      jest
+        .spyOn(FollowModel, 'find')
+        .mockResolvedValueOnce(mockFollowers)
+        .mockResolvedValueOnce(mockFollowing);
+
+      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        followers: ['follower1', 'follower2'],
+        following: ['following1', 'following2'],
+      });
+    });
+
+    it('should return 404 if the username is missing', async () => {
+      const response = await supertest(app).get('/user/follow/');
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 if the username does not exist', async () => {
+      const mockReqParams = { username: 'invalid_user' };
+
+      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+
+      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe('User with provided username is invalid');
+    });
+
+    it('should return empty arrays if the user exists but has no followers or following', async () => {
+      const mockReqParams = { username: 'no_followers_user' };
+
+      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+
+      jest.spyOn(FollowModel, 'find').mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        followers: [],
+        following: [],
+      });
+    });
+
+    it('should return a server error if there is an issue fetching data', async () => {
+      const mockReqParams = { username: 'johnDoe' };
+
+      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+
+      jest.spyOn(FollowModel, 'find').mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain('Error when fetching followers and following');
+    });
   });
 });

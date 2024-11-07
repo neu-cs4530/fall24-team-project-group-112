@@ -594,6 +594,8 @@ describe('GET /upvotedBy/:username', () => {
   it('should return bad request error if username is not provided or invalid', async () => {
     const mockReqParams = { username: 'fake_user' };
 
+    jest.spyOn(util, 'findQuestionUpvotedBy').mockResolvedValue({ error: 'User does not exist' });
+
     const response = await supertest(app).get(`/question/upvotedBy/${mockReqParams.username}`);
 
     expect(response.status).toBe(500);

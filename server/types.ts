@@ -295,42 +295,7 @@ export interface ServerToClientEvents {
 }
 
 /**
- * Enum representing the possible colors for a badge.
- */
-export enum BadgeColor {
-  Gold = 'gold',
-  Silver = 'silver',
-  Bronze = 'bronze',
-}
-
-/**
- * Enum representing the possible types of badges.
- */
-export enum BadgeName {
-  FirstCommenter = 'First Commenter',
-  Voter = 'Voter',
-  DiscussionStarter = 'Discussion Starter',
-  CommunityHelper = 'Community Helper',
-  Influencer = 'Influencer',
-  Lifesaver = 'Lifesaver',
-}
-
-/**
- * Interface representing a Badge, which contains:
- * - _id - The unique identifier for the badge. Optional field.
- * - name - The name of the badge, one of BadgeName.
- * - description - The description of the badge.
- * - color - The color of the badge, one of BadgeColor.
- */
-export interface Badge {
-  _id?: ObjectId;
-  name: BadgeName;
-  description: string;
-  color: BadgeColor;
-}
-
-/**
- * Enum representing the possible colors for a badge.
+ * Enum representing the possible event types for notifications.
  */
 export enum NotificationType {
   ANSWER = 'Answer',
@@ -343,6 +308,7 @@ export enum NotificationType {
  * Interface representing a Notification, which contains:
  * - _id: The unique identifier for the notification.
  * - notificationType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
  * - receiverUsername: The username of the user who will receive the notification.
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
@@ -355,6 +321,20 @@ export interface Notification {
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
+}
+
+/**
+ * Interface extending the request body when retrieving a user's notification, which contains:
+ * - username - The username of the user whose notifications are being retrieved.
+ * - type - The type of notification to retrieve.
+ */
+export interface GetNotificationRequest extends Request {
+  params: {
+    username: string;
+  };
+  query: {
+    type: NotificationType;
+  };
 }
 
 /**
@@ -371,17 +351,6 @@ export interface CreateUserRequest extends Request {
   body: {
     user: User;
     password: string;
-  };
-}
-
-/**
- * Interface extending the request body when finding a user, which contains:
- * - user - The user being found.
- * - password - The password for the user found.
- */
-export interface FindUserRequest extends Request {
-  params: {
-    username: string;
   };
 }
 
@@ -404,6 +373,16 @@ export interface LoginUserRequest extends Request {
   body: {
     email: string;
     password: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding questions upvoted by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsUpvotedByRequest extends Request {
+  params: {
+    username: string;
   };
 }
 

@@ -8,6 +8,7 @@ import {
   FollowRequest,
   User,
   UpdateUserPayload,
+  FindUserRequest,
 } from '../types';
 import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
 import { auth } from '../firebaseConfig';

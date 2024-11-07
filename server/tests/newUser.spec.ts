@@ -3,7 +3,7 @@ import supertest from 'supertest';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
-import UserModel from '../models/user';
+import UserModel from '../models/users';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
@@ -285,5 +285,16 @@ describe('GET /getUserByName/:name', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toContain('Error when fetching user: Error fetching user');
+  });
+
+  it('should return 400 if the request is invalid', async () => {
+    const mockReqBodyError = {};
+
+    const response = await supertest(app)
+      .get('/user/getUserByUsername/invalidName')
+      .send(mockReqBodyError);
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid request');
   });
 });

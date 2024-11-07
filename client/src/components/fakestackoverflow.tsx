@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layout';
 import Login from './login';
@@ -35,18 +35,12 @@ const ProtectedRoute = ({
  */
 const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
   const { getItem } = useLocalStorage();
-  const userItem = getItem('user');
-  const initialUser = userItem ? JSON.parse(userItem) : null;
-  const [user, setUser] = useState<User | null>(initialUser);
 
-  useEffect(() => {
-    if (!user) {
-      const localStorageUser = getItem('user');
-      if (localStorageUser) {
-        setUser(JSON.parse(localStorageUser));
-      }
-    }
-  }, []);
+  // Initialize `user` directly from localStorage once during component mount
+  const [user, setUser] = useState<User | null>(() => {
+    const userItem = getItem('user');
+    return userItem ? JSON.parse(userItem) : null;
+  });
 
   return (
     <LoginContext.Provider value={{ setUser }}>

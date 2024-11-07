@@ -8,9 +8,11 @@ import {
   FollowRequest,
   User,
   UpdateUserPayload,
+  FindUserRequest,
 } from '../types';
 import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
 import { auth } from '../firebaseConfig';
+import UserModel from '../models/users';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -117,6 +119,29 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Retrieves a user's public details through their username.
+   *
+   * @param req The HTTP request object containing the username parameter.
+   * @param res The HTTP response object used to send back the user's public details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getUserByUsername = async (req: FindUserRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+      const user = await UserModel.findOne({ username });
+
+      if (!user) {
+        res.status(404).send(`User with the username "${username}" not found`);
+      } else {
+        res.json(user); // Return the user as JSON
+      }
+    } catch (err) {
+      res.status(500).send(`Error when fetching user: ${(err as Error).message}`);
+    }
+  };
+
+  /**
    * Logs in a user with the given email and password.
    *
    * If the user does not exist or login fails, the HTTP response's status is updated.
@@ -205,9 +230,9 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
-  // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
   router.get('/login', loginUser);
+  router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
 

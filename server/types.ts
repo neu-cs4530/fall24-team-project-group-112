@@ -386,7 +386,7 @@ export interface FindQuestionsDownvotedByRequest extends Request {
   };
 }
 
- /** 
+/**
  * Interface for the request parameters when finding questions upvoted by a given user.
  * - username - The user's unique username.
  */
@@ -447,3 +447,13 @@ export interface FollowRequest extends Request {
  * Type representing the possible responses for a Follow-related operation.
  */
 export type FollowResponse = { success: string } | { error: string };
+
+/**
+ * Interface for the request parameters when a given user.
+ * - username - The user's unique username.
+ */
+export interface FindUserRequest extends Request {
+  params: {
+    username: string;
+  };
+}

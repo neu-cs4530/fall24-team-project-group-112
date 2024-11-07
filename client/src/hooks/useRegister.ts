@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
 import { User } from '../types';
-import addUser from '../services/userService';
+import { addUser } from '../services/userService';
 
 /**
  * Custom hook to handle account registration/creation input and submission.

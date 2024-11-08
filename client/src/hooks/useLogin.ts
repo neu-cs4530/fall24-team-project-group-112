@@ -31,8 +31,16 @@ const useLogin = () => {
    */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const user = { username, firstName: '', lastName: '', email: '', createdAt: new Date() };
+    const user = {
+      username,
+      firstName: '',
+      lastName: '',
+      email: '',
+      badges: [],
+      createdAt: new Date(),
+    };
     setItem('user', JSON.stringify(user));
+    setUser(user);
     navigate('/home');
   };
 

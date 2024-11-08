@@ -49,7 +49,10 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         {/* Public Routes */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
-        <Route path='/profile/:username' element={<Profile />} />
+
+        <Route element={<Layout />}>
+          <Route path='/profile/:username' element={<Profile />} />
+        </Route>
 
         {/* Protected Routes */}
         <Route

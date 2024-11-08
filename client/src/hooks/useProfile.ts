@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { User } from '../types';
 import { getUser } from '../services/userService';
@@ -17,12 +17,13 @@ const useProfile = () => {
     const fetchUser = async () => {
       if (username) {
         try {
-          const user = await getUser(username);
+          const retrievedUser = await getUser(username);
 
-          setUser(user);
+          setUser(retrievedUser);
         } catch (err) {
-          // eslint-disable-next-line no-console
           setError('An error occurred while fetching the user.');
+
+          // eslint-disable-next-line no-console
           console.log(err);
         }
       }
@@ -30,7 +31,7 @@ const useProfile = () => {
     fetchUser();
   }, [username]);
 
-  return { user, setUser, error };
+  return { user, error };
 };
 
 export default useProfile;

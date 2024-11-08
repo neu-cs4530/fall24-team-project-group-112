@@ -1,10 +1,14 @@
+/* src/styles.css
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities'; */
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 10%;
   padding-left: 30px;
-  width: '100%';
   background: #dddddd;
 }
 

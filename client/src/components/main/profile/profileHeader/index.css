@@ -1,57 +1,72 @@
-/* All the CSS related to profile header*/
-
-.header-name {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.profile-header {
+  background-color: #f4f4f9;
+  border-radius: 8px;
   padding: 20px;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  direction: row;
+  margin-top: 0px;
+  border: 1px solid #777;
+  overflow: hidden;
 }
 
-.header-username {
+.text-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
+  margin-left: 30px;
 }
 
-.header-headline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+.icon {
+  font-size: 0.95rem;
 }
 
-.header-username {
+.name-username-container {
   display: flex;
-  flex-direction: column;
+  direction: row;
   align-items: center;
-  padding: 20px;
 }
 
-.header-github {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+.name {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.header-school {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+.username {
+  font-size: 1.5rem;
+  color: #666;
+  margin-top: 4px;
+  margin-left: 50px;
 }
 
-.header-location {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+.headline-container {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  color: #777;
 }
 
-.header-company {
+.info-container {
   display: flex;
-  flex-direction: column;
+  direction: row;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
+  margin-top: 20px;
+}
+
+.profile-header-school,
+.profile-header-location,
+.profile-header-company,
+.profile-header-github {
+  font-size: 0.95rem;
+  margin-right: 10px;
+}
+
+.profile-header-github a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.profile-header-github a:hover {
+  text-decoration: underline;
 }

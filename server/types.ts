@@ -409,11 +409,11 @@ export enum BadgeColor {
  * Enum representing the possible types of badges.
  */
 export enum BadgeName {
-  FIRST_COMMENTER = 'First Commenter',
+  AUTOBIOGRAPHER = 'Autobiographer',
   VOTER = 'Voter',
-  DISCUSSION_STARTER = 'Discussion Starter',
+  SPEEDY_ANSWERER = 'Speedy Answerer',
   COMMUNITY_HELPER = 'Community Helper',
-  INFLUENCER = 'Influencer',
+  TOP_ANSWERER = 'Top Answerer',
   LIFESAVER = 'Lifesaver',
 }
 
@@ -454,6 +454,18 @@ export type FollowResponse = { success: string } | { error: string };
  */
 export interface FindUserRequest extends Request {
   params: {
+    username: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when adding a badge to a user.
+ * - badgeId - The type of badge to add.
+ * - username - The user's unique username.
+ */
+export interface AddBadgeRequest extends Request {
+  params: {
+    badgeId: string;
     username: string;
   };
 }

@@ -944,3 +944,45 @@ export const getNotificationsForUser = async (
     return { error: `Error when getting notifications: ${(error as Error).message}` };
   }
 };
+
+/**
+ * Adds a new follow object to the database.
+ *
+ * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted. // fix
+ *
+ * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
+ */
+export const addBadge = async (username: string, badgeId: string): Promise<UserResponse> => {
+  try {
+    // if (
+    //   (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
+    //   (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+    // ) {
+    //   throw new Error('Follower or followee does not exist');
+    // }
+    // const existingFollow = await FollowModel.findOne({
+    //   followerUsername: follow.followerUsername,
+    //   followeeUsername: follow.followeeUsername,
+    // });
+    // if (existingFollow !== undefined) {
+    //   await FollowModel.deleteOne({
+    //     followerUsername: follow.followerUsername,
+    //     followeeUsername: follow.followeeUsername,
+    //   });
+    //   return { success: 'Follow request deleted' };
+    // }
+    // await FollowModel.create(follow);
+    // return { success: 'Follow request created' };
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { username },
+      { $push: { badges: badgeId } },
+      { new: true },
+    );
+    if (!updatedUser) {
+      throw new Error('User not found');
+    }
+    return updatedUser as UserResponse;
+  } catch (error) {
+    return { error: 'Error when adding badge to user' };
+  }
+};

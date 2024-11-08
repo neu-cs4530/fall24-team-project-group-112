@@ -15,6 +15,7 @@ import tagController from './controller/tag';
 import commentController from './controller/comment';
 import userController from './controller/user';
 import notificationController from './controller/notification';
+import badgeController from './controller/badge';
 
 import { FakeSOSocket } from './types';
 
@@ -75,6 +76,7 @@ app.use('/answer', answerController(socket));
 app.use('/comment', commentController(socket));
 app.use('/notification', notificationController(socket));
 app.use('/user', userController(socket));
+app.use('/badge', badgeController(socket));
 
 // Export the app instance
 export { app, server, startServer };

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
+import Profile from './main/profile';
 import { FakeSOSocket, User } from '../types';
 import LoginContext from '../contexts/LoginContext';
 import UserContext from '../contexts/UserContext';
@@ -48,6 +49,10 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         {/* Public Routes */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
+
+        <Route element={<Layout />}>
+          <Route path='/profile/:username' element={<Profile />} />
+        </Route>
 
         {/* Protected Routes */}
         <Route

@@ -31,10 +31,16 @@ const useLogin = () => {
    */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const user = { username, firstName: '', lastName: '', email: '', createdAt: new Date() };
-    setUser(user); // TODO: Implement login logic, done in another ticket!!!
+    const user = {
+      username,
+      firstName: '',
+      lastName: '',
+      email: '',
+      badges: [],
+      createdAt: new Date(),
+    };
     setItem('user', JSON.stringify(user));
-
+    setUser(user);
     navigate('/home');
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { User } from '../types';
-import { getUser } from '../services/userService';
+import { getFollowers, getUser } from '../services/userService';
 
 /**
  * Custom hook to user profiles.
@@ -11,13 +11,17 @@ import { getUser } from '../services/userService';
 const useProfile = () => {
   const { username } = useParams();
   const [user, setUser] = useState<User>();
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [following, setFollowing] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchUser = async () => {
       if (username) {
+        console.log(username);
         try {
           const retrievedUser = await getUser(username);
+          // const result = await getFollowers(username);
 
           setUser(retrievedUser);
         } catch (err) {

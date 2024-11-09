@@ -6,6 +6,7 @@ import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
 import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
+import useLocalStorage from '../../hooks/useLocalStorage';
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
@@ -13,12 +14,16 @@ import useHeader from '../../hooks/useHeader';
  */
 const Header = () => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
+  // TODO: can we do this more cleanly using UserContext?
+  const { getItem } = useLocalStorage();
+  const user = getItem('user');
+  const username = user ? JSON.parse(user).username : '';
 
   const links = [
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
     { name: 'Notifications', route: 'notifications', image: <FaBell /> },
-    { name: 'Me', route: 'profile', image: <IoMdPerson /> },
+    { name: 'Me', route: username ? `profile/${username}` : '', image: <IoMdPerson /> },
   ];
 
   const { pathname } = useLocation();

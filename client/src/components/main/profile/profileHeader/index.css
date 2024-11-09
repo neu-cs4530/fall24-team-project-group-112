@@ -69,3 +69,14 @@
 .profile-header-github a:hover {
   text-decoration: underline;
 }
+
+.profile-follows {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-follower-count {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}

@@ -37,4 +37,19 @@ const getUser = async (username: string): Promise<User> => {
   }
   return res.data;
 };
-export { addUser, getUser };
+
+/**
+ * Gets a user's followers and following given a specific username.
+ *
+ * @param username - The username of the user whose followers/following are to be retrieved.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns an object containing an array of follower usernames and following usernames.
+ */
+const getFollowers = async (username: string): Promise<User> => {
+  const res = await api.get(`${USER_API_URL}/follow/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching users');
+  }
+  return res.data;
+};
+export { addUser, getUser, getFollowers };

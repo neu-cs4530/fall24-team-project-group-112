@@ -4,9 +4,11 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
 import FollowModel from '../models/follows';
+import UserModel from '../models/users';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
+const findOneSpy = jest.spyOn(UserModel, 'findOne');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
@@ -341,5 +343,56 @@ describe('POST /user', () => {
       expect(response.status).toBe(500);
       expect(response.text).toContain('Error when fetching followers and following');
     });
+  });
+});
+
+describe('GET /getUserByName/:name', () => {
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure connection is properly closed
+    findOneSpy.mockClear(); // Clear mock after each test
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should return the user when found', async () => {
+    const newUser = {
+      username: 'dummyUser',
+      lastName: 'User',
+      email: 'dummy@example.com',
+      createdAt: '2024-06-03T00:00:00.000Z',
+    };
+
+    findOneSpy.mockResolvedValueOnce(newUser);
+
+    const response = await supertest(app).get('/user/dummyUser');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(newUser);
+  });
+
+  it('should return 404 if the user is not found', async () => {
+    findOneSpy.mockResolvedValueOnce(null);
+
+    const response = await supertest(app).get('/user/nonExistentUser');
+
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('User with the username "nonExistentUser" not found');
+  });
+
+  it('should return 500 if there is an error fetching the user', async () => {
+    findOneSpy.mockRejectedValueOnce(new Error('Error fetching user'));
+
+    const response = await supertest(app).get('/user/errorUser');
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching user: Error fetching user');
+  });
+
+  it('should return an error if the request is empty', async () => {
+    const response = await supertest(app).get('/user/');
+
+    expect(response.status).toBe(404);
   });
 });

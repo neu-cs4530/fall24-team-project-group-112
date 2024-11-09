@@ -107,3 +107,5 @@ server/node_modules/
 .stryker-tmp/
 server/reports
 
+# misc
+.DS_Store

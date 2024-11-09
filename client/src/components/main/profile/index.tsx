@@ -20,18 +20,7 @@ const Profile = () => {
     <>
       {user ? (
         <>
-          <ProfileHeader
-            firstName={user.firstName}
-            lastName={user.lastName}
-            username={user.username}
-            avatarName={user.avatarName || 'avatar1'}
-            github={user.githubUrl}
-            school={user.school}
-            city={user.city}
-            state={user.state}
-            company={user.company}
-            headline={user.headline}
-          />
+          <ProfileHeader user={user} />
           {user.bio ? <ProfileBio bio={user.bio} /> : null}
         </>
       ) : null}

@@ -74,7 +74,7 @@ const ProfileHeader = ({
           <div className='profile-header-github'>
             <a href={github} target='_blank' rel='noreferrer'>
               <FaGithub className='icon' />
-              {github}
+              github
             </a>
           </div>
         )}

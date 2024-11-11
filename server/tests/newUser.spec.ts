@@ -243,12 +243,11 @@ describe('POST /user', () => {
 
 describe('GET /follow/:username', () => {
   afterEach(async () => {
-    jest.clearAllMocks();
+    await mongoose.connection.close(); // Ensure connection is properly closed
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
-    await mongoose.disconnect();
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
 
   it('should return a server error if there is an issue fetching followers and following', async () => {

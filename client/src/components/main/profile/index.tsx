@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import './index.css';
-import ProfileHeader from './profileHeader';
-import ProfileBio from './profileBio';
+import ProfileText from './profileText';
 import useProfile from '../../../hooks/useProfile';
+import { User } from '../../../types';
+
 import QuestionDisplay from './questions/question';
 import { Question } from '../../../types';
 import { getQuestionsAskedBy } from '../../../services/questionService';
@@ -26,8 +27,10 @@ const question: Question = {
 
 /**
  * Profile Component displays the full content on a user's profile page. It also includes functionality for a user to edit the information on their own profile page.
+ *
+ * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
-const Profile = () => {
+const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const { user, error } = useProfile();
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
 
@@ -57,8 +60,7 @@ const Profile = () => {
     <>
       {user ? (
         <>
-          <ProfileHeader user={user} />
-          {user.bio ? <ProfileBio bio={user.bio} /> : null}
+          <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
           {questionsAsked.map(q => (
             <QuestionDisplay key={q._id} question={q} />
           ))}

@@ -8,9 +8,16 @@ import {
   FollowRequest,
   User,
   UpdateUserPayload,
+  FindFollowersAndFollowingRequest,
   FindUserRequest,
 } from '../types';
-import { addUser, isUsernameUnique, updateUser, addFollow } from '../models/application';
+import {
+  addUser,
+  isUsernameUnique,
+  updateUser,
+  addFollow,
+  getFollowersAndFollowingForUser,
+} from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/users';
 
@@ -230,11 +237,43 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets all followers and following for a given user
+   * If the provided user is invalid, an error will be returned.
+   *
+   * @param req The request object containing the username as a parameter.
+   * @param res The HTTP response object used to send back the user's followers and following.
+   */
+  const getFollowersAndFollowing = async (
+    req: FindFollowersAndFollowingRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    try {
+      const result = await getFollowersAndFollowingForUser(username);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.status(200).json({
+        followers: result.followers.map(f => f.followerUsername),
+        following: result.following.map(f => f.followeeUsername),
+      });
+    } catch (err: unknown) {
+      res
+        .status(500)
+        .send(`Error when fetching followers and following: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
   router.post('/login', loginUser);
   router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
+  router.get('/follow/:username', getFollowersAndFollowing);
 
   return router;
 };

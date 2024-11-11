@@ -34,7 +34,10 @@ const userSchema: Schema = new Schema(
     city: { type: String },
     state: { type: String },
     badges: { type: [{ type: String }], default: [], required: true },
-    avatarName: { type: String },
+    avatarName: {
+      type: String,
+      enum: ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'],
+    },
     createdAt: { type: Date, required: true },
   },
   { collection: 'User' },

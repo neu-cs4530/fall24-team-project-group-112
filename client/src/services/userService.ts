@@ -25,6 +25,21 @@ export const addUser = async (
 };
 
 /**
+ * Gets a user given a specific username.
+ *
+ * @param username - The username of the user to be retrieved.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns The user object.
+ */
+export const getUser = async (username: string): Promise<User> => {
+  const res = await api.get(`${USER_API_URL}/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching user');
+  }
+  return res.data;
+};
+
+/**
  * Logs in a user with the given email and password.
  *
  * @param email - The email of the user logging in.

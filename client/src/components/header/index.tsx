@@ -6,19 +6,22 @@ import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
 import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
+import { User } from '../../types';
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
  * when they press Enter.
+ *
+ * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
-const Header = () => {
+const Header = ({ user }: { user: User | null }) => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
 
   const links = [
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
     { name: 'Notifications', route: 'notifications', image: <FaBell /> },
-    { name: 'Me', route: 'profile', image: <IoMdPerson /> },
+    { name: 'Me', route: user ? `profile/${user.username}` : 'register', image: <IoMdPerson /> },
   ];
 
   const { pathname } = useLocation();

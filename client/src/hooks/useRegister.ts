@@ -96,6 +96,7 @@ const useRegister = () => {
       lastName,
       email,
       createdAt: new Date(),
+      badges: [],
     };
 
     try {

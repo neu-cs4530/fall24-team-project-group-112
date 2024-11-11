@@ -50,7 +50,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 
-        <Route element={<Layout />}>
+        <Route element={<Layout user={user} />}>
           <Route path='/profile/:username' element={<Profile />} />
         </Route>
 
@@ -58,7 +58,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         <Route
           element={
             <ProtectedRoute user={user} socket={socket}>
-              <Layout />
+              <Layout user={user} />
             </ProtectedRoute>
           }>
           <Route path='/home' element={<QuestionPage />} />

@@ -24,7 +24,7 @@ describe('POST /login', () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
 
-  it('should login a user via firebase and return their email', async () => {
+  it('should login a user via firebase and return the user', async () => {
     const mockReqBody = {
       email: 'testuser@email.com',
       password: '123456',
@@ -32,10 +32,18 @@ describe('POST /login', () => {
 
     mockSignInWithEmailAndPassword.mockResolvedValueOnce('testuser@email.com');
 
+    const mockUser = {
+      _id: '67325222c2afe26a6ab97909',
+      badges: [],
+      username: 'testuser',
+      email: mockReqBody.email,
+    };
+    mockingoose(UserModel).toReturn(mockUser, 'findOne');
+
     const response = await supertest(app).post('/user/login').send(mockReqBody);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockReqBody.email);
+    expect(response.body).toEqual(mockUser);
     expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(
       undefined,
       mockReqBody.email,

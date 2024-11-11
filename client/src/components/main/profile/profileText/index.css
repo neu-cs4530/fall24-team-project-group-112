@@ -1,0 +1,100 @@
+.profile-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-text-header {
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  direction: row;
+  border: 1px solid #777;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 3%;
+}
+
+.icon {
+  font-size: 0.95rem;
+}
+
+.name-username-container {
+  display: flex;
+  direction: row;
+  align-items: right;
+}
+
+.name {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.username {
+  font-size: 1.5rem;
+  color: #666;
+  margin-left: 50px;
+}
+
+.edit-profile-button button {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  font-size: 1.1rem;
+  margin-left: 75%;
+}
+
+.headline-container {
+  margin-top: 3%;
+  font-size: 1.3rem;
+  color: #777;
+}
+
+.info-container {
+  display: flex;
+  direction: row;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.profile-text-school,
+.profile-text-location,
+.profile-text-company,
+.profile-text-github {
+  font-size: 0.95rem;
+  margin-right: 10px;
+}
+
+.profile-text-github a {
+  text-decoration: none;
+}
+
+.profile-text-github a:hover {
+  text-decoration: underline;
+}
+
+.profile-bio {
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #777;
+}
+
+.bio-header {
+  margin-left: 3%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #777;
+}
+
+.bio-content {
+  margin-left: 3%;
+  font-size: 1.3rem;
+  color: #777;
+}

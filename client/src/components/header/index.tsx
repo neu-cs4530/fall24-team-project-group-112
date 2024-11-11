@@ -1,12 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import React from 'react';
 import './index.css';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
 import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
-import useLocalStorage from '../../hooks/useLocalStorage';
 import { User } from '../../types';
 
 /**
@@ -18,10 +16,6 @@ import { User } from '../../types';
  */
 const Header = ({ user }: { user: User | null }) => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
-  // TODO: can we do this more cleanly using UserContext?
-  const { getItem } = useLocalStorage();
-  const user = getItem('user');
-  const username = user ? JSON.parse(user).username : '';
 
   const links = [
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },

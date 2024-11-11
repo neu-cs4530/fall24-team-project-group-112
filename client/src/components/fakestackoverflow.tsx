@@ -23,6 +23,8 @@ const ProtectedRoute = ({
   socket: FakeSOSocket | null;
   children: JSX.Element;
 }) => {
+  console.log('user', user);
+  console.log('socket', socket);
   if (!user || !socket) {
     return <Navigate to='/' />;
   }

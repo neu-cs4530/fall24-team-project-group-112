@@ -22,7 +22,7 @@ interface ProfileHeaderProps {
  * @returns A React component that displays the user's header information.
  */
 const ProfileHeader = ({ user }: ProfileHeaderProps) => (
-  <div className='profile-header'>
+  <div className='bg-white rounded-lg p-5 shadow-md flex flex-row mt-0 border border-gray-500 overflow-hidden'>
     <Avatar avatarName={user.avatarName || 'avatar1'} />
     <div className='text-container'>
       <div className='name-username-container'>

@@ -61,6 +61,7 @@ const useLogin = () => {
           firstName: res.firstName,
           lastName: res.lastName,
           email: res.email,
+          badges: res.badges,
           createdAt: res.createdAt,
         };
 

@@ -159,10 +159,11 @@ const userController = (socket: FakeSOSocket) => {
 
     const { email } = req.body;
 
+    const user = await UserModel.findOne({ email });
+
     try {
       await signInWithEmailAndPassword(auth, email, req.body.password);
-
-      res.json(email);
+      res.json(user);
     } catch (err) {
       res.status(500).send(`Login error: ${(err as Error).message}`);
     }

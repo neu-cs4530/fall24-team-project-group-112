@@ -46,6 +46,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     <LoginContext.Provider value={{ setUser }}>
       <Routes>
         {/* Public Routes */}
+        {/* <Route path='/login' element={user ? <Navigate to='/home' /> : <Login />} /> */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 

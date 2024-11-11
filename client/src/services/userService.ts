@@ -2,6 +2,7 @@ import { User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
+const LOGIN_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/login`;
 
 /**
  * Adds a new answer to a specific question.
@@ -10,7 +11,7 @@ const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
  * @param ans - The answer object containing the answer details.
  * @throws Error Throws an error if the request fails or the response status is not 200.
  */
-const addUser = async (
+export const addUser = async (
   user: User,
   password: string,
 ): Promise<User | { status: number; error: string }> => {
@@ -23,4 +24,26 @@ const addUser = async (
   return res.data;
 };
 
-export default addUser;
+/**
+ * Logs in a user with the given email and password.
+ *
+ * @param email - The email of the user logging in.
+ * @param password - The password of the user logging in.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ */
+export const loginUser = async (
+  email: string,
+  password: string,
+): Promise<User | { status: number; error: string }> => {
+  const data = { email, password };
+
+  try {
+    const res = await api.post(`${LOGIN_API_URL}`, data);
+    return res.data;
+  } catch (error: unknown) {
+    return {
+      status: 500,
+      error: 'An unexpected error occurred',
+    };
+  }
+};

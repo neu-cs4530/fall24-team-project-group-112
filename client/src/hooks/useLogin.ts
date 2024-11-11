@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
 import useLoginContext from './useLoginContext';
 import useLocalStorage from './useLocalStorage';
+import { loginUser } from '../services/userService';
 /**
  * Custom hook to handle login input and submission.
  *
@@ -10,18 +11,25 @@ import useLocalStorage from './useLocalStorage';
  * @returns handleSubmit - Function to handle login submission
  */
 const useLogin = () => {
-  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
   const { setUser } = useLoginContext();
   const { setItem } = useLocalStorage();
   const navigate = useNavigate();
 
   /**
-   * Function to handle the input change event.
+   * Function to handle input change event for both email and password fields.
    *
-   * @param e - the event object.
+   * @param e - The event object.
+   * @param field - The field being updated ('email' or 'password').
    */
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, field: string) => {
+    if (field === 'email') {
+      setEmail(e.target.value);
+    } else if (field === 'password') {
+      setPassword(e.target.value);
+    }
   };
 
   /**
@@ -29,16 +37,47 @@ const useLogin = () => {
    *
    * @param event - the form event object.
    */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const user = { username, firstName: '', lastName: '', email: '', createdAt: new Date() };
-    setUser(user); // TODO: Implement login logic, done in another ticket!!!
-    setItem('user', JSON.stringify(user));
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    let isValid = true;
+    if (!email || !password) {
+      setError('You can not leave any of the fields empty');
+      isValid = false;
+    }
 
-    navigate('/home');
+    if (!isValid) {
+      return;
+    }
+
+    event.preventDefault();
+
+    try {
+      const res = await loginUser(email, password);
+
+      if ('status' in res) {
+        setError(res.error);
+      } else {
+        const user = {
+          username: res.username,
+          firstName: res.firstName,
+          lastName: res.lastName,
+          email: res.email,
+          createdAt: res.createdAt,
+        };
+
+        setUser(user);
+        setItem('user', JSON.stringify(user));
+
+        setError('');
+        navigate('/home');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(`${err.message}`);
+      }
+    }
   };
 
-  return { username, handleInputChange, handleSubmit };
+  return { email, password, handleInputChange, handleSubmit, error };
 };
 
 export default useLogin;

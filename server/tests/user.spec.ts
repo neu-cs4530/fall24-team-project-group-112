@@ -14,7 +14,7 @@ jest.mock('firebase/auth', () => ({
 }));
 const mockSignInWithEmailAndPassword = signInWithEmailAndPassword as jest.Mock;
 
-describe('GET /login', () => {
+describe('POST /login', () => {
   afterEach(async () => {
     jest.clearAllMocks();
   });
@@ -24,7 +24,7 @@ describe('GET /login', () => {
     await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
   });
 
-  it('should login a user via firebase and get their email', async () => {
+  it('should login a user via firebase and return their email', async () => {
     const mockReqBody = {
       email: 'testuser@email.com',
       password: '123456',
@@ -32,7 +32,7 @@ describe('GET /login', () => {
 
     mockSignInWithEmailAndPassword.mockResolvedValueOnce('testuser@email.com');
 
-    const response = await supertest(app).get('/user/login').send(mockReqBody);
+    const response = await supertest(app).post('/user/login').send(mockReqBody);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockReqBody.email);
@@ -46,7 +46,7 @@ describe('GET /login', () => {
   it('should return an error if the request is empty', async () => {
     const mockReqBodyError = {};
 
-    const response = await supertest(app).get('/user/login').send(mockReqBodyError);
+    const response = await supertest(app).post('/user/login').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -57,7 +57,7 @@ describe('GET /login', () => {
       password: '123456',
     };
 
-    const response = await supertest(app).get('/user/login').send(mockReqBodyError);
+    const response = await supertest(app).post('/user/login').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -68,7 +68,7 @@ describe('GET /login', () => {
       email: 'testemail@email.com',
     };
 
-    const response = await supertest(app).get('/user/login').send(mockReqBodyError);
+    const response = await supertest(app).post('/user/login').send(mockReqBodyError);
 
     expect(response.status).toBe(400);
     expect(response.text).toBe('Invalid request');
@@ -82,7 +82,7 @@ describe('GET /login', () => {
 
     mockSignInWithEmailAndPassword.mockRejectedValueOnce(new Error('Invalid email or password'));
 
-    const response = await supertest(app).get('/user/login').send(mockReqBodyError);
+    const response = await supertest(app).post('/user/login').send(mockReqBodyError);
 
     expect(response.status).toBe(500);
     expect(response.text).toBe('Login error: Invalid email or password');

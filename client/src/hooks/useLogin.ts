@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChangeEvent, useState } from 'react';
 import useLoginContext from './useLoginContext';
-
+import useLocalStorage from './useLocalStorage';
 /**
  * Custom hook to handle login input and submission.
  *
@@ -12,6 +12,7 @@ import useLoginContext from './useLoginContext';
 const useLogin = () => {
   const [username, setUsername] = useState<string>('');
   const { setUser } = useLoginContext();
+  const { setItem } = useLocalStorage();
   const navigate = useNavigate();
 
   /**
@@ -30,7 +31,16 @@ const useLogin = () => {
    */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setUser({ username, firstName: '', lastName: '', email: '', createdAt: new Date() }); // TODO: Implement login logic, done in another ticket!!!
+    const user = {
+      username,
+      firstName: '',
+      lastName: '',
+      email: '',
+      badges: [],
+      createdAt: new Date(),
+    };
+    setItem('user', JSON.stringify(user));
+    setUser(user);
     navigate('/home');
   };
 

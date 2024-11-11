@@ -4,9 +4,11 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
 import FollowModel from '../models/follows';
+import UserModel from '../models/users';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
+const findOneSpy = jest.spyOn(UserModel, 'findOne');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
@@ -237,110 +239,161 @@ describe('POST /user', () => {
 
     expect(response.status).toBe(500);
   });
+});
 
-  describe('GET /follow/:username', () => {
-    afterEach(async () => {
-      jest.clearAllMocks();
+describe('GET /follow/:username', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+    await mongoose.disconnect();
+  });
+
+  it('should return a server error if there is an issue fetching followers and following', async () => {
+    const mockReqParams = { username: 'johnDoe' };
+
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+
+    jest.spyOn(FollowModel, 'find').mockImplementation(() => {
+      throw new Error('Database error');
     });
 
-    afterAll(async () => {
-      await mongoose.connection.close();
-      await mongoose.disconnect();
+    const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching followers and following');
+  });
+
+  it('should return 500 if the username does not exist', async () => {
+    const mockReqParams = { username: 'invalid_user' };
+
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+
+    const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+    expect(response.status).toBe(500);
+    expect(response.text).toBe(
+      'Error when fetching followers and following: Error when getting followers and following: Invalid username',
+    );
+  });
+
+  it('should return a list of followers and people the user is following', async () => {
+    const mockReqParams = { username: 'johnDoe' };
+
+    const mockFollowers = [
+      {
+        followerUsername: 'follower1',
+        followeeUsername: 'johnDoe',
+        followDateTime: new Date('2024-06-01T00:00:00.000Z'),
+      },
+      {
+        followerUsername: 'follower2',
+        followeeUsername: 'johnDoe',
+        followDateTime: new Date('2024-06-02T00:00:00.000Z'),
+      },
+    ];
+
+    const mockFollowing = [
+      {
+        followerUsername: 'johnDoe',
+        followeeUsername: 'following1',
+        followDateTime: new Date('2024-06-01T00:00:00.000Z'),
+      },
+      {
+        followerUsername: 'johnDoe',
+        followeeUsername: 'following2',
+        followDateTime: new Date('2024-06-02T00:00:00.000Z'),
+      },
+    ];
+
+    jest.spyOn(util, 'getFollowersAndFollowingForUser').mockResolvedValue({
+      followers: mockFollowers,
+      following: mockFollowing,
     });
 
-    it('should return a server error if there is an issue fetching followers and following', async () => {
-      const mockReqParams = { username: 'johnDoe' };
+    const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
 
-      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
-
-      jest.spyOn(FollowModel, 'find').mockImplementation(() => {
-        throw new Error('Database error');
-      });
-
-      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
-
-      expect(response.status).toBe(500);
-      expect(response.text).toContain('Error when fetching followers and following');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      followers: ['follower1', 'follower2'],
+      following: ['following1', 'following2'],
     });
+  });
 
-    it('should return 500 if the username does not exist', async () => {
-      const mockReqParams = { username: 'invalid_user' };
+  it('should return 404 if the username is missing', async () => {
+    const response = await supertest(app).get('/user/follow/');
 
-      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+    expect(response.status).toBe(404);
+  });
 
-      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+  it('should return empty arrays if the user exists but has no followers or following', async () => {
+    const mockReqParams = { username: 'no_followers_user' };
 
-      expect(response.status).toBe(500);
-      expect(response.text).toBe(
-        'Error when fetching followers and following: Error when getting followers and following: Invalid username',
-      );
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+
+    jest
+      .spyOn(util, 'getFollowersAndFollowingForUser')
+      .mockResolvedValue({ followers: [], following: [] });
+
+    const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      followers: [],
+      following: [],
     });
+  });
+});
 
-    it('should return a list of followers and people the user is following', async () => {
-      const mockReqParams = { username: 'johnDoe' };
+describe('GET /getUserByName/:name', () => {
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure connection is properly closed
+    findOneSpy.mockClear(); // Clear mock after each test
+  });
 
-      const mockFollowers = [
-        {
-          followerUsername: 'follower1',
-          followeeUsername: 'johnDoe',
-          followDateTime: new Date('2024-06-01T00:00:00.000Z'),
-        },
-        {
-          followerUsername: 'follower2',
-          followeeUsername: 'johnDoe',
-          followDateTime: new Date('2024-06-02T00:00:00.000Z'),
-        },
-      ];
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
 
-      const mockFollowing = [
-        {
-          followerUsername: 'johnDoe',
-          followeeUsername: 'following1',
-          followDateTime: new Date('2024-06-01T00:00:00.000Z'),
-        },
-        {
-          followerUsername: 'johnDoe',
-          followeeUsername: 'following2',
-          followDateTime: new Date('2024-06-02T00:00:00.000Z'),
-        },
-      ];
+  it('should return the user when found', async () => {
+    const newUser = {
+      username: 'dummyUser',
+      lastName: 'User',
+      email: 'dummy@example.com',
+      createdAt: '2024-06-03T00:00:00.000Z',
+    };
 
-      jest.spyOn(util, 'getFollowersAndFollowingForUser').mockResolvedValue({
-        followers: mockFollowers,
-        following: mockFollowing,
-      });
+    findOneSpy.mockResolvedValueOnce(newUser);
 
-      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+    const response = await supertest(app).get('/user/dummyUser');
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        followers: ['follower1', 'follower2'],
-        following: ['following1', 'following2'],
-      });
-    });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(newUser);
+  });
 
-    it('should return 404 if the username is missing', async () => {
-      const response = await supertest(app).get('/user/follow/');
+  it('should return 404 if the user is not found', async () => {
+    findOneSpy.mockResolvedValueOnce(null);
 
-      expect(response.status).toBe(404);
-    });
+    const response = await supertest(app).get('/user/nonExistentUser');
 
-    it('should return empty arrays if the user exists but has no followers or following', async () => {
-      const mockReqParams = { username: 'no_followers_user' };
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('User with the username "nonExistentUser" not found');
+  });
 
-      jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+  it('should return 500 if there is an error fetching the user', async () => {
+    findOneSpy.mockRejectedValueOnce(new Error('Error fetching user'));
 
-      jest
-        .spyOn(util, 'getFollowersAndFollowingForUser')
-        .mockResolvedValue({ followers: [], following: [] });
+    const response = await supertest(app).get('/user/errorUser');
 
-      const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching user: Error fetching user');
+  });
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        followers: [],
-        following: [],
-      });
-    });
+  it('should return an error if the request is empty', async () => {
+    const response = await supertest(app).get('/user/');
+
+    expect(response.status).toBe(404);
   });
 });

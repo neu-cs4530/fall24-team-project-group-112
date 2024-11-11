@@ -9,6 +9,7 @@ import {
   User,
   UpdateUserPayload,
   FindFollowersAndFollowingRequest,
+  FindUserRequest,
 } from '../types';
 import {
   addUser,
@@ -18,6 +19,7 @@ import {
   getFollowersAndFollowingForUser,
 } from '../models/application';
 import { auth } from '../firebaseConfig';
+import UserModel from '../models/users';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -120,6 +122,29 @@ const userController = (socket: FakeSOSocket) => {
       res.json(newUser);
     } catch (err) {
       res.status(500).send(`Error when creating a user: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Retrieves a user's public details through their username.
+   *
+   * @param req The HTTP request object containing the username parameter.
+   * @param res The HTTP response object used to send back the user's public details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getUserByUsername = async (req: FindUserRequest, res: Response): Promise<void> => {
+    try {
+      const { username } = req.params;
+      const user = await UserModel.findOne({ username });
+
+      if (!user) {
+        res.status(404).send(`User with the username "${username}" not found`);
+      } else {
+        res.json(user); // Return the user as JSON
+      }
+    } catch (err) {
+      res.status(500).send(`Error when fetching user: ${(err as Error).message}`);
     }
   };
 
@@ -243,9 +268,9 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
-  // Add appropriate HTTP verbs and their endpoints to the router.
   router.post('', createUser);
-  router.get('/login', loginUser);
+  router.post('/login', loginUser);
+  router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
   router.get('/follow/:username', getFollowersAndFollowing);

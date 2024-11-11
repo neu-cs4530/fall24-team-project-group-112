@@ -12,7 +12,7 @@ const Login = () => {
   return (
     <div className='container'>
       <h2>Welcome to FakeStackOverflow!</h2>
-      <h4>Please enter your username.</h4>
+      <h4>Please enter your username</h4>
       <form onSubmit={handleSubmit}>
         <input
           type='text'

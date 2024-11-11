@@ -8,8 +8,8 @@ import * as util from '../models/application';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
+
 const findOneSpy = jest.spyOn(UserModel, 'findOne');
-const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),

@@ -3,8 +3,6 @@ import supertest from 'supertest';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../app';
 import * as util from '../models/application';
-import FollowModel from '../models/follows';
-import UserModel from '../models/users';
 
 const addUserSpy = jest.spyOn(util, 'addUser');
 const isUsernameUniqueSpy = jest.spyOn(util, 'isUsernameUnique');

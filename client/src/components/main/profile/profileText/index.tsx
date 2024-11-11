@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaGithub, FaSchool, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 import { MdWork } from 'react-icons/md';
 import './index.css';
 import { User } from '../../../../types';
@@ -34,7 +34,9 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => (
 
           {loggedInUser && loggedInUser.username === user.username && (
             <div className='edit-profile-button'>
-              <button>Edit Profile</button>
+              <button>
+                <FaEdit className='icon' />
+              </button>
             </div>
           )}
         </div>

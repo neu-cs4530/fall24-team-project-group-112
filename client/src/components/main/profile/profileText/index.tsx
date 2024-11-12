@@ -39,6 +39,12 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => (
               </button>
             </div>
           )}
+
+          {loggedInUser && loggedInUser.username !== user.username && (
+            <div className='follow-button'>
+              <button>Follow</button>
+            </div>
+          )}
         </div>
 
         <div className='headline-container'>{user.headline && <div>{user.headline}</div>}</div>

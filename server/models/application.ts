@@ -884,8 +884,8 @@ export const deleteNotificationsForUser = async (
 export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
   try {
     if (
-      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
-      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+      (await UserModel.findOne({ username: follow.followerUsername })) === null ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === null
     ) {
       throw new Error('Follower or followee does not exist');
     }
@@ -895,7 +895,7 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
       followeeUsername: follow.followeeUsername,
     });
 
-    if (existingFollow !== undefined) {
+    if (existingFollow !== null) {
       await FollowModel.deleteOne({
         followerUsername: follow.followerUsername,
         followeeUsername: follow.followeeUsername,
@@ -961,10 +961,27 @@ export const getFollowersAndFollowingForUser = async (
       throw new Error('Invalid username');
     }
 
-    const followers = await FollowModel.find({ followeeUsername: username });
-    const following = await FollowModel.find({ followerUsername: username });
+    const followers = await FollowModel.find({ followeeUsername: username })
+      .populate('follower')
+      .exec();
+    const following = await FollowModel.find({ followerUsername: username })
+      .populate('followee')
+      .exec();
 
-    return { followers, following };
+    return {
+      followers: followers.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.follower,
+      })),
+      following: following.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.followee,
+      })),
+    };
   } catch (error) {
     return { error: `Error when getting followers and following: ${(error as Error).message}` };
   }

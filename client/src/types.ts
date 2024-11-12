@@ -201,6 +201,18 @@ export interface CommentUpdatePayload {
   type: 'question' | 'answer';
 }
 
+export interface Follow {
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+  user: User;
+}
+
+export interface Follows {
+  followers: Follow[];
+  following: Follow[];
+}
+
 /**
  * Interface representing the possible events that the server can emit to the client.
  */

@@ -242,13 +242,15 @@ export type CommentResponse = Comment | { error: string };
  * - followerUsername - The username of the user who followed a user.
  * - followeeUsername - The username of the user who was followed by a user.
  * - followDateTime - The date and time when the follow was posted.
- *
+ * - user - The user object of the follower or followee, depending on the context.
  */
 export interface Follow {
   _id?: ObjectId;
   followerUsername: string;
   followeeUsername: string;
   followDateTime: Date;
+  followee?: User;
+  follower?: User;
 }
 
 /**

@@ -2,23 +2,21 @@ import { useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
-import PersonIcon from '@mui/icons-material/Person';
-import { ListItemButton, ListItemAvatar, Avatar } from '@mui/material';
-import { blue } from '@mui/material/colors';
-import './index.css';
+import { ListItemButton, ListItemAvatar } from '@mui/material';
+import { Follow } from '../../../../types';
+import Avatar from '../../baseComponents/avatar';
 
 /**
  * Interface representing the props for the FollowDisplay component.
  *
- * - usernames: The list of usernames to display.
+ * - follows: The list of followers or followees to display.
  * - open: A boolean that determines if the dialog is open.
  * - onClose: A function that closes the dialog.
  * - type: A string that determines if the dialog is for followers or following.
  */
 interface FollowDisplayProps {
-  usernames: string[];
+  follows: Follow[];
   open: boolean;
   onClose: () => void;
   type: 'Followers' | 'Following';
@@ -27,14 +25,14 @@ interface FollowDisplayProps {
 /**
  * FollowDisplay component that displays a list of usernames in a dialog.
  *
- * @param usernames The list of usernames to display.
+ * @param follows The list of usernames to display.
  * @param open A boolean that determines if the dialog is open.
  * @param onClose A function that closes the dialog.
  * @param type A string that determines if the dialog is for followers or following.
  *
  * @returns A React component that displays a list of users.
  */
-const FollowDisplay = ({ usernames, open, onClose, type }: FollowDisplayProps) => {
+const FollowDisplay = ({ follows, open, onClose, type }: FollowDisplayProps) => {
   const navigate = useNavigate();
 
   const routeToProfile = (username: string) => {
@@ -44,18 +42,25 @@ const FollowDisplay = ({ usernames, open, onClose, type }: FollowDisplayProps) =
 
   return (
     <Dialog onClose={() => onClose()} open={open}>
-      <div className='follow-display'>
-        <DialogTitle>{type}</DialogTitle>
+      <div className='w-[500px]'>
+        <p className='pl-5 pt-5 text-xl font-bold'>{type}</p>
         <List sx={{ pt: 0 }}>
-          {usernames.map(username => (
-            <ListItem disableGutters key={username}>
-              <ListItemButton onClick={() => routeToProfile(username)}>
+          {follows.map((follow, idx) => (
+            <ListItem disableGutters key={idx}>
+              <ListItemButton onClick={() => routeToProfile(follow.user.username)}>
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
-                    <PersonIcon />
-                  </Avatar>
+                  <span className='max-w-4'>
+                    <Avatar
+                      avatarName={follow.user.avatarName || 'avatar1'}
+                      width={50}
+                      height={50}
+                    />
+                  </span>
                 </ListItemAvatar>
-                <ListItemText primary={username} />
+                <div className='flex-col ml-2'>
+                  <ListItemText primary={`${follow.user.firstName} ${follow.user.lastName}`} />
+                  <ListItemText primary={`@${follow.user.username}`} />
+                </div>
               </ListItemButton>
             </ListItem>
           ))}

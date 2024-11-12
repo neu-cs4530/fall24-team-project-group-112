@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User } from '../types';
+import { Follow, User } from '../types';
 import { getFollowers, getUser } from '../services/userService';
 
 /**
@@ -11,21 +11,21 @@ import { getFollowers, getUser } from '../services/userService';
 const useProfile = () => {
   const { username } = useParams();
   const [user, setUser] = useState<User>();
-  const [followers, setFollowers] = useState<string[]>([]);
-  const [following, setFollowing] = useState<string[]>([]);
+  const [followers, setFollowers] = useState<Follow[]>([]);
+  const [following, setFollowing] = useState<Follow[]>([]);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchUser = async () => {
       if (username) {
-        console.log(username);
         try {
           const retrievedUser = await getUser(username);
-          // const result = await getFollowers(username);
-
           setUser(retrievedUser);
+          const result = await getFollowers(username);
+          setFollowers(result.followers);
+          setFollowing(result.following);
         } catch (err) {
-          setError('An error occurred while fetching the user.');
+          setError('An error occurred while fetching the user and/or followers.');
 
           // eslint-disable-next-line no-console
           console.log(err);
@@ -35,7 +35,7 @@ const useProfile = () => {
     fetchUser();
   }, [username]);
 
-  return { user, error };
+  return { user, followers, following, error };
 };
 
 export default useProfile;

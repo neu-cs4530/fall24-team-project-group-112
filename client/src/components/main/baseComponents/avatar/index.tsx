@@ -7,6 +7,8 @@ import React from 'react';
  */
 interface AvatarProps {
   avatarName: string;
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -14,8 +16,8 @@ interface AvatarProps {
  *
  * @param avatarName The name of the user's avatar image.
  */
-const Avatar = ({ avatarName }: AvatarProps) => (
-  <img src={`/images/${avatarName}.svg`} alt='avatar' width='150px' height='150px' />
+const Avatar = ({ avatarName, width = 150, height = 150 }: AvatarProps) => (
+  <img src={`/images/${avatarName}.svg`} alt='avatar' width={width} height={height} />
 );
 
 export default Avatar;

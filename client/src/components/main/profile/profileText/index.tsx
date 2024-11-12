@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 import { MdWork } from 'react-icons/md';
 import { User } from '../../../../types';
@@ -27,9 +26,8 @@ interface ProfileTextProps {
  * @returns A React component that displays the user's text information.
  */
 const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
-  const [followersOpen, setFollowersOpen] = useState(false);
-  const [followingOpen, setFollowingOpen] = useState(false);
-  const { followers, following } = useProfile();
+  const { followers, following, followersOpen, followingOpen, setFollowersOpen, setFollowingOpen } =
+    useProfile();
 
   const styles = {
     container: 'flex-col',

@@ -13,6 +13,8 @@ const useProfile = () => {
   const [user, setUser] = useState<User>();
   const [followers, setFollowers] = useState<Follow[]>([]);
   const [following, setFollowing] = useState<Follow[]>([]);
+  const [followersOpen, setFollowersOpen] = useState(false);
+  const [followingOpen, setFollowingOpen] = useState(false);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -35,7 +37,16 @@ const useProfile = () => {
     fetchUser();
   }, [username]);
 
-  return { user, followers, following, error };
+  return {
+    user,
+    followers,
+    following,
+    followersOpen,
+    setFollowersOpen,
+    followingOpen,
+    setFollowingOpen,
+    error,
+  };
 };
 
 export default useProfile;

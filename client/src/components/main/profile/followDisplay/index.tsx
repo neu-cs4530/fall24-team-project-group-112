@@ -23,9 +23,9 @@ interface FollowDisplayProps {
 }
 
 /**
- * FollowDisplay component that displays a list of usernames in a dialog.
+ * FollowDisplay component that displays a list of users in a dialog.
  *
- * @param follows The list of usernames to display.
+ * @param follows The users to display.
  * @param open A boolean that determines if the dialog is open.
  * @param onClose A function that closes the dialog.
  * @param type A string that determines if the dialog is for followers or following.
@@ -40,16 +40,23 @@ const FollowDisplay = ({ follows, open, onClose, type }: FollowDisplayProps) => 
     navigate(`/profile/${username}`);
   };
 
+  const styles = {
+    dialogContainer: 'w-[500px]',
+    title: 'pl-5 pt-5 text-xl font-bold',
+    avatarContainer: 'max-w-4',
+    userInfoContainer: 'flex-col ml-2',
+  };
+
   return (
     <Dialog onClose={() => onClose()} open={open}>
-      <div className='w-[500px]'>
-        <p className='pl-5 pt-5 text-xl font-bold'>{type}</p>
+      <div className={styles.dialogContainer}>
+        <p className={styles.title}>{type}</p>
         <List sx={{ pt: 0 }}>
           {follows.map((follow, idx) => (
             <ListItem disableGutters key={idx}>
               <ListItemButton onClick={() => routeToProfile(follow.user.username)}>
                 <ListItemAvatar>
-                  <span className='max-w-4'>
+                  <span className={styles.avatarContainer}>
                     <Avatar
                       avatarName={follow.user.avatarName || 'avatar1'}
                       width={50}
@@ -57,7 +64,7 @@ const FollowDisplay = ({ follows, open, onClose, type }: FollowDisplayProps) => 
                     />
                   </span>
                 </ListItemAvatar>
-                <div className='flex-col ml-2'>
+                <div className={styles.userInfoContainer}>
                   <ListItemText primary={`${follow.user.firstName} ${follow.user.lastName}`} />
                   <ListItemText primary={`@${follow.user.username}`} />
                 </div>

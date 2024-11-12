@@ -13,9 +13,12 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
       <div className='flex justify-between'>
         <p className='font-bold text-xl'>{question.title}</p>
         <div className='flex gap-6'>
-          <a className='font-bold text-blue-800' href={`/profile/${question.askedBy}`}>
+          <Link
+            className='font-bold text-blue-800'
+            key={question._id}
+            to={`/profile/${question.askedBy}`}>
             {question.askedBy}
-          </a>
+          </Link>
           <p>{new Date(question.askDateTime).toLocaleDateString()}</p>
         </div>
       </div>

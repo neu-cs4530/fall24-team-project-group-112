@@ -43,6 +43,7 @@ import AnswerModel from '../models/answers';
 import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
+import { Query } from 'mongoose';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -1512,7 +1513,7 @@ describe('application module', () => {
     describe('addFollow', () => {
       test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
         mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
-        mockingoose(FollowModel).toReturn(undefined, 'findOne');
+        mockingoose(FollowModel).toReturn(null, 'findOne');
         const result = (await addFollow({
           followerUsername: 'user1',
           followeeUsername: 'user2',
@@ -1581,19 +1582,43 @@ describe('application module', () => {
     });
 
     it('should return followers and following for a valid user', async () => {
-      const mockFollowers = [{ followerUsername: 'follower1' }, { followerUsername: 'follower2' }];
+      const mockFollowers = [
+        {
+          followerUsername: 'follower1',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+        {
+          followerUsername: 'follower2',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+      ];
 
       const mockFollowing = [
-        { followeeUsername: 'following1' },
-        { followeeUsername: 'following2' },
+        {
+          followerUsername: 'john',
+          followeeUsername: 'following1',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+        {
+          followerUsername: 'john',
+          followeeUsername: 'following2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
       ];
 
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ username: 'johnDoe' });
 
-      jest
-        .spyOn(FollowModel, 'find')
-        .mockResolvedValueOnce(mockFollowers)
-        .mockResolvedValueOnce(mockFollowing);
+      const createMockQuery = (resolvedValue: any) => {
+        return {
+          populate: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(resolvedValue),
+        } as unknown as Query<any, any>;
+      };
+
+      jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowers));
+      jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowing));
 
       const result = await getFollowersAndFollowingForUser('johnDoe');
 

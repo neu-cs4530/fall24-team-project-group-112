@@ -14,13 +14,19 @@ const QuestionList = ({ questions, title }: QuestionListProps) => {
     setOpen(prevOpen => !prevOpen);
   };
 
+  const styles = {
+    container: 'px-4 border border-gray-200',
+    header:
+      'cursor-pointer flex tablet:flex-row tablet:flex-wrap mobile:flex-col tablet:items-center items-start justify-between py-6',
+    title: 'text-xl font-bold',
+    iconContainer: 'mt-1 tablet:mt-0',
+  };
+
   return (
-    <div className='px-4 py-6 border border-gray-200'>
-      <div
-        className='cursor-pointer flex tablet:flex-row tablet:flex-wrap mobile:flex-col tablet:items-center items-start justify-between'
-        onClick={toggleOpen}>
-        <p className='text-xl font-bold'>{title}</p>
-        <div className='mt-1 tablet:mt-0'>{open ? <MdExpandLess /> : <MdExpandMore />}</div>{' '}
+    <div className={styles.container}>
+      <div className={styles.header} onClick={toggleOpen}>
+        <p className={styles.title}>{title}</p>
+        <div className={styles.iconContainer}>{open ? <MdExpandLess /> : <MdExpandMore />}</div>
       </div>
       {open && questions.map(q => <QuestionDisplay key={q._id} question={q} />)}
     </div>

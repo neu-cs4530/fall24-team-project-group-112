@@ -717,7 +717,9 @@ export const addUser = async (user: User): Promise<UserResponse> => {
  *
  * @returns {Promise<Question[]>} - The list of questions answered by the provided user,
  */
-export const findQuestionAnsweredBy = async (username: string): Promise<Question[]> => {
+export const findQuestionAnsweredBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
   try {
     const answers = await AnswerModel.find({ ansBy: username });
 
@@ -734,7 +736,9 @@ export const findQuestionAnsweredBy = async (username: string): Promise<Question
       },
     ]);
   } catch (error) {
-    return [];
+    return {
+      error: `Error when finding questions answered by specified user: ${(error as Error).message}`,
+    };
   }
 };
 

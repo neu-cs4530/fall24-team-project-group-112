@@ -365,7 +365,7 @@ describe('application module', () => {
         mockingoose(AnswerModel).toReturn([ans4], 'find');
         mockingoose(QuestionModel).toReturn([QUESTIONS[2]], 'find');
 
-        const result = await findQuestionAnsweredBy('ansBy4');
+        const result = (await findQuestionAnsweredBy('ansBy4')) as Question[];
 
         expect(result.length).toEqual(1);
         expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
@@ -376,7 +376,7 @@ describe('application module', () => {
         mockingoose(AnswerModel).toReturn([ans1], 'find');
         mockingoose(QuestionModel).toReturn([QUESTIONS[0], QUESTIONS[1]], 'find');
 
-        const result = await findQuestionAnsweredBy('ansBy1');
+        const result = (await findQuestionAnsweredBy('ansBy1')) as Question[];
 
         expect(result).toHaveLength(2);
         expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
@@ -384,6 +384,7 @@ describe('application module', () => {
       });
 
       test('findQuestionAnsweredBy should return empty list, no questions answered by username', async () => {
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
         mockingoose(QuestionModel).toReturn([], 'find');
 
         const result = await findQuestionAnsweredBy('ansBy4');
@@ -392,11 +393,14 @@ describe('application module', () => {
       });
 
       test('findQuestionAnsweredBy should return empty list if find returns an error', async () => {
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
         mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
 
         const result = await findQuestionAnsweredBy('ansBy4');
 
-        expect(result).toHaveLength(0);
+        expect(result).toEqual({
+          error: 'Error when finding questions answered by specified user: error',
+        });
       });
     });
 

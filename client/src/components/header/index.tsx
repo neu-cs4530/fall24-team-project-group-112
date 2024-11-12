@@ -29,7 +29,7 @@ const Header = ({ user }: { user: User | null }) => {
   return (
     <div id='header' className='header'>
       <div className='left-side-header'>
-        <div className='title'>Fake Stack Overflow</div>
+        <div className='text-[24px] font-bold pr-8'>Fake Stack Overflow</div>
         <input
           id='searchBar'
           placeholder='Search ...'

@@ -16,6 +16,9 @@ import {
   UpdateUserPayload,
   User,
   UserResponse,
+  Badge,
+  BadgeColor,
+  BadgeName,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -24,6 +27,105 @@ import CommentModel from './comments';
 import NotificationModel from './notifications';
 import UserModel from './users';
 import FollowModel from './follows';
+
+export const checkAutobiographerBadge = (user: User): boolean => {
+  const profileCompleted =
+    user.firstName &&
+    user.lastName &&
+    user.email &&
+    user.headline &&
+    user.bio &&
+    user.githubUrl &&
+    user.company &&
+    user.school &&
+    user.city &&
+    user.state;
+
+  return Boolean(profileCompleted);
+};
+
+export const checkVoterBadge = async (username: string): Promise<boolean> => {
+  const voteCount = await QuestionModel.countDocuments({
+    $or: [{ upVotes: username }, { downVotes: username }],
+  });
+
+  return voteCount === 1;
+};
+
+export const checkSpeedyAnswererBadge = async (qid: string): Promise<boolean> => {
+  const question = await QuestionModel.findById(qid);
+  if (!question) return false;
+
+  const now = new Date();
+  return now.getTime() - question.askDateTime.getTime() <= 30 * 60 * 1000;
+};
+
+// not sure if this logic makes the most sense
+export const checkCommunityHelperBadge = async (username: string): Promise<boolean> => {
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const result = await QuestionModel.aggregate([
+    { $unwind: '$answers' },
+    {
+      $match: {
+        'answers.ansBy': username,
+        'answers.ansDateTime': { $gt: weekAgo },
+      },
+    },
+    {
+      $group: {
+        _id: '$answers._id',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $count: 'totalAnswers',
+    },
+  ]).exec();
+
+  return result.length > 0 && result[0].totalAnswers >= 10;
+};
+
+export const checkTopAnswererBadge = async (user: User): Promise<boolean> => {
+  const totalAnswers = await QuestionModel.countDocuments({ 'answers.ansBy': user.username });
+  return totalAnswers >= 20;
+};
+
+export const checkLifesaverBadge = async (qid: string): Promise<boolean> => {
+  const question = await QuestionModel.findById(qid);
+  if (!question) return false;
+
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return question.upVotes.length >= 50 && question.askDateTime >= weekAgo;
+};
+
+/**
+ * Adds the specified badge to the provided user.
+ *
+ * @param {string} username - The username of the user to add the badge to
+ * @param {Badge} badge - The badge to add
+ *
+ * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
+ */
+export const addBadge = async (username: string, badge: Badge): Promise<UserResponse> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    if (user.badges.includes(badge)) {
+      return user as UserResponse;
+    }
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { username },
+      { $push: { badges: badge } },
+      { new: true },
+    );
+    return updatedUser as UserResponse;
+  } catch (error) {
+    return { error: 'Error when adding badge to user' };
+  }
+};
 
 /**
  * Parses tags from a search string.
@@ -571,6 +673,25 @@ export const addVoteToQuestion = async (
         : 'Downvote cancelled successfully';
     }
 
+    const shouldReceiveVoterbadge = await checkVoterBadge(username);
+    if (shouldReceiveVoterbadge) {
+      await addBadge(username, {
+        name: BadgeName.VOTER,
+        description: 'You have cast your first upvote or downvote!',
+        color: BadgeColor.BRONZE,
+      });
+    }
+
+    const shouldReceiveLifesaverBadge = await checkLifesaverBadge(qid);
+    if (shouldReceiveLifesaverBadge) {
+      await addBadge(result.askedBy, {
+        name: BadgeName.LIFESAVER,
+        description:
+          'You have asked a question that is upvoted more than 50 times within a week of posting!',
+        color: BadgeColor.GOLD,
+      });
+    }
+
     return {
       msg,
       upVotes: result.upVotes || [],
@@ -607,6 +728,36 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
     if (result === null) {
       throw new Error('Error when adding answer to question');
     }
+
+    if (ans._id) {
+      const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
+      if (shouldReceiveSpeedyAnswererBadge) {
+        await addBadge(ans.ansBy, {
+          name: BadgeName.SPEEDY_ANSWERER,
+          description: 'You have answered a question within 30 minutes of it being asked!',
+          color: BadgeColor.SILVER,
+        });
+      }
+    }
+
+    const shouldReceiveCommunityHelperBadge = await checkCommunityHelperBadge(ans.ansBy);
+    if (shouldReceiveCommunityHelperBadge) {
+      await addBadge(ans.ansBy, {
+        name: BadgeName.COMMUNITY_HELPER,
+        description: 'You have answered 10 different questions within a week!',
+        color: BadgeColor.SILVER,
+      });
+    }
+
+    const shouldReceiveTopAnswererBadge = await checkCommunityHelperBadge(ans.ansBy);
+    if (shouldReceiveTopAnswererBadge) {
+      await addBadge(ans.ansBy, {
+        name: BadgeName.TOP_ANSWERER,
+        description: 'You have answered over 20 questions!',
+        color: BadgeColor.GOLD,
+      });
+    }
+
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
@@ -827,6 +978,15 @@ export const updateUser = async (
   Object.assign(existingUser, userUpdate);
   await existingUser.save();
 
+  const shouldReceiveAutobiographerBadge = await checkAutobiographerBadge(existingUser);
+  if (shouldReceiveAutobiographerBadge) {
+    await addBadge(existingUser.username, {
+      name: BadgeName.AUTOBIOGRAPHER,
+      description: 'You have completed every section of your profile details!',
+      color: BadgeColor.BRONZE,
+    });
+  }
+
   return existingUser as User;
 };
 
@@ -942,47 +1102,5 @@ export const getNotificationsForUser = async (
     return notifications;
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
-  }
-};
-
-/**
- * Adds a new follow object to the database.
- *
- * @param {Follow} follow - The follow object to add. If the follow object already exists in the database, it is deleted. // fix
- *
- * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
- */
-export const addBadge = async (username: string, badgeId: string): Promise<UserResponse> => {
-  try {
-    // if (
-    //   (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
-    //   (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
-    // ) {
-    //   throw new Error('Follower or followee does not exist');
-    // }
-    // const existingFollow = await FollowModel.findOne({
-    //   followerUsername: follow.followerUsername,
-    //   followeeUsername: follow.followeeUsername,
-    // });
-    // if (existingFollow !== undefined) {
-    //   await FollowModel.deleteOne({
-    //     followerUsername: follow.followerUsername,
-    //     followeeUsername: follow.followeeUsername,
-    //   });
-    //   return { success: 'Follow request deleted' };
-    // }
-    // await FollowModel.create(follow);
-    // return { success: 'Follow request created' };
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { username },
-      { $push: { badges: badgeId } },
-      { new: true },
-    );
-    if (!updatedUser) {
-      throw new Error('User not found');
-    }
-    return updatedUser as UserResponse;
-  } catch (error) {
-    return { error: 'Error when adding badge to user' };
   }
 };

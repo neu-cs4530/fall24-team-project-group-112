@@ -1,5 +1,5 @@
 import express, { Response, Router } from 'express';
-import { FakeSOSocket, AddBadgeRequest } from '../types';
+import { FakeSOSocket, AddBadgeRequest, BadgeName, Badge, BadgeColor } from '../types';
 import { addBadge } from '../models/application';
 
 const badgeController = (socket: FakeSOSocket) => {
@@ -33,8 +33,58 @@ const badgeController = (socket: FakeSOSocket) => {
 
     const { badgeId, username } = req.params;
 
+    let badge: Badge;
+    switch (badgeId) {
+      case 'autobiographer':
+        badge = {
+          name: BadgeName.AUTOBIOGRAPHER,
+          description: 'You have completed every section of your profile details!',
+          color: BadgeColor.BRONZE,
+        };
+        break;
+      case 'voter':
+        badge = {
+          name: BadgeName.VOTER,
+          description: 'You have cast your first upvote or downvote!',
+          color: BadgeColor.BRONZE,
+        };
+        break;
+      case 'speedy_answerer':
+        badge = {
+          name: BadgeName.SPEEDY_ANSWERER,
+          description: 'You have answered a question within 30 minutes of it being asked!',
+          color: BadgeColor.SILVER,
+        };
+        break;
+      case 'community_helper':
+        badge = {
+          name: BadgeName.COMMUNITY_HELPER,
+          description: 'You have answered 10 different questions within a week!',
+          color: BadgeColor.SILVER,
+        };
+        break;
+      case 'top_answerer':
+        badge = {
+          name: BadgeName.TOP_ANSWERER,
+          description: 'You have answered over 20 questions!',
+          color: BadgeColor.GOLD,
+        };
+        break;
+      case 'lifesaver':
+        badge = {
+          name: BadgeName.LIFESAVER,
+          description:
+            'You have asked a question that is upvoted more than 50 times within a week of posting!',
+          color: BadgeColor.GOLD,
+        };
+        break;
+      default:
+        res.status(404).send('Invalid badge');
+        return;
+    }
+
     try {
-      const response = await addBadge(badgeId, username);
+      const response = await addBadge(username, badge);
 
       if (response && 'error' in response) {
         throw new Error(response.error);

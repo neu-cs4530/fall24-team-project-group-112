@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { Question } from '../../../../types';
-import useUserContext from '../../../../hooks/useUserContext';
 
 export interface QuestionProps {
   question: Question;

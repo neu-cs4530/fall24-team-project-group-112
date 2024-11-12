@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { Query } from 'mongoose';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
 import {
@@ -43,7 +44,6 @@ import AnswerModel from '../models/answers';
 import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
-import { Query } from 'mongoose';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -1610,12 +1610,11 @@ describe('application module', () => {
 
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ username: 'johnDoe' });
 
-      const createMockQuery = (resolvedValue: any) => {
-        return {
+      const createMockQuery = (resolvedValue: Follow[]) =>
+        ({
           populate: jest.fn().mockReturnThis(),
           exec: jest.fn().mockResolvedValue(resolvedValue),
-        } as unknown as Query<any, any>;
-      };
+        }) as unknown as Query<Follow[], Follow>;
 
       jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowers));
       jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowing));

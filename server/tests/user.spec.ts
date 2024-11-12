@@ -389,12 +389,8 @@ describe('GET /follow/:username', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      followers: mockFollowers.map(f => {
-        return { ...f, followDateTime: f.followDateTime.toISOString() };
-      }),
-      following: mockFollowing.map(f => {
-        return { ...f, followDateTime: f.followDateTime.toISOString() };
-      }),
+      followers: mockFollowers.map(f => ({ ...f, followDateTime: f.followDateTime.toISOString() })),
+      following: mockFollowing.map(f => ({ ...f, followDateTime: f.followDateTime.toISOString() })),
     });
   });
 

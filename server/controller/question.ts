@@ -233,10 +233,10 @@ const questionController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Retrieves questions answerewd by a specific user.
+   * Retrieves questions answered by a specific user.
    * If there is an error, the HTTP response's status is updated.
    *
-   * @param req The FindQuestionsAnsweredByRequest object containing the question ID as a parameter.
+   * @param req The FindQuestionsAnsweredByRequest object containing the username as a parameter.
    * @param res The HTTP response object used to send back the question details.
    *
    * @returns A Promise that resolves to void.
@@ -278,7 +278,7 @@ const questionController = (socket: FakeSOSocket) => {
    * Retrieves questions asked by a specific user.
    * If there is an error, the HTTP response's status is updated.
    *
-   * @param req The FindQuestionByIdRequest object containing the question ID as a parameter.
+   * @param req The FindQuestionByIdRequest object containing the username as a parameter.
    * @param res The HTTP response object used to send back the question details.
    *
    * @returns A Promise that resolves to void.

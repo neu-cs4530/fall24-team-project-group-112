@@ -713,9 +713,9 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 /**
  * Finds all questions answered by a given user.
  *
- * @param {User} user - The user to add
+ * @param {string} username - The username of the user to filter questions by
  *
- * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
+ * @returns {Promise<Question[]>} - The list of questions answered by the provided user,
  */
 export const findQuestionAnsweredBy = async (username: string): Promise<Question[]> => {
   try {
@@ -741,7 +741,7 @@ export const findQuestionAnsweredBy = async (username: string): Promise<Question
 /**
  * Finds all questions asked by a given user.
  *
- * @param {User} user - The user to add
+ * @param {string} username - The username of the user to filter questions by
  *
  * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
  */

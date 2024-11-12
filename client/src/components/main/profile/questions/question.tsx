@@ -20,7 +20,7 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
             <p>{new Date(question.askDateTime).toLocaleDateString()}</p>
           </div>
         </div>
-        <p>{question.text}</p>
+        <p className='line-clamp-2'>{question.text}</p>
         <div className='flex gap-6'>
           <p>{question.upVotes.length} upvotes</p>
           <p>{question.downVotes.length} downvotes</p>

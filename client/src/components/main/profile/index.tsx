@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import useProfile from '../../../hooks/useProfile';
-import QuestionDisplay from './questions/question';
 import ProfileText from './profileText';
 import { getQuestionsAskedBy } from '../../../services/questionService';
 import { User, Question } from '../../../types';
+import QuestionList from './questions/questionList';
 import './index.css';
 
 /**
@@ -29,20 +29,27 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
     if (user) {
       fetchData(user.username);
     }
-  }, [user]); // Add `user` as a dependency
+  }, [user]);
 
-  return error ? (
-    <div className='container'>
-      <h2>{error}</h2>
-    </div>
-  ) : (
+  if (error) {
+    return (
+      <div className='container'>
+        <h2>{error}</h2>
+      </div>
+    );
+  }
+
+  return (
     <>
       {user ? (
         <>
           <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
-          {questionsAsked.map(q => (
-            <QuestionDisplay key={q._id} question={q} />
-          ))}
+          {questionsAsked.length > 1 && (
+            <QuestionList
+              questions={questionsAsked}
+              title={`Questions asked by @${user.username}`}
+            />
+          )}
         </>
       ) : null}
     </>

@@ -1,10 +1,13 @@
-/* Add CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Add global CSS here */
-/* Add CSS stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 
 * {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Newsreader', serif;
 }
 
 html {

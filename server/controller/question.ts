@@ -8,6 +8,8 @@ import {
   VoteRequest,
   FindQuestionsAnsweredByRequest,
   FindQuestionsAskedByRequest,
+  FindQuestionsDownvotedByRequest,
+  FindQuestionsUpvotedByRequest,
   FakeSOSocket,
 } from '../types';
 import {
@@ -22,6 +24,8 @@ import {
   isUsernameUnique,
   findQuestionAnsweredBy,
   findQuestionAskedBy,
+  findQuestionDownvotedBy,
+  findQuestionUpvotedBy,
 } from '../models/application';
 
 const questionController = (socket: FakeSOSocket) => {
@@ -278,7 +282,7 @@ const questionController = (socket: FakeSOSocket) => {
    * Retrieves questions asked by a specific user.
    * If there is an error, the HTTP response's status is updated.
    *
-   * @param req The FindQuestionByIdRequest object containing the username as a parameter.
+   * @param req The FindQuestionsAskedByRequest object containing the question ID as a parameter.
    * @param res The HTTP response object used to send back the question details.
    *
    * @returns A Promise that resolves to void.
@@ -316,6 +320,80 @@ const questionController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves questions downvoted by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionsDownvotedByRequest object containing the question ID as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsDownvotedBy = async (
+    req: FindQuestionsDownvotedByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionDownvotedBy(username);
+
+      if (qlist && 'error' in qlist) {
+        throw new Error(qlist.error);
+      }
+
+      res.json(qlist);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question downvoted by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question downvoted by user`);
+      }
+    }
+  };
+
+  /**
+   * Retrieves questions upvoted by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionsUpvotedByRequest object containing the question ID as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsUpvotedBy = async (
+    req: FindQuestionsUpvotedByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionUpvotedBy(username);
+
+      if (qlist && 'error' in qlist) {
+        throw new Error(qlist.error);
+      }
+
+      res.json(qlist);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question upvoted by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question upvoted by user`);
+      }
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
@@ -324,6 +402,8 @@ const questionController = (socket: FakeSOSocket) => {
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/answeredBy/:username', getQuestionsAnsweredBy);
   router.get('/askedBy/:username', getQuestionsAskedBy);
+  router.get('/downvotedBy/:username', getQuestionsDownvotedBy);
+  router.get('/upvotedBy/:username', getQuestionsUpvotedBy);
 
   return router;
 };

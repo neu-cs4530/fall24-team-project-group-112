@@ -39,8 +39,38 @@ export interface User {
   createdAt: Date;
 }
 
-// TODO: fill in interface details
-export interface Badge {}
+/**
+ * Interface extending the request body when updating a user's profile, which contains a
+ * username parameter and UpdateUserPayload body containing updated profile information.
+ */
+export interface UpdateUserRequest extends Request {
+  params: {
+    username: string;
+  };
+  body: UpdateUserPayload;
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
+}
 
 /**
  * Type representing the possible ordering options for questions.
@@ -268,10 +298,10 @@ export interface ServerToClientEvents {
  * Enum representing the possible event types for notifications.
  */
 export enum NotificationType {
-  ANSWER = 'answer',
-  COMMENT = 'comment',
-  BADGE = 'badge',
-  FOLLOW = 'follow',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
 }
 
 /**
@@ -283,13 +313,28 @@ export enum NotificationType {
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
  */
+
 export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
-  eventId: ObjectId;
+  eventId: ObjectId | Answer | Comment | Badge | Follow;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
+}
+
+/**
+ * Interface extending the request body when retrieving a user's notification, which contains:
+ * - username - The username of the user whose notifications are being retrieved.
+ * - type - The type of notification to retrieve.
+ */
+export interface GetNotificationRequest extends Request {
+  params: {
+    username: string;
+  };
+  query: {
+    type: NotificationType;
+  };
 }
 
 /**
@@ -343,24 +388,44 @@ export interface LoginUserRequest extends Request {
 }
 
 /**
+ * Interface for the request parameters when finding questions downvoted by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsDownvotedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding questions upvoted by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsUpvotedByRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
  * Enum representing the possible colors for a badge.
  */
 export enum BadgeColor {
-  Gold = 'gold',
-  Silver = 'silver',
-  Bronze = 'bronze',
+  GOLD = 'gold',
+  SILVER = 'silver',
+  BRONZE = 'bronze',
 }
 
 /**
  * Enum representing the possible types of badges.
  */
 export enum BadgeName {
-  FirstCommenter = 'First Commenter',
-  Voter = 'Voter',
-  DiscussionStarter = 'Discussion Starter',
-  CommunityHelper = 'Community Helper',
-  Influencer = 'Influencer',
-  Lifesaver = 'Lifesaver',
+  FIRST_COMMENTER = 'First Commenter',
+  VOTER = 'Voter',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
+  INFLUENCER = 'Influencer',
+  LIFESAVER = 'Lifesaver',
 }
 
 /**
@@ -375,4 +440,41 @@ export interface Badge {
   name: BadgeName;
   description: string;
   color: BadgeColor;
+}
+
+/**
+ * Interface extending the request body when creating a new follow request, which contains:
+ * - followerUsername - The username of the user following another user.
+ * - followeeUsername - The username of the user being followed.
+ */
+export interface FollowRequest extends Request {
+  body: {
+    followerUsername: string;
+    followeeUsername: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding followers and following for a given user.
+ * - username - The user's unique username.
+ */
+export interface FindFollowersAndFollowingRequest extends Request {
+  params: {
+    username: string;
+  };
+}
+
+/**
+ * Type representing the possible responses for a Follow-related operation.
+ */
+export type FollowResponse = { success: string } | { error: string };
+
+/**
+ * Interface for the request parameters when a given user.
+ * - username - The user's unique username.
+ */
+export interface FindUserRequest extends Request {
+  params: {
+    username: string;
+  };
 }

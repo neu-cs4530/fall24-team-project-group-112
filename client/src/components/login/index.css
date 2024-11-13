@@ -3,8 +3,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100vw !important;
   min-height: 100vh;
   background-color: #f7f7f7;
+  max-width: none;
 }
 
 .container h2,

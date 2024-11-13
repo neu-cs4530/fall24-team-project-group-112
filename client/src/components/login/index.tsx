@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './index.css';
 import useLogin from '../../hooks/useLogin';
 /**
@@ -10,7 +11,7 @@ const Login = () => {
 
   return (
     <div className='container'>
-      <h2>Welcome to FakeStackOverflow!</h2>
+      <h2 className='font-bold text-2xl'>Welcome to FakeStackOverflow!</h2>
       <h4>Please enter your email and password</h4>
       <form className='username-and-password' onSubmit={handleSubmit}>
         <input
@@ -35,6 +36,12 @@ const Login = () => {
         <button type='submit' className='login-button'>
           Submit
         </button>
+        <div className='mt-5'>
+          Don&apos;t have an account?
+          <span className='font-bold'>
+            <NavLink to='/register'> Click here to register.</NavLink>
+          </span>
+        </div>
       </form>
     </div>
   );

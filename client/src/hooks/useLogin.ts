@@ -63,6 +63,14 @@ const useLogin = () => {
           email: res.email,
           badges: res.badges,
           createdAt: res.createdAt,
+          headline: res.headline || '',
+          bio: res.bio || '',
+          githubUrl: res.githubUrl || '',
+          company: res.company || '',
+          school: res.school || '',
+          city: res.city || '',
+          state: res.state || '',
+          avatarName: res.avatarName || '',
         };
 
         setUser(user);

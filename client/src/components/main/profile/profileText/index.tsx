@@ -47,6 +47,8 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     bioContainer: 'bg-white p-5 shadow-md flex flex-col border border-gray-500',
     bioHeader: 'ml-3 text-2xl font-bold text-gray-500',
     bioContent: 'ml-3 text-xl text-gray-500',
+    followButton: 'bg-blue-800 text-white rounded-md p-2 ml-4',
+    followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4',
   };
 
   return (
@@ -64,9 +66,18 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                 </button>
               </div>
             )}
-            {loggedInUser && loggedInUser.username !== user.username && (
-              <div className='follow-button'>
-                <button>Follow</button>
+            {loggedInUser?.username !== user.username && (
+              <div>
+                <button
+                  className={
+                    followers.some(follow => follow.user.username === loggedInUser?.username)
+                      ? styles.followingButton
+                      : styles.followButton
+                  }>
+                  {followers.some(follow => follow.user.username === loggedInUser?.username)
+                    ? 'Following'
+                    : 'Follow'}
+                </button>
               </div>
             )}
           </div>

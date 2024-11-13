@@ -846,14 +846,64 @@ describe('application module', () => {
       const username = 'testUser';
 
       it('should return true if the user has answered 20 or more questions', async () => {
-        mockingoose(QuestionModel).toReturn(20, 'countDocuments');
+        mockingoose(QuestionModel).toReturn(
+          Array(20)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: username,
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: username,
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
 
         const result = await checkTopAnswererBadge(username);
         expect(result).toBe(true);
       });
 
       it('should return false if the user has answered fewer than 20 questions', async () => {
-        mockingoose(QuestionModel).toReturn(10, 'countDocuments');
+        mockingoose(QuestionModel).toReturn(
+          Array(10)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: username,
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: username,
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
 
         const result = await checkTopAnswererBadge(username);
         expect(result).toBe(false);
@@ -958,7 +1008,32 @@ describe('application module', () => {
         jest
           .spyOn(QuestionModel, 'aggregate')
           .mockReturnValue(mockAggregate as unknown as ReturnType<typeof QuestionModel.aggregate>);
-        jest.spyOn(QuestionModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
 
         const result = (await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1)) as Question;
 

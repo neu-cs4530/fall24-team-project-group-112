@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { Query } from 'mongoose';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
 import {
@@ -19,6 +20,7 @@ import {
   addUser,
   isUsernameUnique,
   findQuestionAskedBy,
+  findQuestionAnsweredBy,
   markNotificationsAsSeen,
   getNotificationsForUser,
   updateUser,
@@ -136,7 +138,7 @@ const QUESTIONS: Question[] = [
     title: 'Is there a language to write programmes by pictures?',
     text: 'Does something like that exist?',
     tags: [],
-    answers: [],
+    answers: [ans4],
     askedBy: 'q_by3',
     askDateTime: new Date('2023-11-19T09:24:00'),
     views: ['question1_user', 'question2_user', 'question3_user', 'question4_user'],
@@ -346,10 +348,9 @@ describe('application module', () => {
 
         const result = await getQuestionsByOrder('unanswered');
 
-        expect(result.length).toEqual(3);
+        expect(result.length).toEqual(2);
         expect(result[0]._id?.toString()).toEqual('65e9b716ff0e892116b2de08');
         expect(result[1]._id?.toString()).toEqual('65e9b716ff0e892116b2de09');
-        expect(result[2]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
       });
 
       test('get newest questions', async () => {
@@ -404,6 +405,50 @@ describe('application module', () => {
         const result = await getQuestionsByOrder('newest');
 
         expect(result.length).toEqual(0);
+      });
+    });
+
+    describe('findQuestionAnsweredBy', () => {
+      test('findQuestionAnsweredBy should return all questions answered by user, only one question', async () => {
+        mockingoose(AnswerModel).toReturn([ans4], 'find');
+        mockingoose(QuestionModel).toReturn([QUESTIONS[2]], 'find');
+
+        const result = (await findQuestionAnsweredBy('ansBy4')) as Question[];
+
+        expect(result.length).toEqual(1);
+        expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result[0].answers).toHaveLength(1);
+      });
+
+      test('findQuestionAnsweredBy should return all questions answered by user, more than one question', async () => {
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
+        mockingoose(QuestionModel).toReturn([QUESTIONS[0], QUESTIONS[1]], 'find');
+
+        const result = (await findQuestionAnsweredBy('ansBy1')) as Question[];
+
+        expect(result).toHaveLength(2);
+        expect(result[0]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
+        expect(result[1]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+      });
+
+      test('findQuestionAnsweredBy should return empty list, no questions answered by username', async () => {
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
+        mockingoose(QuestionModel).toReturn([], 'find');
+
+        const result = await findQuestionAnsweredBy('ansBy4');
+
+        expect(result).toHaveLength(0);
+      });
+
+      test('findQuestionAnsweredBy should return empty list if find returns an error', async () => {
+        mockingoose(AnswerModel).toReturn([ans1], 'find');
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'find');
+
+        const result = await findQuestionAnsweredBy('ansBy4');
+
+        expect(result).toEqual({
+          error: 'Error when finding questions answered by specified user: error',
+        });
       });
     });
 
@@ -1512,7 +1557,7 @@ describe('application module', () => {
     describe('addFollow', () => {
       test('addFollow should create a new follow request if both users exist and the follower is not already following the followee.', async () => {
         mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'findOne');
-        mockingoose(FollowModel).toReturn(undefined, 'findOne');
+        mockingoose(FollowModel).toReturn(null, 'findOne');
         const result = (await addFollow({
           followerUsername: 'user1',
           followeeUsername: 'user2',
@@ -1581,19 +1626,42 @@ describe('application module', () => {
     });
 
     it('should return followers and following for a valid user', async () => {
-      const mockFollowers = [{ followerUsername: 'follower1' }, { followerUsername: 'follower2' }];
+      const mockFollowers = [
+        {
+          followerUsername: 'follower1',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+        {
+          followerUsername: 'follower2',
+          followeeUsername: 'johnDoe',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+      ];
 
       const mockFollowing = [
-        { followeeUsername: 'following1' },
-        { followeeUsername: 'following2' },
+        {
+          followerUsername: 'john',
+          followeeUsername: 'following1',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
+        {
+          followerUsername: 'john',
+          followeeUsername: 'following2',
+          followDateTime: new Date('2023-11-19T09:24:00'),
+        },
       ];
 
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ username: 'johnDoe' });
 
-      jest
-        .spyOn(FollowModel, 'find')
-        .mockResolvedValueOnce(mockFollowers)
-        .mockResolvedValueOnce(mockFollowing);
+      const createMockQuery = (resolvedValue: Follow[]) =>
+        ({
+          populate: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(resolvedValue),
+        }) as unknown as Query<Follow[], Follow>;
+
+      jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowers));
+      jest.spyOn(FollowModel, 'find').mockImplementationOnce(() => createMockQuery(mockFollowing));
 
       const result = await getFollowersAndFollowingForUser('johnDoe');
 

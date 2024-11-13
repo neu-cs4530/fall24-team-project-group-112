@@ -248,7 +248,7 @@ describe('POST /follow', () => {
     };
 
     mockingoose(UserModel).toReturn([mockUser1, mockUser2], 'findOne');
-    mockingoose(FollowModel).toReturn(undefined, 'findOne');
+    mockingoose(FollowModel).toReturn(null, 'findOne');
 
     const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
 
@@ -302,7 +302,7 @@ describe('POST /follow', () => {
       followeeUsername: 'fakeuser',
     };
 
-    mockingoose(UserModel).toReturn(undefined, 'findOne');
+    mockingoose(UserModel).toReturn(null, 'findOne');
 
     const response = await supertest(app).post(`/user/follow`).send(mockReqBody);
 
@@ -389,8 +389,8 @@ describe('GET /follow/:username', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      followers: ['follower1', 'follower2'],
-      following: ['following1', 'following2'],
+      followers: mockFollowers.map(f => ({ ...f, followDateTime: f.followDateTime.toISOString() })),
+      following: mockFollowing.map(f => ({ ...f, followDateTime: f.followDateTime.toISOString() })),
     });
   });
 

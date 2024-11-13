@@ -201,6 +201,18 @@ export interface CommentUpdatePayload {
   type: 'question' | 'answer';
 }
 
+export interface Follow {
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+  user: User;
+}
+
+export interface Follows {
+  followers: Follow[];
+  following: Follow[];
+}
+
 /**
  * Interface representing the payload for a notification update event, which contains:
  * - username - The username of which the notification is for.

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User } from '../types';
-import { getUser } from '../services/userService';
+import { Follow, User } from '../types';
+import { getFollowers, getUser } from '../services/userService';
 
 /**
  * Custom hook to user profiles.
@@ -11,6 +11,10 @@ import { getUser } from '../services/userService';
 const useProfile = () => {
   const { username } = useParams();
   const [user, setUser] = useState<User>();
+  const [followers, setFollowers] = useState<Follow[]>([]);
+  const [following, setFollowing] = useState<Follow[]>([]);
+  const [followersOpen, setFollowersOpen] = useState(false);
+  const [followingOpen, setFollowingOpen] = useState(false);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -18,8 +22,10 @@ const useProfile = () => {
       if (username) {
         try {
           const retrievedUser = await getUser(username);
-
           setUser(retrievedUser);
+          const result = await getFollowers(username);
+          setFollowers(result.followers);
+          setFollowing(result.following);
         } catch (err) {
           setError('An error occurred while fetching the user.');
           // eslint-disable-next-line no-console
@@ -30,7 +36,16 @@ const useProfile = () => {
     fetchUser();
   }, [username]);
 
-  return { user, error };
+  return {
+    user,
+    followers,
+    following,
+    followersOpen,
+    setFollowersOpen,
+    followingOpen,
+    setFollowingOpen,
+    error,
+  };
 };
 
 export default useProfile;

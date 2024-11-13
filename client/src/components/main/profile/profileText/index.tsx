@@ -82,7 +82,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                 </button>
               </div>
             )}
-            {loggedInUser?.username !== user.username && (
+            {loggedInUser && loggedInUser?.username !== user.username && (
               <div>
                 <button
                   onClick={async () => {

@@ -17,7 +17,7 @@ const NotificationCenter: React.FC = () => {
 
   return (
     <div className='notification-div'>
-      <h2 className='notification-title font-bold'>Notifications Center</h2>
+      <h2 className='notification-title font-bold text-4xl'>Notifications Center</h2>
 
       <div className='mb-5'>
         <NotificationFilter onFilterChange={handleFilterChange} />

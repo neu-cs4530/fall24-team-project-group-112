@@ -169,9 +169,7 @@ export const checkLifesaverBadge = async (qid: string): Promise<boolean> => {
  * @returns {Promise<UserResponse> | null} The object id of the matching badge, or null if there is no matching badge with the provided name.
  */
 export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | null> => {
-  console.log(badgeName);
   const badge = await BadgeModel.findOne({ name: badgeName });
-  console.log(badge);
   return badge ? badge._id : null;
 };
 

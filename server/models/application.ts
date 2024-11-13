@@ -26,7 +26,6 @@ import CommentModel from './comments';
 import NotificationModel from './notifications';
 import UserModel from './users';
 import FollowModel from './follows';
-import followSchema from './schema/follow';
 
 /**
  * Parses tags from a search string.
@@ -990,7 +989,142 @@ export const getFollowersAndFollowingForUser = async (
   }
 };
 
-export const getFeedForUser = async (username: string): Promise<FeedPost[] | { error: string }> => {
+/**
+ * Retrieves the 10 most recent questions asked by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
+ *
+ * @returns {Promise<Question[]>} - The list of questions asked by these users
+ */
+const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const result = await QuestionModel.find({
+    askedBy: { $in: followingUsernames },
+  })
+    .select('_id title text askedBy askDateTime')
+    .sort({ askDateTime: -1 })
+    .limit(10); // only fetch necessary columns
+
+  return result.map(question => ({
+    postType: FeedPostType.QUESTION,
+    event: question,
+    date: question.askDateTime,
+  }));
+};
+
+/**
+ * Retrieves the 10 most recent questions answered by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
+ * @returns {Promise<Question[]>} - The list of questions answered by these users
+ */
+const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const answersByFollowing = await AnswerModel.find({ ansBy: { $in: followingUsernames } });
+  const questions = await QuestionModel.find({
+    answers: { $in: answersByFollowing.map(a => a._id) },
+  })
+    .select('title text askDateTime askedBy answers user')
+    .populate([
+      {
+        path: 'answers',
+        match: { ansBy: { $in: followingUsernames } },
+        select: 'ansBy ansDateTime text',
+        populate: { path: 'user', select: 'username firstName lastName avatarName' },
+      },
+      { path: 'user', select: 'username firstName lastName avatarName' },
+    ]);
+
+  // Find 10 most recent answers
+  const sortedQuestions = questions
+    .map(question => {
+      const latestAnsDateTime = question.answers.reduce((latest, answer) => {
+        const ans = answer as Answer;
+        return ans.ansDateTime > latest ? ans.ansDateTime : latest;
+      }, new Date(0));
+      return { ...question.toObject(), latestAnsDateTime };
+    })
+    .sort((a, b) => b.latestAnsDateTime.getTime() - a.latestAnsDateTime.getTime()) // Sort by the latest answer date in descending order
+    .slice(0, 10);
+
+  return sortedQuestions.flatMap(question =>
+    question.answers.map(answer => {
+      const ans = answer as Answer;
+      question.answers = [ans];
+
+      return {
+        postType: FeedPostType.ANSWER,
+        event: question,
+        date: ans.ansDateTime,
+      };
+    }),
+  );
+};
+
+/**
+ * Retrieves the 10 most recent comments made by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose comments should be retrieved
+ * @returns {Promise<Question[]>} - The list of comments made by these users
+ */
+const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
+  const questions = await QuestionModel.find({
+    comments: { $in: commentsByFollowing.map(a => a._id) },
+  })
+    .select('title text askDateTime askedBy comments user')
+    .populate([
+      {
+        path: 'comments',
+        match: { commentBy: { $in: followingUsernames } },
+        populate: { path: 'user', select: 'username firstName lastName avatarName' },
+      },
+      { path: 'user', select: 'username firstName lastName avatarName' },
+    ])
+    .limit(10);
+
+  const sortedQuestions = questions
+    .map(question => {
+      const latestComDateTime = question.comments.reduce((latest, comment) => {
+        const com = comment as Comment;
+        return com.commentDateTime > latest ? com.commentDateTime : latest;
+      }, new Date(0));
+      return { ...question.toObject(), latestComDateTime };
+    })
+    .sort((a, b) => b.latestComDateTime.getTime() - a.latestComDateTime.getTime())
+    .slice(0, 10);
+
+  return sortedQuestions.flatMap(question =>
+    question.comments.map(comment => {
+      const com = comment as Comment;
+      question.comments = [com];
+
+      return {
+        postType: FeedPostType.COMMENT,
+        event: question,
+        date: com.commentDateTime,
+      };
+    }),
+  );
+};
+
+const getFollowsByFollowing = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const follows = await FollowModel.find({ followerUsername: { $in: followingUsernames } })
+    .populate([
+      { path: 'follower', select: 'username firstName lastName avatarName' },
+      { path: 'followee', select: 'username firstName lastName avatarName' },
+    ])
+    .limit(10);
+
+  return follows.map(follow => ({
+    postType: FeedPostType.FOLLOW,
+    event: follow,
+    date: follow.followDateTime,
+  }));
+};
+
+export const getFeedForUser = async (
+  username: string,
+  postType?: FeedPostType,
+): Promise<FeedPost[] | { error: string }> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
@@ -1000,111 +1134,24 @@ export const getFeedForUser = async (username: string): Promise<FeedPost[] | { e
     const following = await FollowModel.find({ followerUsername: username });
     const followingUsernames = following.map(f => f.followeeUsername);
 
-    // Get all questions asked by the users the current user is following
-    const questionsAskedByFollowing = await QuestionModel.find({
-      askedBy: { $in: followingUsernames },
-    });
-    const answersByFollowing = await AnswerModel.find({
-      ansBy: { $in: followingUsernames },
-    });
-    const questionsAnsweredByFollowing = await QuestionModel.find({
-      answers: { $in: answersByFollowing.map(a => a._id) },
-    }).populate([
-      {
-        path: 'answers',
-        model: AnswerModel,
-        match: { ansBy: { $in: followingUsernames } },
-        // populate the user associated with the answer
-        populate: {
-          path: 'user',
-          model: UserModel,
-        },
-      },
-      // populate the user associated with the question
-      {
-        path: 'user',
-        model: UserModel,
-      },
-    ]);
-
-    const commentsByFollowing = await CommentModel.find({
-      commentBy: { $in: followingUsernames },
-    });
-    const questionsCommentedOnByFollowing = await QuestionModel.find({
-      comments: { $in: commentsByFollowing.map(a => a._id) },
-    }).populate([
-      {
-        path: 'comments',
-        model: CommentModel,
-        match: {
-          ansBy: { $in: followingUsernames },
-          // populate the user associated with the comment
-          path: 'user',
-          model: UserModel,
-        },
-      },
-      // populate the user associated with the question
-      {
-        path: 'user',
-        model: UserModel,
-      },
-    ]);
-
-    const followsByFollowing = await FollowModel.find({
-      followerUsername: { $in: followingUsernames },
-    })
-      .populate('follower')
-      .populate('followee')
-      .exec();
-
-    const result = [];
-
-    for (const question of questionsAskedByFollowing) {
-      result.push({
-        postType: FeedPostType.QUESTION,
-        event: question,
-        date: question.askDateTime,
-      });
+    const fetchTasks = [];
+    // Only fetch data the user has requested
+    if (!postType || postType === FeedPostType.QUESTION) {
+      fetchTasks.push(getQuestionsAskedByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.ANSWER) {
+      fetchTasks.push(getQuestionsAnsweredByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.COMMENT) {
+      fetchTasks.push(getCommentsMadeByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.FOLLOW) {
+      fetchTasks.push(getFollowsByFollowing(followingUsernames));
     }
 
-    for (const question of questionsAnsweredByFollowing) {
-      // A question may have multiple answers, but we only want to show the answer by the user the current user is following
-      for (const answer of question.answers) {
-        console.log(answer);
-        const ans = answer as Answer;
-        const questionWithIndividualAnswer = question.toObject();
-        questionWithIndividualAnswer.answers = [answer as Answer];
-
-        result.push({
-          postType: FeedPostType.ANSWER,
-          event: questionWithIndividualAnswer,
-          date: ans.ansDateTime,
-        });
-      }
-    }
-
-    for (const question of questionsCommentedOnByFollowing) {
-      for (const comment of question.comments) {
-        const com = comment as Comment;
-        const questionWithIndividualAnswer = question.toObject();
-        questionWithIndividualAnswer.comments = [com as Comment];
-
-        result.push({
-          postType: FeedPostType.COMMENT,
-          event: questionWithIndividualAnswer,
-          date: com.commentDateTime,
-        });
-      }
-    }
-
-    for (const follow of followsByFollowing) {
-      result.push({
-        postType: FeedPostType.FOLLOW,
-        event: follow,
-        date: follow.followDateTime,
-      });
-    }
-
+    // Execute only the necessary data fetches, and do this concurrently
+    const fetchedData = await Promise.all(fetchTasks);
+    const result = fetchedData.flat();
     return result.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
   } catch (error) {
     return { error: `Error when getting feed: ${(error as Error).message}` };

@@ -10,6 +10,7 @@ import {
   UpdateUserPayload,
   FindFollowersAndFollowingRequest,
   FindUserRequest,
+  GetFeedRequest,
 } from '../types';
 import {
   addUser,
@@ -266,11 +267,12 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
-  const getFeed = async (req: FindUserRequest, res: Response): Promise<void> => {
+  const getFeed = async (req: GetFeedRequest, res: Response): Promise<void> => {
     const { username } = req.params;
+    const { postType } = req.query;
 
     try {
-      const result = await getFeedForUser(username);
+      const result = await getFeedForUser(username, postType);
 
       if (result && 'error' in result) {
         throw new Error(result.error);

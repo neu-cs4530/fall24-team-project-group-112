@@ -368,6 +368,20 @@ export interface FeedPost {
 }
 
 /**
+ * Interface for the request parameters when retrieving a user's following feed.
+ * - username - The user's unique username.
+ * - postType - The type of post to retrieve. Optional.
+ */
+export interface GetFeedRequest extends Request {
+  params: {
+    username: string;
+  };
+  query: {
+    postType: FeedPostType;
+  };
+}
+
+/**
  * Type representing the possible responses for a User-related operation.
  */
 export type UserResponse = User | { error: string };

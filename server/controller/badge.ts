@@ -84,7 +84,7 @@ const badgeController = (socket: FakeSOSocket) => {
     }
 
     try {
-      const response = await addBadge(username, badge);
+      const response = await addBadge(username, 'hi');
 
       if (response && 'error' in response) {
         throw new Error(response.error);

@@ -34,7 +34,7 @@ export interface User {
   school?: string;
   city?: string;
   state?: string;
-  badges: Badge[];
+  badges: Badge[] | ObjectId[];
   avatarName?: string;
   createdAt: Date;
 }

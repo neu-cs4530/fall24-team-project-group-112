@@ -25,6 +25,12 @@ import {
   findQuestionUpvotedBy,
   deleteNotificationsForUser,
   findQuestionDownvotedBy,
+  checkAutobiographerBadge,
+  checkVoterBadge,
+  checkSpeedyAnswererBadge,
+  checkCommunityHelperBadge,
+  checkTopAnswererBadge,
+  checkLifesaverBadge,
 } from '../models/application';
 import {
   Answer,
@@ -792,6 +798,129 @@ describe('application module', () => {
         expect(result).toEqual({ error: 'Error when adding downvote to question' });
       });
     });
+
+    describe('checkSpeedyAnswererBadge', () => {
+      const qid = '507f1f77bcf86cd799439011';
+
+      it('should return true if the question was asked within 30 minutes', async () => {
+        const recentQuestion = {
+          _id: qid,
+          askDateTime: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+        };
+        mockingoose(QuestionModel).toReturn(recentQuestion, 'findOne');
+
+        const result = await checkSpeedyAnswererBadge(qid);
+        expect(result).toBe(true);
+      });
+
+      it('should return false if the question was asked more than 30 minutes ago', async () => {
+        const olderQuestion = {
+          _id: qid,
+          askDateTime: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
+        };
+        mockingoose(QuestionModel).toReturn(olderQuestion, 'findOne');
+
+        const result = await checkSpeedyAnswererBadge(qid);
+        expect(result).toBe(false);
+      });
+
+      it('should return false if the question does not exist', async () => {
+        mockingoose(QuestionModel).toReturn(null, 'findOne');
+
+        const result = await checkSpeedyAnswererBadge(qid);
+        expect(result).toBe(false);
+      });
+
+      it('should handle errors if the database query fails', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('Database error'), 'findOne');
+
+        await expect(checkSpeedyAnswererBadge(qid)).rejects.toThrow(
+          'Error checking speedy voter badge eligibility',
+        );
+      });
+    });
+
+    describe('checkTopAnswererBadge', () => {
+      const username = 'testUser';
+
+      it('should return true if the user has answered 20 or more questions', async () => {
+        mockingoose(QuestionModel).toReturn(20, 'countDocuments');
+
+        const result = await checkTopAnswererBadge(username);
+        expect(result).toBe(true);
+      });
+
+      it('should return false if the user has answered fewer than 20 questions', async () => {
+        mockingoose(QuestionModel).toReturn(10, 'countDocuments');
+
+        const result = await checkTopAnswererBadge(username);
+        expect(result).toBe(false);
+      });
+
+      it('should handle errors if the database query fails', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('Database error'), 'countDocuments');
+
+        await expect(checkTopAnswererBadge(username)).rejects.toThrow(
+          'Error checking top answerer badge eligibility',
+        );
+      });
+    });
+
+    describe('checkLifesaverBadge', () => {
+      const qid = '507f1f77bcf86cd799439011'; // example question ID
+      // const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // date exactly one week ago
+
+      it('should return true if the question has 50 or more upvotes and was asked within the last week', async () => {
+        const recentQuestion = {
+          _id: qid,
+          askDateTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+          upVotes: Array(50),
+        };
+        mockingoose(QuestionModel).toReturn(recentQuestion, 'findOne');
+
+        const result = await checkLifesaverBadge(qid);
+        expect(result).toBe(true);
+      });
+
+      it('should return false if the question has fewer than 50 upvotes', async () => {
+        const recentQuestion = {
+          _id: qid,
+          askDateTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+          upVotes: Array(30),
+        };
+        mockingoose(QuestionModel).toReturn(recentQuestion, 'findOne');
+
+        const result = await checkLifesaverBadge(qid);
+        expect(result).toBe(false);
+      });
+
+      it('should return false if the question was asked more than one week ago', async () => {
+        const oldQuestion = {
+          _id: qid,
+          askDateTime: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+          upVotes: Array(50), // 50 upvotes
+        };
+        mockingoose(QuestionModel).toReturn(oldQuestion, 'findOne');
+
+        const result = await checkLifesaverBadge(qid);
+        expect(result).toBe(false);
+      });
+
+      it('should return false if the question does not exist', async () => {
+        mockingoose(QuestionModel).toReturn(null, 'findOne');
+
+        const result = await checkLifesaverBadge(qid);
+        expect(result).toBe(false);
+      });
+
+      it('should handle errors if the database query fails', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('Database error'), 'findOne');
+
+        await expect(checkLifesaverBadge(qid)).rejects.toThrow(
+          'Error checking lifesaver badge eligibility',
+        );
+      });
+    });
   });
 
   describe('Answer model', () => {
@@ -820,6 +949,14 @@ describe('application module', () => {
         )[0];
         (question.answers as Answer[]).push(ans4);
         jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        const mockAggregate = {
+          exec: jest.fn().mockResolvedValue([{ totalAnswers: 10 }]),
+        };
+        jest
+          .spyOn(QuestionModel, 'aggregate')
+          .mockReturnValue(mockAggregate as unknown as ReturnType<typeof QuestionModel.aggregate>);
+        jest.spyOn(QuestionModel, 'countDocuments').mockResolvedValueOnce(5);
 
         const result = (await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1)) as Question;
 
@@ -865,6 +1002,71 @@ describe('application module', () => {
           expect(err).toBeInstanceOf(Error);
           if (err instanceof Error) expect(err.message).toBe('Invalid answer');
         }
+      });
+    });
+
+    describe('checkCommunityHelperBadge', () => {
+      const username = 'testUser';
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+
+      // Optional: Clean up after all tests
+      afterAll(() => {
+        mockingoose.resetAll();
+      });
+
+      it('should return true if the user has answered 10 or more questions in the past week', async () => {
+        const recentAnswers = [{ totalAnswers: 10 }];
+        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
+          () =>
+            ({
+              exec: jest.fn().mockResolvedValue(recentAnswers),
+            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
+        );
+
+        const result = await checkCommunityHelperBadge(username);
+        expect(result).toBe(true);
+      });
+
+      it('should return false if the user has fewer than 10 answers in the past week', async () => {
+        const recentAnswers = [{ totalAnswers: 5 }];
+        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
+          () =>
+            ({
+              exec: jest.fn().mockResolvedValue(recentAnswers),
+            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
+        );
+
+        const result = await checkCommunityHelperBadge(username);
+        expect(result).toBe(false);
+      });
+
+      it('should return false if the user has no recent answers', async () => {
+        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
+          () =>
+            ({
+              exec: jest.fn().mockResolvedValue([]),
+            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
+        );
+
+        const result = await checkCommunityHelperBadge(username);
+        expect(result).toBe(false);
+      });
+
+      it('should handle errors if the database query fails', async () => {
+        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
+          () =>
+            ({
+              exec: jest.fn().mockRejectedValue(new Error('Database error')),
+            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
+        );
+
+        await expect(checkCommunityHelperBadge(username)).rejects.toThrow(
+          'Error checking community helper badge eligibility',
+        );
       });
     });
   });
@@ -1185,6 +1387,109 @@ describe('application module', () => {
 
         const result = await updateUser('notARealUser', mockReqBody);
         expect(result).toEqual({ error: 'User does not exist' });
+      });
+    });
+
+    describe('checkAutobiographerBadge', () => {
+      const fullUser = {
+        username: 'testUser',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'testuser@example.com',
+        headline: 'Software Engineer',
+        bio: 'Passionate about technology.',
+        githubUrl: 'https://github.com/testUser',
+        company: 'Test Company',
+        school: 'Test University',
+        city: 'Test City',
+        state: 'Test State',
+        badges: [],
+        createdAt: new Date(),
+      };
+
+      it('should return true when all required fields are present', () => {
+        const user = { ...fullUser };
+        expect(checkAutobiographerBadge(user)).toBe(true);
+      });
+
+      it('should return false when firstName is missing', () => {
+        const user = { ...fullUser, firstName: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when lastName is missing', () => {
+        const user = { ...fullUser, lastName: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when email is missing', () => {
+        const user = { ...fullUser, email: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when headline is missing', () => {
+        const user = { ...fullUser, headline: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when bio is missing', () => {
+        const user = { ...fullUser, bio: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when githubUrl is missing', () => {
+        const user = { ...fullUser, githubUrl: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when company is missing', () => {
+        const user = { ...fullUser, company: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when school is missing', () => {
+        const user = { ...fullUser, school: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when city is missing', () => {
+        const user = { ...fullUser, city: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+
+      it('should return false when state is missing', () => {
+        const user = { ...fullUser, state: '' };
+        expect(checkAutobiographerBadge(user)).toBe(false);
+      });
+    });
+
+    describe('checkVoterBadge', () => {
+      const username = 'testUser';
+
+      it('should return true when the user has exactly one vote', async () => {
+        mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+        const result = await checkVoterBadge(username);
+        expect(result).toBe(true);
+      });
+
+      it('should return false when the user has no votes', async () => {
+        mockingoose(QuestionModel).toReturn(0, 'countDocuments');
+        const result = await checkVoterBadge(username);
+        expect(result).toBe(false);
+      });
+
+      it('should return false when the user has more than one vote', async () => {
+        mockingoose(QuestionModel).toReturn(2, 'countDocuments');
+        const result = await checkVoterBadge(username);
+        expect(result).toBe(false);
+      });
+
+      it('should handle errors if the database query fails', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('Database error'), 'countDocuments');
+
+        await expect(checkVoterBadge(username)).rejects.toThrow(
+          'Error checking voter badge eligibility',
+        );
       });
     });
   });

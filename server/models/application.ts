@@ -16,6 +16,8 @@ import {
   UpdateUserPayload,
   User,
   UserResponse,
+  FeedPost,
+  FeedPostType,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -24,6 +26,7 @@ import CommentModel from './comments';
 import NotificationModel from './notifications';
 import UserModel from './users';
 import FollowModel from './follows';
+import followSchema from './schema/follow';
 
 /**
  * Parses tags from a search string.
@@ -984,5 +987,126 @@ export const getFollowersAndFollowingForUser = async (
     };
   } catch (error) {
     return { error: `Error when getting followers and following: ${(error as Error).message}` };
+  }
+};
+
+export const getFeedForUser = async (username: string): Promise<FeedPost[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+
+    const following = await FollowModel.find({ followerUsername: username });
+    const followingUsernames = following.map(f => f.followeeUsername);
+
+    // Get all questions asked by the users the current user is following
+    const questionsAskedByFollowing = await QuestionModel.find({
+      askedBy: { $in: followingUsernames },
+    });
+    const answersByFollowing = await AnswerModel.find({
+      ansBy: { $in: followingUsernames },
+    });
+    const questionsAnsweredByFollowing = await QuestionModel.find({
+      answers: { $in: answersByFollowing.map(a => a._id) },
+    }).populate([
+      {
+        path: 'answers',
+        model: AnswerModel,
+        match: { ansBy: { $in: followingUsernames } },
+        // populate the user associated with the answer
+        populate: {
+          path: 'user',
+          model: UserModel,
+        },
+      },
+      // populate the user associated with the question
+      {
+        path: 'user',
+        model: UserModel,
+      },
+    ]);
+
+    const commentsByFollowing = await CommentModel.find({
+      commentBy: { $in: followingUsernames },
+    });
+    const questionsCommentedOnByFollowing = await QuestionModel.find({
+      comments: { $in: commentsByFollowing.map(a => a._id) },
+    }).populate([
+      {
+        path: 'comments',
+        model: CommentModel,
+        match: {
+          ansBy: { $in: followingUsernames },
+          // populate the user associated with the comment
+          path: 'user',
+          model: UserModel,
+        },
+      },
+      // populate the user associated with the question
+      {
+        path: 'user',
+        model: UserModel,
+      },
+    ]);
+
+    const followsByFollowing = await FollowModel.find({
+      followerUsername: { $in: followingUsernames },
+    })
+      .populate('follower')
+      .populate('followee')
+      .exec();
+
+    const result = [];
+
+    for (const question of questionsAskedByFollowing) {
+      result.push({
+        postType: FeedPostType.QUESTION,
+        event: question,
+        date: question.askDateTime,
+      });
+    }
+
+    for (const question of questionsAnsweredByFollowing) {
+      // A question may have multiple answers, but we only want to show the answer by the user the current user is following
+      for (const answer of question.answers) {
+        console.log(answer);
+        const ans = answer as Answer;
+        const questionWithIndividualAnswer = question.toObject();
+        questionWithIndividualAnswer.answers = [answer as Answer];
+
+        result.push({
+          postType: FeedPostType.ANSWER,
+          event: questionWithIndividualAnswer,
+          date: ans.ansDateTime,
+        });
+      }
+    }
+
+    for (const question of questionsCommentedOnByFollowing) {
+      for (const comment of question.comments) {
+        const com = comment as Comment;
+        const questionWithIndividualAnswer = question.toObject();
+        questionWithIndividualAnswer.comments = [com as Comment];
+
+        result.push({
+          postType: FeedPostType.COMMENT,
+          event: questionWithIndividualAnswer,
+          date: com.commentDateTime,
+        });
+      }
+    }
+
+    for (const follow of followsByFollowing) {
+      result.push({
+        postType: FeedPostType.FOLLOW,
+        event: follow,
+        date: follow.followDateTime,
+      });
+    }
+
+    return result.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+  } catch (error) {
+    return { error: `Error when getting feed: ${(error as Error).message}` };
   }
 };

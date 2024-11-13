@@ -91,6 +91,7 @@ export interface Answer {
   ansBy: string;
   ansDateTime: Date;
   comments: Comment[] | ObjectId[];
+  user?: User;
 }
 
 /**
@@ -215,6 +216,7 @@ export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
+  // user?: User;
 }
 
 /**
@@ -338,6 +340,31 @@ export interface GetNotificationRequest extends Request {
   query: {
     type: NotificationType;
   };
+}
+
+/**
+ * Enum representing the possible event types for feed posts.
+ */
+export enum FeedPostType {
+  QUESTION = 'Question',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - postType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ */
+
+export interface FeedPost {
+  _id?: ObjectId;
+  postType: FeedPostType;
+  event: ObjectId | Question | Answer | Comment | Badge | Follow;
+  date: Date;
 }
 
 /**

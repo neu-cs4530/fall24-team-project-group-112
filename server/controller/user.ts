@@ -17,6 +17,7 @@ import {
   updateUser,
   addFollow,
   getFollowersAndFollowingForUser,
+  getFeedForUser,
 } from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/users';
@@ -265,12 +266,29 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getFeed = async (req: FindUserRequest, res: Response): Promise<void> => {
+    const { username } = req.params;
+
+    try {
+      const result = await getFeedForUser(username);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when fetching user feed: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
   router.post('/login', loginUser);
   router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
   router.get('/follow/:username', getFollowersAndFollowing);
+  router.get('/feed/:username', getFeed);
 
   return router;
 };

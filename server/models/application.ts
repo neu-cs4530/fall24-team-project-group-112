@@ -131,7 +131,7 @@ export const checkTopAnswererBadge = async (username: string): Promise<boolean> 
   try {
     const questions = await QuestionModel.find().populate({
       path: 'answers',
-      match: { ansBy: username }, // Only populate answers where ansBy matches the username
+      match: { ansBy: username },
     });
 
     const totalAnswers = questions.reduce(
@@ -210,7 +210,7 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
     );
     return updatedUser as UserResponse;
   } catch (error) {
-    return { error: 'Error when adding badge to user' };
+    return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
 };
 

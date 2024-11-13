@@ -31,6 +31,7 @@ import {
   checkCommunityHelperBadge,
   checkTopAnswererBadge,
   checkLifesaverBadge,
+  addBadge,
 } from '../models/application';
 import {
   Answer,
@@ -48,6 +49,7 @@ import AnswerModel from '../models/answers';
 import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
+import BadgeModel from '../models/badges';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -1490,6 +1492,67 @@ describe('application module', () => {
         await expect(checkVoterBadge(username)).rejects.toThrow(
           'Error checking voter badge eligibility',
         );
+      });
+    });
+
+    describe('addBadge', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      const mockUser = USERS[0];
+
+      test('should add a badge to the user if they do not already have it', async () => {
+        const badgeId = new ObjectId('673425329c00935604e19ea6');
+        jest
+          .spyOn(UserModel, 'findOne')
+          .mockResolvedValueOnce(mockUser)
+          .mockResolvedValueOnce(null);
+        jest.spyOn(BadgeModel, 'findOne').mockResolvedValueOnce(badgeId);
+        jest
+          .spyOn(UserModel, 'findOneAndUpdate')
+          .mockResolvedValueOnce({ ...mockUser, badges: [badgeId] });
+
+        const result = (await addBadge('dummyUser', 'AUTOBIOGRAPHER')) as User;
+
+        expect(result.badges).toContainEqual(badgeId);
+        expect(UserModel.findOneAndUpdate).toHaveBeenCalledWith(
+          { username: 'dummyUser' },
+          { $addToSet: { badges: badgeId } },
+          { new: true },
+        );
+      });
+
+      test('should return the user as-is if they already have the badge', async () => {
+        const badgeId = new ObjectId('673425329c00935604e19ea6');
+        const userWithBadge = { ...mockUser, badges: [badgeId] };
+
+        jest
+          .spyOn(UserModel, 'findOne')
+          .mockResolvedValueOnce(userWithBadge)
+          .mockResolvedValueOnce(userWithBadge);
+        jest.spyOn(BadgeModel, 'findOne').mockResolvedValueOnce(badgeId);
+        // (getBadgeIdFromName as jest.Mock).mockResolvedValue(badgeId);
+
+        const result = await addBadge('dummyUser', 'AUTOBIOGRAPHER');
+
+        expect(result).toEqual(userWithBadge);
+      });
+
+      test('should return an error if the username is invalid', async () => {
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
+
+        const result = await addBadge('nonexistentuser', 'VOTER');
+
+        expect(result).toEqual({ error: 'Error when adding badge to user: Invalid username' });
+      });
+
+      test('should return an error if the badge name is invalid', async () => {
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+
+        const result = await addBadge('dummyUser', 'INVALID_BADGE');
+
+        expect(result).toEqual({ error: 'Error when adding badge to user: Invalid badge name' });
       });
     });
   });

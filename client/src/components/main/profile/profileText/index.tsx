@@ -1,8 +1,10 @@
+import React from 'react';
 import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 import { MdWork } from 'react-icons/md';
 import { User } from '../../../../types';
 import Avatar from '../../baseComponents/avatar';
 import FollowDisplay from '../followDisplay';
+import ErrorDisplay from '../errorDisplay';
 import useProfile from '../../../../hooks/useProfile';
 import './index.css';
 
@@ -26,8 +28,20 @@ interface ProfileTextProps {
  * @returns A React component that displays the user's text information.
  */
 const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
-  const { followers, following, followersOpen, followingOpen, setFollowersOpen, setFollowingOpen } =
-    useProfile();
+  const {
+    followers,
+    following,
+    followersOpen,
+    followingOpen,
+    showErrorModal,
+    setFollowersOpen,
+    setFollowingOpen,
+    setShowErrorModal,
+    postFollow,
+    error,
+  } = useProfile();
+
+  const isFollowing = followers.some(follow => follow.user.username === loggedInUser?.username);
 
   const styles = {
     container: 'flex-col',
@@ -49,6 +63,8 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     bioContent: 'ml-3 text-xl text-gray-500',
     followButton: 'bg-blue-800 text-white rounded-md p-2 ml-4',
     followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4',
+    errorModal: 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50',
+    modalContent: 'bg-white p-6 rounded-md shadow-lg text-center',
   };
 
   return (
@@ -69,14 +85,17 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             {loggedInUser?.username !== user.username && (
               <div>
                 <button
-                  className={
-                    followers.some(follow => follow.user.username === loggedInUser?.username)
-                      ? styles.followingButton
-                      : styles.followButton
-                  }>
-                  {followers.some(follow => follow.user.username === loggedInUser?.username)
-                    ? 'Following'
-                    : 'Follow'}
+                  onClick={async () => {
+                    try {
+                      if (loggedInUser) {
+                        await postFollow(loggedInUser.username, user.username);
+                      }
+                    } catch (err) {
+                      setShowErrorModal(true);
+                    }
+                  }}
+                  className={isFollowing ? styles.followingButton : styles.followButton}>
+                  {isFollowing ? 'Following' : 'Follow'}
                 </button>
               </div>
             )}
@@ -144,6 +163,13 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
           <div className={styles.bioHeader}>Bio</div>
           <div className={styles.bioContent}>{user.bio}</div>
         </div>
+      )}
+      {showErrorModal && (
+        <ErrorDisplay
+          error={error}
+          open={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+        />
       )}
     </div>
   );

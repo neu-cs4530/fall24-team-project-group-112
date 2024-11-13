@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { Follows, User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
@@ -62,3 +62,20 @@ export const loginUser = async (
     };
   }
 };
+
+/**
+ * Gets a user's followers and following given a specific username.
+ *
+ * @param username - The username of the user whose followers/following are to be retrieved.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns an object containing an array of follower usernames and following usernames.
+ */
+const getFollowers = async (username: string): Promise<Follows> => {
+  const res = await api.get(`${USER_API_URL}/follow/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching follows');
+  }
+  return res.data;
+};
+
+export { addUser, getUser, getFollowers };

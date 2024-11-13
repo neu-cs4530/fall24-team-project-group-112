@@ -6,6 +6,7 @@ import {
   FindQuestionByIdRequest,
   AddQuestionRequest,
   VoteRequest,
+  FindQuestionsAnsweredByRequest,
   FindQuestionsAskedByRequest,
   FindQuestionsDownvotedByRequest,
   FindQuestionsUpvotedByRequest,
@@ -21,6 +22,7 @@ import {
   populateDocument,
   saveQuestion,
   isUsernameUnique,
+  findQuestionAnsweredBy,
   findQuestionAskedBy,
   findQuestionDownvotedBy,
   findQuestionUpvotedBy,
@@ -235,6 +237,48 @@ const questionController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Retrieves questions answered by a specific user.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The FindQuestionsAnsweredByRequest object containing the username as a parameter.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestionsAnsweredBy = async (
+    req: FindQuestionsAnsweredByRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    const usernameUnique = await isUsernameUnique(username);
+
+    if (usernameUnique) {
+      res.status(400).send('User with provided username is invalid');
+      return;
+    }
+
+    try {
+      const qlist = await findQuestionAnsweredBy(username);
+
+      if (qlist && !('error' in qlist)) {
+        res.json(qlist);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question answered by user: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question answered by user`);
+      }
+    }
+  };
+
+  /**
    * Retrieves questions asked by a specific user.
    * If there is an error, the HTTP response's status is updated.
    *
@@ -256,7 +300,7 @@ const questionController = (socket: FakeSOSocket) => {
 
     const usernameUnique = await isUsernameUnique(username);
 
-    if (!usernameUnique) {
+    if (usernameUnique) {
       res.status(400).send('User with provided username is invalid');
       return;
     }
@@ -356,6 +400,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
+  router.get('/answeredBy/:username', getQuestionsAnsweredBy);
   router.get('/askedBy/:username', getQuestionsAskedBy);
   router.get('/downvotedBy/:username', getQuestionsDownvotedBy);
   router.get('/upvotedBy/:username', getQuestionsUpvotedBy);

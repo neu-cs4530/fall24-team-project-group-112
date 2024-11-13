@@ -715,9 +715,41 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 };
 
 /**
+ * Finds all questions answered by a given user.
+ *
+ * @param {string} username - The username of the user to filter questions by
+ *
+ * @returns {Promise<Question[]>} - The list of questions answered by the provided user,
+ */
+export const findQuestionAnsweredBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
+  try {
+    const answers = await AnswerModel.find({ ansBy: username });
+
+    const answerIds = answers.map(answer => answer._id);
+
+    return await QuestionModel.find({ answers: { $in: answerIds } }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+      },
+    ]);
+  } catch (error) {
+    return {
+      error: `Error when finding questions answered by specified user: ${(error as Error).message}`,
+    };
+  }
+};
+
+/**
  * Finds all questions asked by a given user.
  *
- * @param {User} user - The user to add
+ * @param {string} username - The username of the user to filter questions by
  *
  * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
  */
@@ -884,8 +916,8 @@ export const deleteNotificationsForUser = async (
 export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
   try {
     if (
-      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
-      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+      (await UserModel.findOne({ username: follow.followerUsername })) === null ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === null
     ) {
       throw new Error('Follower or followee does not exist');
     }
@@ -895,7 +927,7 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
       followeeUsername: follow.followeeUsername,
     });
 
-    if (existingFollow !== undefined) {
+    if (existingFollow !== null) {
       await FollowModel.deleteOne({
         followerUsername: follow.followerUsername,
         followeeUsername: follow.followeeUsername,
@@ -961,10 +993,27 @@ export const getFollowersAndFollowingForUser = async (
       throw new Error('Invalid username');
     }
 
-    const followers = await FollowModel.find({ followeeUsername: username });
-    const following = await FollowModel.find({ followerUsername: username });
+    const followers = await FollowModel.find({ followeeUsername: username })
+      .populate('follower')
+      .exec();
+    const following = await FollowModel.find({ followerUsername: username })
+      .populate('followee')
+      .exec();
 
-    return { followers, following };
+    return {
+      followers: followers.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.follower,
+      })),
+      following: following.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.followee,
+      })),
+    };
   } catch (error) {
     return { error: `Error when getting followers and following: ${(error as Error).message}` };
   }

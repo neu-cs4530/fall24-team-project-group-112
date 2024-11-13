@@ -84,4 +84,19 @@ const downvoteQuestion = async (qid: string, username: string) => {
   return res.data;
 };
 
-export { getQuestionsByFilter, getQuestionById, addQuestion, upvoteQuestion, downvoteQuestion };
+const getQuestionsAskedBy = async (username: string): Promise<Question[]> => {
+  const res = await api.get(`${QUESTION_API_URL}/askedBy/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching questions asked by user');
+  }
+  return res.data;
+};
+
+export {
+  getQuestionsByFilter,
+  getQuestionById,
+  addQuestion,
+  upvoteQuestion,
+  downvoteQuestion,
+  getQuestionsAskedBy,
+};

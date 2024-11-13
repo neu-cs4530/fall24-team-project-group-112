@@ -599,7 +599,7 @@ export const addVoteToQuestion = async (
  */
 export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<QuestionResponse> => {
   try {
-    if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime) {
+    if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime || !ans._id) {
       throw new Error('Invalid answer');
     }
     const result = await QuestionModel.findOneAndUpdate(
@@ -611,7 +611,7 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
       throw new Error('Error when adding answer to question');
     }
 
-    await addNotifications(result._id, result.askedBy, NotificationType.ANSWER);
+    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER);
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };

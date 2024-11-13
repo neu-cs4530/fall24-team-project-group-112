@@ -17,10 +17,11 @@ const NotificationCenter: React.FC = () => {
 
   return (
     <div className='notification-div'>
-      <h2 className='notification-title'>Notification Center</h2>
+      <h2 className='notification-title font-bold'>Notifications Center</h2>
 
-      {/* Notification Filter */}
-      <NotificationFilter onFilterChange={handleFilterChange} />
+      <div className='mb-5'>
+        <NotificationFilter onFilterChange={handleFilterChange} />
+      </div>
 
       {!notifications.length && <div className='no-notifications'>No notifications here yet</div>}
 

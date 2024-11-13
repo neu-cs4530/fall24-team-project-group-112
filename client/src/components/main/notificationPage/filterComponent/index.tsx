@@ -11,30 +11,61 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
 
   return (
     <div className='notification-filter'>
-      <h3>Filter Notifications</h3>
+      <h3 className='font-bold mb-2'>Filter By:</h3>
 
-      <label>
-        <input type='radio' name='filter' value='' onChange={handleRadioChange} defaultChecked />
+      <label className='mr-3'>
+        <input
+          className='mr-1'
+          type='radio'
+          name='filter'
+          value=''
+          onChange={handleRadioChange}
+          defaultChecked
+        />
         All Notifications
       </label>
 
-      <label>
-        <input type='radio' name='filter' value='ANSWER' onChange={handleRadioChange} />
+      <label className='mr-3'>
+        <input
+          className='mr-1'
+          type='radio'
+          name='filter'
+          value='ANSWER'
+          onChange={handleRadioChange}
+        />
         Answers
       </label>
 
-      <label>
-        <input type='radio' name='filter' value='COMMENT' onChange={handleRadioChange} />
+      <label className='mr-3'>
+        <input
+          className='mr-1'
+          type='radio'
+          name='filter'
+          value='COMMENT'
+          onChange={handleRadioChange}
+        />
         Comments
       </label>
 
-      <label>
-        <input type='radio' name='filter' value='BADGE' onChange={handleRadioChange} />
+      <label className='mr-3'>
+        <input
+          className='mr-1'
+          type='radio'
+          name='filter'
+          value='BADGE'
+          onChange={handleRadioChange}
+        />
         Badges
       </label>
 
       <label>
-        <input type='radio' name='filter' value='FOLLOW' onChange={handleRadioChange} />
+        <input
+          className='mr-1'
+          type='radio'
+          name='filter'
+          value='FOLLOW'
+          onChange={handleRadioChange}
+        />
         Follows
       </label>
     </div>

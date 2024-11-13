@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io-client';
+
 export type FakeSOSocket = Socket<ServerToClientEvents>;
 /**
  * Interface representing a User, which contains:

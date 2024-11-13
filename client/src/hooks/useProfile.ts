@@ -22,7 +22,6 @@ const useProfile = () => {
           setUser(retrievedUser);
         } catch (err) {
           setError('An error occurred while fetching the user.');
-
           // eslint-disable-next-line no-console
           console.log(err);
         }

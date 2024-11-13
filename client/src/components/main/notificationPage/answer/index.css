@@ -1,0 +1,22 @@
+.answer {
+  display: flex;
+  flex-direction: column;
+  border: 0px;
+}
+
+.user-in-answer {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.trash-icon {
+  cursor: pointer;
+  font-size: 1.1em;
+}

@@ -1,0 +1,16 @@
+.user-in-notification {
+  font-weight: bold;
+}
+
+.notification {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  border: 1px solid grey;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.padding {
+  padding: 10px;
+}

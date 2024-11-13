@@ -20,7 +20,7 @@ const Header = ({ user }: { user: User | null }) => {
   const links = [
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
-    { name: 'Notifications', route: 'notifications', image: <FaBell /> },
+    { name: 'Notifications', route: 'notification', image: <FaBell /> },
     { name: 'Me', route: user ? `profile/${user.username}` : 'register', image: <IoMdPerson /> },
   ];
 

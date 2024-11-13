@@ -210,4 +210,51 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: Question) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (update: CommentUpdatePayload) => void;
+  newNotification: (notification: Notification) => void;
+  notificationUpdate: (notification: Notification) => void;
+  notificationDelete: (id: string) => void;
+}
+
+/**
+ * Enum representing the possible event types for notifications.
+ */
+export enum NotificationType {
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+
+export interface Notification {
+  _id?: string;
+  notificationType: NotificationType;
+  eventId: Answer | Comment | Badge | Follow;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
+}
+
+/**
+ * Interface representing a Follow, which contains:
+ * - _id - The unique identifier for the follower. Optional field.
+ * - followerUsername - The username of the user who followed a user.
+ * - followeeUsername - The username of the user who was followed by a user.
+ * - followDateTime - The date and time when the follow was posted.
+ *
+ */
+export interface Follow {
+  _id?: string;
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
 }

@@ -219,6 +219,8 @@ const addNotifications = async (
       throw new Error('Invalid request');
     }
 
+    console.log('Adding notification for event:', eventId, 'to user:', receiverUsername);
+
     /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
     who performed the action and create a notification record for each of them. */
 
@@ -418,10 +420,11 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
 export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
-    await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
+
     return result;
   } catch (error) {
-    return { error: 'Error when saving an answer' };
+    throw error;
+    // return { error: 'Error when saving an answer' };
   }
 };
 
@@ -607,6 +610,8 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
     if (result === null) {
       throw new Error('Error when adding answer to question');
     }
+
+    await addNotifications(result._id, result.askedBy, NotificationType.ANSWER);
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };

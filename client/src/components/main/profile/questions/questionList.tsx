@@ -15,7 +15,7 @@ const QuestionList = ({ questions, title }: QuestionListProps) => {
   };
 
   const styles = {
-    container: 'px-4 border border-gray-200',
+    container: 'px-4 border border-gray-200 pb-2',
     header:
       'cursor-pointer flex tablet:flex-row tablet:flex-wrap mobile:flex-col tablet:items-center items-start justify-between py-6',
     title: 'text-xl font-bold',
@@ -28,7 +28,15 @@ const QuestionList = ({ questions, title }: QuestionListProps) => {
         <p className={styles.title}>{title}</p>
         <div className={styles.iconContainer}>{open ? <MdExpandLess /> : <MdExpandMore />}</div>
       </div>
-      {open && questions.map(q => <QuestionDisplay key={q._id} question={q} />)}
+      {open && (
+        <>
+          {questions.length > 0 ? (
+            questions.map(q => <QuestionDisplay key={q._id} question={q} />)
+          ) : (
+            <p>No questions to display</p>
+          )}
+        </>
+      )}
     </div>
   );
 };

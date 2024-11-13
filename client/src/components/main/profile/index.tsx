@@ -44,12 +44,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
       {user ? (
         <>
           <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
-          {questionsAsked.length > 1 && (
-            <QuestionList
-              questions={questionsAsked}
-              title={`Questions asked by @${user.username}`}
-            />
-          )}
+          <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
         </>
       ) : null}
     </>

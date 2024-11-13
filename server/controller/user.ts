@@ -257,10 +257,7 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(result.error);
       }
 
-      res.status(200).json({
-        followers: result.followers.map(f => f.followerUsername),
-        following: result.following.map(f => f.followeeUsername),
-      });
+      res.status(200).json(result);
     } catch (err: unknown) {
       res
         .status(500)

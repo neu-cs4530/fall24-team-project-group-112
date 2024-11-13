@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom';
-import React from 'react';
 import './index.css';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
@@ -7,6 +6,7 @@ import { FaBell } from 'react-icons/fa';
 import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
+
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page

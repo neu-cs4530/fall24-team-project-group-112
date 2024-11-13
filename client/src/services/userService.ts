@@ -70,12 +70,10 @@ export const loginUser = async (
  * @throws Error Throws an error if the request fails or the response status is not 200.
  * @returns an object containing an array of follower usernames and following usernames.
  */
-const getFollowers = async (username: string): Promise<Follows> => {
+export const getFollowers = async (username: string): Promise<Follows> => {
   const res = await api.get(`${USER_API_URL}/follow/${username}`);
   if (res.status !== 200) {
     throw new Error('Error while fetching follows');
   }
   return res.data;
 };
-
-export { addUser, getUser, getFollowers };

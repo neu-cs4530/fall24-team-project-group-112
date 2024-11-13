@@ -23,7 +23,21 @@ const followSchema: Schema = new Schema(
       required: true,
     },
   },
-  { collection: 'Follow' },
+  { collection: 'Follow', toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+followSchema.virtual('follower', {
+  ref: 'User',
+  localField: 'followerUsername',
+  foreignField: 'username',
+  justOne: true,
+});
+
+followSchema.virtual('followee', {
+  ref: 'User',
+  localField: 'followeeUsername',
+  foreignField: 'username',
+  justOne: true,
+});
 
 export default followSchema;

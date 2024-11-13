@@ -8,9 +8,12 @@ interface NotificationListProps {
 
 const NotificationList: React.FC<NotificationListProps> = ({ notifications }) => (
   <ul>
-    {notifications.map(notification => (
-      <NotificationItem key={notification._id} notification={notification} />
-    ))}
+    {notifications
+      .slice()
+      .reverse()
+      .map(notification => (
+        <NotificationItem key={notification._id} notification={notification} />
+      ))}
   </ul>
 );
 

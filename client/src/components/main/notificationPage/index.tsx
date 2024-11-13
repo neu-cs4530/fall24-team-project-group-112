@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import useNotifications from '../../../hooks/useNotifications';
 import NotificationList from './notificationList';
 import NotificationFilter from './filterComponent';
 import './index.css';
 
-const NotificationCenter = () => {
-  const [filterType, setFilterType] = useState<string | undefined>(undefined);
+const NotificationCenter: React.FC = () => {
+  const { notifications, error, setNotificationType } = useNotifications();
 
-  const { notifications, error } = useNotifications(filterType);
-
-  if (!notifications.length && !error) {
-    return <div>Loading notifications...</div>;
-  }
+  const handleFilterChange = (type: string) => {
+    setNotificationType(type);
+  };
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -20,8 +18,13 @@ const NotificationCenter = () => {
   return (
     <div className='notification-div'>
       <h2 className='notification-title'>Notification Center</h2>
-      <NotificationList notifications={notifications} />
-      <NotificationFilter onFilterChange={setFilterType} />
+
+      {/* Notification Filter */}
+      <NotificationFilter onFilterChange={handleFilterChange} />
+
+      {!notifications.length && <div className='no-notifications'>No notifications here yet</div>}
+
+      {notifications.length > 0 && <NotificationList notifications={notifications} />}
     </div>
   );
 };

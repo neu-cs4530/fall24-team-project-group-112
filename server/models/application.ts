@@ -219,8 +219,6 @@ const addNotifications = async (
       throw new Error('Invalid request');
     }
 
-    console.log('Adding notification for event:', eventId, 'to user:', receiverUsername);
-
     /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
     who performed the action and create a notification record for each of them. */
 
@@ -423,8 +421,7 @@ export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
 
     return result;
   } catch (error) {
-    throw error;
-    // return { error: 'Error when saving an answer' };
+    return { error: 'Error when saving an answer' };
   }
 };
 
@@ -633,7 +630,13 @@ export const addComment = async (
   comment: Comment,
 ): Promise<QuestionResponse | AnswerResponse> => {
   try {
-    if (!comment || !comment.text || !comment.commentBy || !comment.commentDateTime) {
+    if (
+      !comment ||
+      !comment.text ||
+      !comment.commentBy ||
+      !comment.commentDateTime ||
+      !comment._id
+    ) {
       throw new Error('Invalid comment');
     }
     let result: QuestionResponse | AnswerResponse | null;
@@ -653,6 +656,15 @@ export const addComment = async (
     if (result === null) {
       throw new Error('Failed to add comment');
     }
+
+    if (type === 'question') {
+      result = result as Question;
+      await addNotifications(comment._id, result.askedBy, NotificationType.COMMENT);
+    } else {
+      result = result as Answer;
+      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT);
+    }
+
     return result;
   } catch (error) {
     return { error: `Error when adding comment: ${(error as Error).message}` };
@@ -908,6 +920,11 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
       return { success: 'Follow request deleted' };
     }
     await FollowModel.create(follow);
+
+    if (follow._id) {
+      await addNotifications(follow._id, follow.followeeUsername, NotificationType.FOLLOW);
+    }
+
     return { success: 'Follow request created' };
   } catch (error) {
     return { error: 'Error when creating or deleting a follow request' };
@@ -935,7 +952,7 @@ export const getNotificationsForUser = async (
     if (type) {
       const notifications = await NotificationModel.find({
         receiverUsername: username,
-        notificationType: type,
+        notificationType: new RegExp(type, 'i'),
       }).populate('eventId');
       return notifications;
     }

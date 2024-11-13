@@ -18,3 +18,13 @@
   display: flex;
   flex-direction: row;
 }
+
+.no-notifications {
+  display: flex;
+  justify-content: center;
+  font-size: 1.5rem;
+  height: 100%;
+  width: 100vw;
+  margin-top: 50px;
+  font-weight: bold;
+}

@@ -11,9 +11,12 @@ const NOTIFICATION_API_URL = `${process.env.REACT_APP_SERVER_URL}/notification`;
  * @throws Error if there is an issue fetching the notifications.
  */
 const getNotifications = async (username: string, type?: string): Promise<Notification[]> => {
-  console.log(username);
-  const res = await api.get(`${NOTIFICATION_API_URL}/${username}`);
-  console.log(res);
+  let url = `${NOTIFICATION_API_URL}/${username}`;
+  if (type) {
+    url += `?type=${type}`;
+  }
+
+  const res = await api.get(url);
 
   if (res.status !== 200) {
     throw new Error('Error when fetching or filtering notifications');

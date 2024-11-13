@@ -12,12 +12,10 @@ interface NotificationItemProps {
 
 const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => {
   let content;
-  console.log(notification.eventId);
 
   switch (notification.notificationType) {
     case 'Answer': {
       const answer = notification.eventId as Answer;
-      console.log(answer);
       content = <AnswerNotification answer={answer} />;
       break;
     }

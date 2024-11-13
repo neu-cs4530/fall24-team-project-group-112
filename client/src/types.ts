@@ -202,6 +202,15 @@ export interface CommentUpdatePayload {
 }
 
 /**
+ * Interface representing the payload for a notification update event, which contains:
+ * - username - The username of which the notification is for.
+ * - type - The type of notificiation, either comment, answer, badge, or follow.
+ */
+export interface NotificationUpdatePayload {
+  notification: Notification;
+}
+
+/**
  * Interface representing the possible events that the server can emit to the client.
  */
 export interface ServerToClientEvents {
@@ -210,9 +219,7 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: Question) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (update: CommentUpdatePayload) => void;
-  newNotification: (notification: Notification) => void;
-  notificationUpdate: (notification: Notification) => void;
-  notificationDelete: (id: string) => void;
+  notificationUpdate: (notification: NotificationUpdatePayload) => void;
 }
 
 /**

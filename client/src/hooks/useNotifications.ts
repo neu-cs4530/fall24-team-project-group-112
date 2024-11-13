@@ -3,16 +3,16 @@ import useUserContext from './useUserContext';
 import getNotifications from '../services/notificationService';
 import { Notification } from '../types';
 
-const useNotifications = (type?: string) => {
+const useNotifications = (initialType?: string) => {
   const { user, socket } = useUserContext();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [notificationType, setNotificationType] = useState<string | undefined>(type);
+  const [notificationType, setNotificationType] = useState<string | undefined>(initialType);
 
   useEffect(() => {
     /**
-     * Function to fetch questions based on the filter and update the question list.
+     * Fetches notifications based on the selected filter and updates the notification list.
      */
     const fetchData = async () => {
       if (!user.username) {
@@ -23,61 +23,36 @@ const useNotifications = (type?: string) => {
       setError(null);
 
       try {
-        const res = await getNotifications(user.username, type);
-        console.log(res);
+        const res = await getNotifications(user.username, notificationType);
         setNotifications(res || []);
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log(err);
+        setError('Failed to fetch notifications');
       }
     };
 
-    fetchData();
-  }, [user.username, type]);
-
-  // Handle real-time updates via socket events
-  useEffect(() => {
     /**
-     * Function to handle new notification received via socket.
+     * Handles real-time updates via socket events for new or updated notifications.
      *
-     * @param notification - The new notification object.
+     * @param notification - The new or updated notification object.
      */
-    const handleNewNotification = (notification: Notification) => {
+    const handleNotificationUpdate = ({ notification }: { notification: Notification }) => {
       setNotifications(prevNotifications => [notification, ...prevNotifications]);
     };
 
-    /**
-     * Function to handle notification updates via socket.
-     *
-     * @param updatedNotification - The updated notification object.
-     */
-    const handleNotificationUpdate = (updatedNotification: Notification) => {
-      setNotifications(prevNotifications =>
-        prevNotifications.map(n => (n._id === updatedNotification._id ? updatedNotification : n)),
-      );
-    };
+    fetchData();
 
-    /**
-     * Function to handle notification deletion via socket.
-     *
-     * @param id - The ID of the deleted notification.
-     */
-    const handleNotificationDelete = (id: string) => {
-      setNotifications(prevNotifications => prevNotifications.filter(n => n._id !== id));
-    };
-
-    socket.on('newNotification', handleNewNotification);
     socket.on('notificationUpdate', handleNotificationUpdate);
-    socket.on('notificationDelete', handleNotificationDelete);
 
     return () => {
-      socket.off('newNotification', handleNewNotification);
       socket.off('notificationUpdate', handleNotificationUpdate);
-      socket.off('notificationDelete', handleNotificationDelete);
     };
-  }, [socket]);
+  }, [user.username, notificationType, socket]);
 
-  return { notifications, error, setNotificationType };
+  return {
+    notifications,
+    error,
+    setNotificationType,
+  };
 };
 
 export default useNotifications;

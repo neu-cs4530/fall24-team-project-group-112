@@ -5,18 +5,39 @@ interface NotificationFilterProps {
 }
 
 const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange }) => {
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange(e.target.value);
+  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFilterChange(e.target.value); // Pass only the selected value (string)
   };
 
   return (
-    <select onChange={handleFilterChange}>
-      <option value=''>All Notifications</option>
-      <option value='type1'>Answers</option>
-      <option value='type2'>Comments</option>
-      <option value='type3'>Badges</option>
-      <option value='type4'>Follows</option>
-    </select>
+    <div className='notification-filter'>
+      <h3>Filter Notifications</h3>
+
+      <label>
+        <input type='radio' name='filter' value='' onChange={handleRadioChange} defaultChecked />
+        All Notifications
+      </label>
+
+      <label>
+        <input type='radio' name='filter' value='ANSWER' onChange={handleRadioChange} />
+        Answers
+      </label>
+
+      <label>
+        <input type='radio' name='filter' value='COMMENT' onChange={handleRadioChange} />
+        Comments
+      </label>
+
+      <label>
+        <input type='radio' name='filter' value='BADGE' onChange={handleRadioChange} />
+        Badges
+      </label>
+
+      <label>
+        <input type='radio' name='filter' value='FOLLOW' onChange={handleRadioChange} />
+        Follows
+      </label>
+    </div>
   );
 };
 

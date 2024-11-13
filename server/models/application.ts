@@ -1034,29 +1034,20 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
     ]);
 
   // Find 10 most recent answers
-  const sortedQuestions = questions
-    .map(question => {
-      const latestAnsDateTime = question.answers.reduce((latest, answer) => {
-        const ans = answer as Answer;
-        return ans.ansDateTime > latest ? ans.ansDateTime : latest;
-      }, new Date(0));
-      return { ...question.toObject(), latestAnsDateTime };
-    })
-    .sort((a, b) => b.latestAnsDateTime.getTime() - a.latestAnsDateTime.getTime()) // Sort by the latest answer date in descending order
-    .slice(0, 10);
-
-  return sortedQuestions.flatMap(question =>
+  const allAnswersAsFeedPosts = questions.flatMap(question =>
     question.answers.map(answer => {
       const ans = answer as Answer;
-      question.answers = [ans];
+      const questionWithSingleAnswer = { ...question.toObject(), answers: [ans] }; // Create a copy for each answer
 
       return {
         postType: FeedPostType.ANSWER,
-        event: question,
+        event: questionWithSingleAnswer,
         date: ans.ansDateTime,
       };
     }),
   );
+
+  return allAnswersAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 
 /**
@@ -1078,8 +1069,7 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
         populate: { path: 'user', select: 'username firstName lastName avatarName' },
       },
       { path: 'user', select: 'username firstName lastName avatarName' },
-    ])
-    .limit(10);
+    ]);
 
   const sortedQuestions = questions
     .map(question => {

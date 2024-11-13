@@ -1639,4 +1639,71 @@ describe('application module', () => {
       });
     });
   });
+  describe('getFeedForUser', () => {
+    it('should return an error if the user does not exist', async () => {
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await getFeedForUser('nonExistentUser');
+
+      expect(result).toEqual({ error: 'Error when getting feed: Invalid username' });
+    });
+
+    it('should return a feed with all types of posts for a valid user', async () => {
+      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(AnswerModel).toReturn([ans1, ans2, ans3], 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+
+      mockingoose(CommentModel).toReturn([com1], 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+
+      const result = await getFeedForUser('user1');
+
+      expect(result).toEqual({ error: 'Error when getting feed: Invalid username' });
+    });
+
+    it('should return a feed with only questions asked when the question filter is applied', async () => {
+      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.QUESTION);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      console.log(posts);
+      for (const post of posts) {
+        expect(post.postType).toEqual(FeedPostType.QUESTION);
+      }
+    });
+
+    it('should return a feed with only comments posted when the comment filter is applied', async () => {
+      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(CommentModel).toReturn([com1], 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(1);
+      for (const post of posts) {
+        expect(post.postType).toEqual(FeedPostType.COMMENT);
+      }
+
+    it('should return a feed with only follow events when the follow filter is applied', async () => {
+      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.FOLLOW);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      for (const post of posts) {
+        expect(post.postType).toEqual(FeedPostType.FOLLOW);
+      }
+  });
 });

@@ -997,18 +997,22 @@ export const getFollowersAndFollowingForUser = async (
  * @returns {Promise<Question[]>} - The list of questions asked by these users
  */
 const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
-  const result = await QuestionModel.find({
-    askedBy: { $in: followingUsernames },
-  })
-    .select('_id title text askedBy askDateTime')
-    .sort({ askDateTime: -1 })
-    .limit(10); // only fetch necessary columns
+  try {
+    const result = await QuestionModel.find({
+      askedBy: { $in: followingUsernames },
+    })
+      .select('_id title text askedBy askDateTime')
+      .sort({ askDateTime: -1 })
+      .limit(10); // only fetch necessary columns
 
-  return result.map(question => ({
-    postType: FeedPostType.QUESTION,
-    event: question,
-    date: question.askDateTime,
-  }));
+    return result.map(question => ({
+      postType: FeedPostType.QUESTION,
+      event: question,
+      date: question.askDateTime,
+    }));
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**
@@ -1018,45 +1022,49 @@ const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<F
  * @returns {Promise<Question[]>} - The list of questions answered by these users
  */
 const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
-  const answersByFollowing = await AnswerModel.find({ ansBy: { $in: followingUsernames } });
-  const questions = await QuestionModel.find({
-    answers: { $in: answersByFollowing.map(a => a._id) },
-  })
-    .select('title text askDateTime askedBy answers user')
-    .populate([
-      {
-        path: 'answers',
-        match: { ansBy: { $in: followingUsernames } },
-        select: 'ansBy ansDateTime text',
-        populate: { path: 'user', select: 'username firstName lastName avatarName' },
-      },
-      { path: 'user', select: 'username firstName lastName avatarName' },
-    ]);
-
-  // Find 10 most recent answers
-  const sortedQuestions = questions
-    .map(question => {
-      const latestAnsDateTime = question.answers.reduce((latest, answer) => {
-        const ans = answer as Answer;
-        return ans.ansDateTime > latest ? ans.ansDateTime : latest;
-      }, new Date(0));
-      return { ...question.toObject(), latestAnsDateTime };
+  try {
+    const answersByFollowing = await AnswerModel.find({ ansBy: { $in: followingUsernames } });
+    const questions = await QuestionModel.find({
+      answers: { $in: answersByFollowing.map(a => a._id) },
     })
-    .sort((a, b) => b.latestAnsDateTime.getTime() - a.latestAnsDateTime.getTime()) // Sort by the latest answer date in descending order
-    .slice(0, 10);
+      .select('title text askDateTime askedBy answers user')
+      .populate([
+        {
+          path: 'answers',
+          match: { ansBy: { $in: followingUsernames } },
+          select: 'ansBy ansDateTime text',
+          populate: { path: 'user', select: 'username firstName lastName avatarName' },
+        },
+        { path: 'user', select: 'username firstName lastName avatarName' },
+      ]);
 
-  return sortedQuestions.flatMap(question =>
-    question.answers.map(answer => {
-      const ans = answer as Answer;
-      question.answers = [ans];
+    // Find 10 most recent answers
+    const sortedQuestions = questions
+      .map(question => {
+        const latestAnsDateTime = question.answers.reduce((latest, answer) => {
+          const ans = answer as Answer;
+          return ans.ansDateTime > latest ? ans.ansDateTime : latest;
+        }, new Date(0));
+        return { ...question.toObject(), latestAnsDateTime };
+      })
+      .sort((a, b) => b.latestAnsDateTime.getTime() - a.latestAnsDateTime.getTime()) // Sort by the latest answer date in descending order
+      .slice(0, 10);
 
-      return {
-        postType: FeedPostType.ANSWER,
-        event: question,
-        date: ans.ansDateTime,
-      };
-    }),
-  );
+    return sortedQuestions.flatMap(question =>
+      question.answers.map(answer => {
+        const ans = answer as Answer;
+        question.answers = [ans];
+
+        return {
+          postType: FeedPostType.ANSWER,
+          event: question,
+          date: ans.ansDateTime,
+        };
+      }),
+    );
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**
@@ -1066,59 +1074,67 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
  * @returns {Promise<Question[]>} - The list of comments made by these users
  */
 const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
-  const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
-  const questions = await QuestionModel.find({
-    comments: { $in: commentsByFollowing.map(a => a._id) },
-  })
-    .select('title text askDateTime askedBy comments user')
-    .populate([
-      {
-        path: 'comments',
-        match: { commentBy: { $in: followingUsernames } },
-        populate: { path: 'user', select: 'username firstName lastName avatarName' },
-      },
-      { path: 'user', select: 'username firstName lastName avatarName' },
-    ])
-    .limit(10);
-
-  const sortedQuestions = questions
-    .map(question => {
-      const latestComDateTime = question.comments.reduce((latest, comment) => {
-        const com = comment as Comment;
-        return com.commentDateTime > latest ? com.commentDateTime : latest;
-      }, new Date(0));
-      return { ...question.toObject(), latestComDateTime };
+  try {
+    const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
+    const questions = await QuestionModel.find({
+      comments: { $in: commentsByFollowing.map(a => a._id) },
     })
-    .sort((a, b) => b.latestComDateTime.getTime() - a.latestComDateTime.getTime())
-    .slice(0, 10);
+      .select('title text askDateTime askedBy comments user')
+      .populate([
+        {
+          path: 'comments',
+          match: { commentBy: { $in: followingUsernames } },
+          populate: { path: 'user', select: 'username firstName lastName avatarName' },
+        },
+        { path: 'user', select: 'username firstName lastName avatarName' },
+      ])
+      .limit(10);
 
-  return sortedQuestions.flatMap(question =>
-    question.comments.map(comment => {
-      const com = comment as Comment;
-      question.comments = [com];
+    const sortedQuestions = questions
+      .map(question => {
+        const latestComDateTime = question.comments.reduce((latest, comment) => {
+          const com = comment as Comment;
+          return com.commentDateTime > latest ? com.commentDateTime : latest;
+        }, new Date(0));
+        return { ...question.toObject(), latestComDateTime };
+      })
+      .sort((a, b) => b.latestComDateTime.getTime() - a.latestComDateTime.getTime())
+      .slice(0, 10);
 
-      return {
-        postType: FeedPostType.COMMENT,
-        event: question,
-        date: com.commentDateTime,
-      };
-    }),
-  );
+    return sortedQuestions.flatMap(question =>
+      question.comments.map(comment => {
+        const com = comment as Comment;
+        question.comments = [com];
+
+        return {
+          postType: FeedPostType.COMMENT,
+          event: question,
+          date: com.commentDateTime,
+        };
+      }),
+    );
+  } catch (error) {
+    throw error;
+  }
 };
 
 const getFollowsByFollowing = async (followingUsernames: string[]): Promise<FeedPost[]> => {
-  const follows = await FollowModel.find({ followerUsername: { $in: followingUsernames } })
-    .populate([
-      { path: 'follower', select: 'username firstName lastName avatarName' },
-      { path: 'followee', select: 'username firstName lastName avatarName' },
-    ])
-    .limit(10);
+  try {
+    const follows = await FollowModel.find({ followerUsername: { $in: followingUsernames } })
+      .populate([
+        { path: 'follower', select: 'username firstName lastName avatarName' },
+        { path: 'followee', select: 'username firstName lastName avatarName' },
+      ])
+      .limit(10);
 
-  return follows.map(follow => ({
-    postType: FeedPostType.FOLLOW,
-    event: follow,
-    date: follow.followDateTime,
-  }));
+    return follows.map(follow => ({
+      postType: FeedPostType.FOLLOW,
+      event: follow,
+      date: follow.followDateTime,
+    }));
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getFeedForUser = async (

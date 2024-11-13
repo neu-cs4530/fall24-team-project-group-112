@@ -256,7 +256,7 @@ const questionController = (socket: FakeSOSocket) => {
 
     const usernameUnique = await isUsernameUnique(username);
 
-    if (!usernameUnique) {
+    if (usernameUnique) {
       res.status(400).send('User with provided username is invalid');
       return;
     }

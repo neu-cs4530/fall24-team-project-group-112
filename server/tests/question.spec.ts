@@ -499,7 +499,7 @@ describe('GET /askedBy/:username', () => {
       askDateTime: question.askDateTime,
     }));
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
     jest.spyOn(util, 'findQuestionAskedBy').mockResolvedValue(mockPopulatedQuestions);
 
     const response = await supertest(app).get(`/question/askedBy/${mockReqParams.username}`);
@@ -516,7 +516,7 @@ describe('GET /askedBy/:username', () => {
   it('should return bad request error if username is not provided or invalid', async () => {
     const mockReqParams = { username: 'invalid_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
 
     const response = await supertest(app).get(`/question/askedBy/${mockReqParams.username}`);
 
@@ -527,7 +527,7 @@ describe('GET /askedBy/:username', () => {
   it('should return empty array if the username exists but has no questions asked', async () => {
     const mockReqParams = { username: 'no_questions_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
     jest.spyOn(util, 'findQuestionAskedBy').mockResolvedValue([]);
 
     const response = await supertest(app).get(`/question/askedBy/${mockReqParams.username}`);
@@ -539,7 +539,7 @@ describe('GET /askedBy/:username', () => {
   it('should return server error if an error occurs while fetching questions', async () => {
     const mockReqParams = { username: 'question3_user' };
 
-    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
+    jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(false);
     jest.spyOn(util, 'findQuestionAskedBy').mockImplementation(() => {
       throw new Error('Error while fetching question asked by user');
     });

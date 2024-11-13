@@ -715,9 +715,41 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 };
 
 /**
+ * Finds all questions answered by a given user.
+ *
+ * @param {string} username - The username of the user to filter questions by
+ *
+ * @returns {Promise<Question[]>} - The list of questions answered by the provided user,
+ */
+export const findQuestionAnsweredBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
+  try {
+    const answers = await AnswerModel.find({ ansBy: username });
+
+    const answerIds = answers.map(answer => answer._id);
+
+    return await QuestionModel.find({ answers: { $in: answerIds } }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+      },
+    ]);
+  } catch (error) {
+    return {
+      error: `Error when finding questions answered by specified user: ${(error as Error).message}`,
+    };
+  }
+};
+
+/**
  * Finds all questions asked by a given user.
  *
- * @param {User} user - The user to add
+ * @param {string} username - The username of the user to filter questions by
  *
  * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
  */

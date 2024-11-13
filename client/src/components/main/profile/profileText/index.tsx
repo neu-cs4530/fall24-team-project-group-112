@@ -30,21 +30,22 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     useProfile();
 
   const styles = {
-    container: 'flex-col',
-    header: 'bg-white p-5 shadow-md flex flex-row border border-gray-500',
+    container: 'flex-col ',
+    header: 'bg-white p-5 shadow-md flex flex-row',
     avatarContainer: 'flex flex-col ml-4',
     nameUsernameContainer: 'flex flex-row items-end',
     name: 'text-4xl font-bold text-gray-800',
     username: 'text-2xl text-gray-600 ml-12',
-    editButton: 'bg-white text-black border border-black text-lg ml-4',
-    headline: 'mt-3 text-xl text-gray-500',
-    infoContainer: 'flex gap-4',
+    editButton: 'bg-white text-black text-lg ml-8',
+    editIcon: 'text-2xl',
+    headline: 'mt-1 text-xl text-gray-500',
+    infoContainer: 'flex gap-4 mt-3',
     infoItem: 'flex gap-2 items-center',
     icon: 'text-sm mb-1',
     github: 'no-underline hover:underline',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
-    bioContainer: 'bg-white p-5 shadow-md flex flex-col border border-gray-500',
+    bioContainer: 'bg-white p-5 shadow-md flex flex-col',
     bioHeader: 'ml-3 text-2xl font-bold text-gray-500',
     bioContent: 'ml-3 text-xl text-gray-500',
   };
@@ -60,7 +61,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             {loggedInUser && loggedInUser.username === user.username && (
               <div>
                 <button className={styles.editButton}>
-                  <FaEdit className={styles.icon} />
+                  <FaEdit className={styles.editIcon} />
                 </button>
               </div>
             )}
@@ -123,6 +124,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
           </div>
         </div>
       </div>
+      <hr></hr>
       {user.bio && (
         <div className={styles.bioContainer}>
           <div className={styles.bioHeader}>Bio</div>

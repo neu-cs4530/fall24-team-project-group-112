@@ -1,7 +1,5 @@
 import { Socket } from 'socket.io-client';
-
 export type FakeSOSocket = Socket<ServerToClientEvents>;
-
 /**
  * Interface representing a User, which contains:
  * - username - The unique identifier of the user.
@@ -36,7 +34,6 @@ export interface User {
   avatarName?: string;
   createdAt: Date;
 }
-
 /**
  * Interface representing a Badge, which contains:
  * - _id - The unique identifier for the badge. Optional field.
@@ -50,7 +47,6 @@ export interface Badge {
   description: string;
   color: BadgeColor;
 }
-
 /**
  * Enum representing the possible colors for a badge.
  */
@@ -59,7 +55,6 @@ export enum BadgeColor {
   SILVER = 'silver',
   BRONZE = 'bronze',
 }
-
 /**
  * Enum representing the possible types of badges.
  */
@@ -71,7 +66,6 @@ export enum BadgeName {
   INFLUENCER = 'Influencer',
   LIFESAVER = 'Lifesaver',
 }
-
 /**
  * Enum representing the possible ordering options for questions.
  * and their display names.
@@ -82,13 +76,11 @@ export const orderTypeDisplayName = {
   active: 'Active',
   mostViewed: 'Most Viewed',
 } as const;
-
 /**
  * Type representing the keys of the orderTypeDisplayName object.
  * This type can be used to restrict values to the defined order types.
  */
 export type OrderType = keyof typeof orderTypeDisplayName;
-
 /**
  * Interface represents a comment.
  *
@@ -101,7 +93,6 @@ export interface Comment {
   commentBy: string;
   commentDateTime: Date;
 }
-
 /**
  * Interface representing a tag associated with a question.
  *
@@ -113,7 +104,6 @@ export interface Tag {
   name: string;
   description: string;
 }
-
 /**
  * Interface represents the data for a tag.
  *
@@ -124,7 +114,6 @@ export interface TagData {
   name: string;
   qcnt: number;
 }
-
 /**
  * Interface representing the voting data for a question, which contains:
  * - qid - The ID of the question being voted on
@@ -136,7 +125,6 @@ export interface VoteData {
   upVotes: string[];
   downVotes: string[];
 }
-
 /**
  * Interface representing an Answer document, which contains:
  * - _id - The unique identifier for the answer. Optional field
@@ -152,7 +140,6 @@ export interface Answer {
   ansDateTime: Date;
   comments: Comment[];
 }
-
 /**
  * Interface representing the structure of a Question object.
  *
@@ -181,7 +168,6 @@ export interface Question {
   downVotes: string[];
   comments: Comment[];
 }
-
 /**
  * Interface representing the payload for a vote update socket event.
  */
@@ -190,15 +176,25 @@ export interface VoteUpdatePayload {
   upVotes: string[];
   downVotes: string[];
 }
-
 export interface AnswerUpdatePayload {
   qid: string;
   answer: Answer;
 }
-
 export interface CommentUpdatePayload {
   result: Question | Answer;
   type: 'question' | 'answer';
+}
+
+export interface Follow {
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+  user: User;
+}
+
+export interface Follows {
+  followers: Follow[];
+  following: Follow[];
 }
 
 /**
@@ -249,19 +245,4 @@ export interface Notification {
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
-}
-
-/**
- * Interface representing a Follow, which contains:
- * - _id - The unique identifier for the follower. Optional field.
- * - followerUsername - The username of the user who followed a user.
- * - followeeUsername - The username of the user who was followed by a user.
- * - followDateTime - The date and time when the follow was posted.
- *
- */
-export interface Follow {
-  _id?: string;
-  followerUsername: string;
-  followeeUsername: string;
-  followDateTime: Date;
 }

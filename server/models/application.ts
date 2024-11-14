@@ -1034,7 +1034,7 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
       { path: 'user', select: 'username firstName lastName avatarName' },
     ]);
 
-  // Find 10 most recent answers
+  // Find 10 most recent answers. Each answer gets its own feed post, even if part of the same question.
   const allAnswersAsFeedPosts = questions.flatMap(question =>
     question.answers.map(answer => {
       const ans = answer as Answer;
@@ -1072,29 +1072,21 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
       { path: 'user', select: 'username firstName lastName avatarName' },
     ]);
 
-  const sortedQuestions = questions
-    .map(question => {
-      const latestComDateTime = question.comments.reduce((latest, comment) => {
-        const com = comment as Comment;
-        return com.commentDateTime > latest ? com.commentDateTime : latest;
-      }, new Date(0));
-      return { ...question.toObject(), latestComDateTime };
-    })
-    .sort((a, b) => b.latestComDateTime.getTime() - a.latestComDateTime.getTime())
-    .slice(0, 10);
-
-  return sortedQuestions.flatMap(question =>
+  // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
+  const allCommentsAsFeedPosts = questions.flatMap(question =>
     question.comments.map(comment => {
       const com = comment as Comment;
-      question.comments = [com];
+      const questionWithSingleComment = { ...question.toObject(), comments: [com] };
 
       return {
         postType: FeedPostType.COMMENT,
-        event: question,
+        event: questionWithSingleComment,
         date: com.commentDateTime,
       };
     }),
   );
+
+  return allCommentsAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 
 const getFollowsByFollowing = async (followingUsernames: string[]): Promise<FeedPost[]> => {
@@ -1103,6 +1095,7 @@ const getFollowsByFollowing = async (followingUsernames: string[]): Promise<Feed
       { path: 'follower', select: 'username firstName lastName avatarName' },
       { path: 'followee', select: 'username firstName lastName avatarName' },
     ])
+    .sort({ followDateTime: -1 })
     .limit(10);
 
   return follows.map(follow => ({

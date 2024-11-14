@@ -42,24 +42,10 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     isEditing,
     setIsEditing,
     formData,
-    setFormData,
     handleSave,
+    handleChange,
+    handleSelectAvatar,
   } = useProfile();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectAvatar = (avatarName: string) => {
-    setFormData(prevState => ({
-      ...prevState,
-      avatarName,
-    }));
-  };
 
   const styles = {
     container: 'flex-col ',

@@ -60,6 +60,21 @@ const useProfile = () => {
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectAvatar = (avatarName: string) => {
+    setFormData(prevState => ({
+      ...prevState,
+      avatarName,
+    }));
+  };
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -126,6 +141,8 @@ const useProfile = () => {
     formData,
     setFormData,
     handleSave,
+    handleChange,
+    handleSelectAvatar,
   };
 };
 

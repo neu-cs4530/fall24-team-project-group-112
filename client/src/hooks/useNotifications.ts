@@ -9,6 +9,7 @@ const useNotifications = (initialType?: string) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<string | undefined>(initialType);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
   useEffect(() => {
     /**
@@ -62,6 +63,8 @@ const useNotifications = (initialType?: string) => {
     error,
     setNotificationType,
     deleteNotifications,
+    showConfirmationModal,
+    setShowConfirmationModal,
   };
 };
 

@@ -7,7 +7,6 @@ import useUserContext from './useUserContext';
 /**
  * Custom hook to user profiles.
  *
- * @param userProfile - The initial user object for the profile page.
  *
  * @returns user - The user object for the profile page.
  */

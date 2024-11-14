@@ -113,23 +113,24 @@ const useProfile = () => {
 
         console.log(err); // eslint-disable-line no-console
       }
-    };
-
-    const handleProfileUpdate = (updatedUser: User) => {
-      setUser(updatedUser);
-    };
-
-    fetchUser();
-
-    socket.on('profileUpdate', handleProfileUpdate);
-    return () => {
-      socket.off('profileUpdate', handleProfileUpdate);
-    };
-  }, [username, socket]);
+    }
+  }, [username]);
 
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  const handleProfileUpdate = useCallback(
+    async (updatedUser: User) => {
+      setUser(updatedUser);
+
+      socket.on('profileUpdate', handleProfileUpdate);
+      return () => {
+        socket.off('profileUpdate', handleProfileUpdate);
+      };
+    },
+    [socket],
+  );
 
   const postFollow = async (followerUsername: string, followeeUsername: string) => {
     if (!followerUsername || !followeeUsername) {

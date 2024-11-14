@@ -3,6 +3,7 @@ import { ChangeEvent, useState } from 'react';
 import useLoginContext from './useLoginContext';
 import useLocalStorage from './useLocalStorage';
 import { loginUser } from '../services/userService';
+import { User } from '../types';
 /**
  * Custom hook to handle login input and submission.
  *
@@ -56,22 +57,23 @@ const useLogin = () => {
       if ('status' in res) {
         setError(res.error);
       } else {
-        const user = {
+        const user: User = {
           username: res.username,
           firstName: res.firstName,
           lastName: res.lastName,
           email: res.email,
           badges: res.badges,
           createdAt: res.createdAt,
-          headline: res.headline || '',
-          bio: res.bio || '',
-          githubUrl: res.githubUrl || '',
-          company: res.company || '',
-          school: res.school || '',
-          city: res.city || '',
-          state: res.state || '',
-          avatarName: res.avatarName || '',
         };
+
+        if (res.headline) user.headline = res.headline;
+        if (res.bio) user.bio = res.bio;
+        if (res.githubUrl) user.githubUrl = res.githubUrl;
+        if (res.company) user.company = res.company;
+        if (res.school) user.school = res.school;
+        if (res.city) user.city = res.city;
+        if (res.state) user.state = res.state;
+        if (res.avatarName) user.avatarName = res.avatarName;
 
         setUser(user);
         setItem('user', JSON.stringify(user));

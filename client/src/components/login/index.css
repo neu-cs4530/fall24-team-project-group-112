@@ -62,4 +62,6 @@
 
 .error-message {
   padding-bottom: 15px;
+  font-weight: bold;
+  color: red;
 }

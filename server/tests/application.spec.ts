@@ -48,14 +48,7 @@ import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
 import CommentModel from '../models/comments';
-import {
-  feedUser,
-  populatedAnswer1,
-  //  populatedAnswerPost1,
-  populatedComment1,
-  populatedQuestion1,
-  // populatedQuestionPost1,
-} from './mockObjects';
+import { feedUser, populatedAnswer1, populatedComment1, populatedQuestion1 } from './mockObjects';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');

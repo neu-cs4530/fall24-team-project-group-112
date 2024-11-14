@@ -14,25 +14,25 @@ export const FOLLOWS = [
     _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
     followerUsername: 'user1',
     followeeUsername: 'user2',
-    followDateTime: new Date('2023-11-19T09:24:00'),
+    followDateTime: new Date('2023-11-19T09:24:00Z'),
   },
   {
     _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
     followerUsername: 'user2',
     followeeUsername: 'user1',
-    followDateTime: new Date('2023-11-19T09:24:00'),
+    followDateTime: new Date('2023-11-19T09:24:00Z'),
   },
   {
     _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
     followerUsername: 'user1',
     followeeUsername: 'com_by1',
-    followDateTime: new Date('2023-11-19T09:24:00'),
+    followDateTime: new Date('2023-11-19T09:24:00Z'),
   },
   {
     _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
     followerUsername: 'user1',
     followeeUsername: 'ansBy1',
-    followDateTime: new Date('2023-11-19T09:24:00'),
+    followDateTime: new Date('2023-11-19T09:24:00Z'),
   },
 ];
 
@@ -263,10 +263,10 @@ export const FULL_FEED = [
     postType: 'Question',
   },
   {
-    date: '2023-11-19T14:24:00.000Z',
+    date: '2023-11-19T09:24:00.000Z',
     event: {
       _id: '65e9b58910afe6e94fc6e6df',
-      followDateTime: '2023-11-19T14:24:00.000Z',
+      followDateTime: '2023-11-19T09:24:00.000Z',
       followeeUsername: 'user2',
       followerUsername: 'user1',
       id: '65e9b58910afe6e94fc6e6df',
@@ -274,10 +274,10 @@ export const FULL_FEED = [
     postType: 'Follow',
   },
   {
-    date: '2023-11-19T14:24:00.000Z',
+    date: '2023-11-19T09:24:00.000Z',
     event: {
       _id: '65e9b58910afe6e94fc6e7de',
-      followDateTime: '2023-11-19T14:24:00.000Z',
+      followDateTime: '2023-11-19T09:24:00.000Z',
       followeeUsername: 'user1',
       followerUsername: 'user2',
       id: '65e9b58910afe6e94fc6e7de',
@@ -285,10 +285,10 @@ export const FULL_FEED = [
     postType: 'Follow',
   },
   {
-    date: '2023-11-19T14:24:00.000Z',
+    date: '2023-11-19T09:24:00.000Z',
     event: {
       _id: '65e9b58910afe6e94fc6e7de',
-      followDateTime: '2023-11-19T14:24:00.000Z',
+      followDateTime: '2023-11-19T09:24:00.000Z',
       followeeUsername: 'com_by1',
       followerUsername: 'user1',
       id: '65e9b58910afe6e94fc6e7de',
@@ -296,10 +296,10 @@ export const FULL_FEED = [
     postType: 'Follow',
   },
   {
-    date: '2023-11-19T14:24:00.000Z',
+    date: '2023-11-19T09:24:00.000Z',
     event: {
       _id: '65e9b58910afe6e94fc6e7de',
-      followDateTime: '2023-11-19T14:24:00.000Z',
+      followDateTime: '2023-11-19T09:24:00.000Z',
       followeeUsername: 'ansBy1',
       followerUsername: 'user1',
       id: '65e9b58910afe6e94fc6e7de',

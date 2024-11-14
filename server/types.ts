@@ -91,7 +91,7 @@ export interface Answer {
   ansBy: string;
   ansDateTime: Date;
   comments: Comment[] | ObjectId[];
-  user?: User;
+  // user?: User;
 }
 
 /**

@@ -1000,9 +1000,10 @@ const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<F
   const result = await QuestionModel.find({
     askedBy: { $in: followingUsernames },
   })
-    .select('_id title text askedBy askDateTime')
+    .populate([{ path: 'user', select: 'username firstName lastName avatarName' }])
+    .select('title text askedBy askDateTime')
     .sort({ askDateTime: -1 })
-    .limit(10); // only fetch necessary columns
+    .limit(10);
 
   return result.map(question => ({
     postType: FeedPostType.QUESTION,
@@ -1037,7 +1038,7 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
   const allAnswersAsFeedPosts = questions.flatMap(question =>
     question.answers.map(answer => {
       const ans = answer as Answer;
-      const questionWithSingleAnswer = { ...question.toObject(), answers: [ans] }; // Create a copy for each answer
+      const questionWithSingleAnswer = { ...question.toObject(), answers: [ans] };
 
       return {
         postType: FeedPostType.ANSWER,

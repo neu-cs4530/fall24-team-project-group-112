@@ -27,6 +27,7 @@ import {
   deleteNotificationsForUser,
   getFollowersAndFollowingForUser,
   findQuestionDownvotedBy,
+  getFeedForUser,
 } from '../models/application';
 import {
   Answer,
@@ -38,12 +39,22 @@ import {
   NotificationType,
   Follow,
   FollowResponse,
+  FeedPostType,
+  FeedPost,
 } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
 import UserModel from '../models/users';
 import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
+import CommentModel from '../models/comments';
+import {
+  populatedAnswer1,
+  //  populatedAnswerPost1,
+  populatedComment1,
+  populatedQuestion1,
+  // populatedQuestionPost1,
+} from './mockObjects';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -169,7 +180,7 @@ const QUESTIONS: Question[] = [
     views: [],
     upVotes: [],
     downVotes: [],
-    comments: [],
+    comments: [com1],
   },
 ];
 
@@ -208,6 +219,33 @@ const USERS: User[] = [
     email: 'user3@email.com',
     badges: [],
     createdAt: new Date('2024-06-03'),
+  },
+];
+
+const FOLLOWS: Follow[] = [
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+    followerUsername: 'user1',
+    followeeUsername: 'user2',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user2',
+    followeeUsername: 'user1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user1',
+    followeeUsername: 'com_by1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user1',
+    followeeUsername: 'ansBy1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
   },
 ];
 
@@ -1639,7 +1677,16 @@ describe('application module', () => {
       });
     });
   });
+
   describe('getFeedForUser', () => {
+    beforeAll(() => {
+      mockingoose.resetAll();
+    });
+
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
     it('should return an error if the user does not exist', async () => {
       jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
 
@@ -1648,53 +1695,66 @@ describe('application module', () => {
       expect(result).toEqual({ error: 'Error when getting feed: Invalid username' });
     });
 
-    it('should return a feed with all types of posts for a valid user', async () => {
+    test('should return a feed with all types of posts for a valid user', async () => {
       mockingoose(UserModel).toReturn(USERS[1], 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
-      mockingoose(AnswerModel).toReturn([ans1, ans2, ans3], 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+      mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+      mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
-      mockingoose(CommentModel).toReturn([com1], 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
-      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      const feedPosts = await getFeedForUser('user1');
 
-      const result = await getFeedForUser('user1');
-
-      expect(result).toEqual({ error: 'Error when getting feed: Invalid username' });
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(5);
     });
 
-    it('should return a feed with only questions asked when the question filter is applied', async () => {
+    test('should return a feed with only questions asked when the question filter is applied', async () => {
       mockingoose(UserModel).toReturn(USERS[1], 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
 
       const feedPosts = await getFeedForUser('user1', FeedPostType.QUESTION);
 
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
-      console.log(posts);
-      for (const post of posts) {
-        expect(post.postType).toEqual(FeedPostType.QUESTION);
-      }
+      expect(posts.length).toBe(1);
+      expect(posts[0].postType).toEqual(FeedPostType.QUESTION);
     });
 
-    it('should return a feed with only comments posted when the comment filter is applied', async () => {
+    it('should return an error if there is an error fetching questions asked', async () => {});
+
+    test('should return a feed with only questions answered when the answer filter is applied', async () => {
+      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+      mockingoose(QuestionModel).toReturn([populatedAnswer1], 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.ANSWER);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(1);
+      expect(posts[0].postType).toEqual(FeedPostType.ANSWER);
+    });
+    it('should return an error if there is an error fetching questions answered', async () => {});
+
+    test('should return a feed with only comments posted when the comment filter is applied', async () => {
       mockingoose(UserModel).toReturn(USERS[1], 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
       mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
-      mockingoose(CommentModel).toReturn([com1], 'find');
+      mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
       const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
 
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
       expect(posts.length).toBe(1);
-      for (const post of posts) {
-        expect(post.postType).toEqual(FeedPostType.COMMENT);
-      }
+      expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
+    });
+    it('should return an error if there is an error fetching comments posted', async () => {});
 
-    it('should return a feed with only follow events when the follow filter is applied', async () => {
+    test('should return a feed with only follow events when the follow filter is applied', async () => {
       mockingoose(UserModel).toReturn(USERS[1], 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
 
@@ -1702,8 +1762,12 @@ describe('application module', () => {
 
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(4);
       for (const post of posts) {
         expect(post.postType).toEqual(FeedPostType.FOLLOW);
       }
+    });
+    it('should return an error if there is an error fetching follows', async () => {});
+    it('should return a feed sorted from most to least recent', async () => {});
   });
 });

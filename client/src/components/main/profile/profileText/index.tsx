@@ -47,13 +47,9 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     handleSave,
     handleChange,
     handleSelectAvatar,
-    followingOpen,
     showErrorModal,
-    setFollowersOpen,
-    setFollowingOpen,
     setShowErrorModal,
     postFollow,
-    error,
   } = useProfile();
 
   const isFollowing = followers.some(follow => follow.user.username === loggedInUser?.username);
@@ -169,7 +165,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                   </button>
                 </div>
               </>
-)}
+            )}
             {loggedInUser && loggedInUser?.username !== user.username && (
               <div>
                 <button

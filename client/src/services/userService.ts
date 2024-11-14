@@ -1,4 +1,4 @@
-import { Follows, User } from '../types';
+import { Follows, UpdateUserPayload, User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
@@ -39,6 +39,22 @@ const getUser = async (username: string): Promise<User> => {
 };
 
 /**
+ * Updates a user's information with the given information.
+ *
+ * @param username - The username of the user to be updated.
+ * @param userPayload - The user payload object containing the updated user details.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns The updated user object.
+ */
+const updateProfile = async (username: string, userPayload: UpdateUserPayload): Promise<User> => {
+  const res = await api.patch(`${USER_API_URL}/${username}`, userPayload);
+  if (res.status !== 200) {
+    throw new Error('Error while updating user');
+  }
+  return res.data;
+};
+
+/**
  * Gets a user's followers and following given a specific username.
  *
  * @param username - The username of the user whose followers/following are to be retrieved.
@@ -52,4 +68,4 @@ const getFollowers = async (username: string): Promise<Follows> => {
   }
   return res.data;
 };
-export { addUser, getUser, getFollowers };
+export { addUser, getUser, getFollowers, updateProfile };

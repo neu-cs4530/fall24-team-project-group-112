@@ -52,6 +52,8 @@ export interface UpdateUserRequest extends Request {
 
 /**
  * Interface for updating a user's profile, which contains:
+ * - firstName - The user's first name. Optional field.
+ * - lastName - The user's last name. Optional field.
  * - headline - The user's one-liner headline. Optional field.
  * - bio - The user's full bio. Optional field.
  * - githubUrl - The user's GitHub profile. Optional field.
@@ -62,6 +64,8 @@ export interface UpdateUserRequest extends Request {
  * - avatarName - The name of the user's avatar image. Optional field.
  */
 export interface UpdateUserPayload {
+  firstName?: string;
+  lastName?: string;
   headline?: string;
   bio?: string;
   githubUrl?: string;
@@ -295,6 +299,7 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: QuestionResponse) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
+  profileUpdate: (user: User) => void;
 }
 
 /**
@@ -356,7 +361,6 @@ export interface CreateUserRequest extends Request {
     password: string;
   };
 }
-
 
 /**
  * Interface for the request parameters when finding questions answered by a given user.

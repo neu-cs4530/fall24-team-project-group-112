@@ -92,30 +92,31 @@ export const checkSpeedyAnswererBadge = async (qid: string): Promise<boolean> =>
  */
 export const checkCommunityHelperBadge = async (username: string): Promise<boolean> => {
   try {
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const result = await AnswerModel.countDocuments({ ansBy: username });
+    // const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    const result = await QuestionModel.aggregate([
-      { $unwind: '$answers' },
-      {
-        $match: {
-          'answers.ansBy': username,
-          'answers.ansDateTime': { $gt: weekAgo },
-        },
-      },
-      {
-        $group: {
-          _id: '$answers._id',
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $count: 'totalAnswers',
-      },
-    ]).exec();
+    // const result = await QuestionModel.aggregate([
+    //   { $unwind: '$answers' },
+    //   {
+    //     $match: {
+    //       'answers.ansBy': username,
+    //       'answers.ansDateTime': { $gt: weekAgo },
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: '$answers._id',
+    //       count: { $sum: 1 },
+    //     },
+    //   },
+    //   {
+    //     $count: 'totalAnswers',
+    //   },
+    // ]).exec();
 
     console.log(result);
 
-    return result.length > 0 && result[0].totalAnswers >= 10;
+    return result >= 10;
   } catch (error) {
     throw new Error('Error checking community helper badge eligibility');
   }

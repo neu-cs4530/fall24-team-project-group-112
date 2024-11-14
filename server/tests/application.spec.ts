@@ -1002,12 +1002,7 @@ describe('application module', () => {
         (question.answers as Answer[]).push(ans4);
         jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
         jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
-        const mockAggregate = {
-          exec: jest.fn().mockResolvedValue([{ totalAnswers: 10 }]),
-        };
-        jest
-          .spyOn(QuestionModel, 'aggregate')
-          .mockReturnValue(mockAggregate as unknown as ReturnType<typeof QuestionModel.aggregate>);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
         mockingoose(QuestionModel).toReturn(
           Array(5)
             .fill(null)
@@ -1085,61 +1080,39 @@ describe('application module', () => {
     describe('checkCommunityHelperBadge', () => {
       const username = 'testUser';
 
-      beforeEach(() => {
-        jest.clearAllMocks();
-        mockingoose.resetAll();
-      });
+      // beforeEach(() => {
+      //   jest.clearAllMocks();
+      //   mockingoose.resetAll();
+      // });
 
-      // Optional: Clean up after all tests
-      afterAll(() => {
-        mockingoose.resetAll();
-      });
+      // // Optional: Clean up after all tests
+      // afterAll(() => {
+      //   mockingoose.resetAll();
+      // });
 
       it('should return true if the user has answered 10 or more questions in the past week', async () => {
-        const recentAnswers = [{ totalAnswers: 10 }];
-        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
-          () =>
-            ({
-              exec: jest.fn().mockResolvedValue(recentAnswers),
-            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
-        );
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValue(15);
 
         const result = await checkCommunityHelperBadge(username);
         expect(result).toBe(true);
       });
 
       it('should return false if the user has fewer than 10 answers in the past week', async () => {
-        const recentAnswers = [{ totalAnswers: 5 }];
-        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
-          () =>
-            ({
-              exec: jest.fn().mockResolvedValue(recentAnswers),
-            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
-        );
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValue(5);
 
         const result = await checkCommunityHelperBadge(username);
         expect(result).toBe(false);
       });
 
       it('should return false if the user has no recent answers', async () => {
-        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
-          () =>
-            ({
-              exec: jest.fn().mockResolvedValue([]),
-            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
-        );
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValue(0);
 
         const result = await checkCommunityHelperBadge(username);
         expect(result).toBe(false);
       });
 
       it('should handle errors if the database query fails', async () => {
-        jest.spyOn(QuestionModel, 'aggregate').mockImplementation(
-          () =>
-            ({
-              exec: jest.fn().mockRejectedValue(new Error('Database error')),
-            }) as unknown as ReturnType<typeof QuestionModel.aggregate>,
-        );
+        jest.spyOn(AnswerModel, 'countDocuments').mockRejectedValue(new Error('Database error'));
 
         await expect(checkCommunityHelperBadge(username)).rejects.toThrow(
           'Error checking community helper badge eligibility',

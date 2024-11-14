@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Follow, User } from '../types';
-import { getFollowers, getUser } from '../services/userService';
+import { getFollowers, getUser, addFollow } from '../services/userService';
 
 /**
  * Custom hook to user profiles.
@@ -16,25 +16,48 @@ const useProfile = () => {
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingOpen, setFollowingOpen] = useState(false);
   const [error, setError] = useState<string>('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+
+  const fetchUser = useCallback(async () => {
+    if (username) {
+      try {
+        const retrievedUser = await getUser(username);
+        setUser(retrievedUser);
+        const result = await getFollowers(username);
+        setFollowers(result.followers);
+        setFollowing(result.following);
+      } catch (err) {
+        setError('An error occurred while fetching the user and/or followers.');
+
+        console.log(err); // eslint-disable-line no-console
+      }
+    }
+  }
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (username) {
-        try {
-          const retrievedUser = await getUser(username);
-          setUser(retrievedUser);
-          const result = await getFollowers(username);
-          setFollowers(result.followers);
-          setFollowing(result.following);
-        } catch (err) {
-          setError('An error occurred while fetching the user.');
-          // eslint-disable-next-line no-console
-          console.log(err);
-        }
-      }
-    };
     fetchUser();
-  }, [username]);
+  }, [fetchUser]);
+
+  const postFollow = async (followerUsername: string, followeeUsername: string) => {
+    if (!followerUsername || !followeeUsername) {
+      setError('An error occurred while following the user.');
+      return;
+    }
+
+    try {
+      const res = await addFollow(followerUsername, followeeUsername);
+      if (res) {
+        setError('');
+        await fetchUser();
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setShowErrorModal(true);
+        setError(`An error occurred while following the user`);
+      }
+    }
+  };
 
   return {
     user,
@@ -45,6 +68,9 @@ const useProfile = () => {
     followingOpen,
     setFollowingOpen,
     error,
+    showErrorModal,
+    setShowErrorModal,
+    postFollow,
   };
 };
 

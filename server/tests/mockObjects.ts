@@ -9,7 +9,7 @@ export const feedUser = {
   createdAt: new Date('2024-06-04'),
 };
 
-export const follows = [
+export const FOLLOWS = [
   {
     _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
     followerUsername: 'user1',
@@ -237,7 +237,7 @@ export const populatedFollowPost1 = {
   date: new Date('2024-11-13T18:12:17.902Z'),
 };
 
-export const fullFeed = [
+export const FULL_FEED = [
   {
     date: '2024-11-13T06:48:03.273Z',
     event: {

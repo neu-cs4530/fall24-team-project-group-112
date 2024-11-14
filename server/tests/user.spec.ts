@@ -7,8 +7,8 @@ import FollowModel from '../models/follows';
 import * as util from '../models/application';
 import {
   feedUser,
-  follows,
-  fullFeed,
+  FOLLOWS,
+  FULL_FEED,
   populatedAnswer1,
   populatedComment1,
   populatedQuestion1,
@@ -488,23 +488,23 @@ describe('GET /getFeed/:username', () => {
 
   it('should return the feed for a user with no filter provided', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
     mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
     mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
     mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
     const response = await supertest(app).get('/user/feed/user1');
-    console.log(' FAILING RESOPNSE ', response);
+
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(fullFeed);
+    expect(response.body).toEqual(FULL_FEED);
   });
 
   it('should return the feed for a user with the question filter provided', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
     mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
 
-    const expectedResult = fullFeed.filter(post => post.postType === 'Question');
+    const expectedResult = FULL_FEED.filter(post => post.postType === 'Question');
 
     const response = await supertest(app).get('/user/feed/user1?postType=Question');
 
@@ -514,11 +514,11 @@ describe('GET /getFeed/:username', () => {
 
   it('should return the feed for a user with the answer filter provided', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
     mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
     mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
 
-    const expectedResult = fullFeed.filter(post => post.postType === 'Answer');
+    const expectedResult = FULL_FEED.filter(post => post.postType === 'Answer');
 
     const response = await supertest(app).get('/user/feed/user1?postType=Answer');
 
@@ -528,11 +528,11 @@ describe('GET /getFeed/:username', () => {
 
   it('should return the feed for a user with the comment filter provided', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
     mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
     mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
-    const expectedResult = fullFeed.filter(post => post.postType === 'Comment');
+    const expectedResult = FULL_FEED.filter(post => post.postType === 'Comment');
 
     const response = await supertest(app).get('/user/feed/user1?postType=Comment');
 
@@ -542,9 +542,9 @@ describe('GET /getFeed/:username', () => {
 
   it('should return the feed for a user with the follow filter provided', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
 
-    const expectedResult = fullFeed.filter(post => post.postType === 'Follow');
+    const expectedResult = FULL_FEED.filter(post => post.postType === 'Follow');
 
     const response = await supertest(app).get('/user/feed/user1?postType=Follow');
 
@@ -563,7 +563,7 @@ describe('GET /getFeed/:username', () => {
 
   it('should return an error if there is an issue fetching the feed', async () => {
     mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
     mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
     mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
     mockingoose(CommentModel).toReturn([populatedComment1], 'find');

@@ -21,7 +21,14 @@ const commentSchema: Schema = new Schema(
       type: Date,
     },
   },
-  { collection: 'Comment' },
+  { collection: 'Comment', toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+commentSchema.virtual('user', {
+  ref: 'User',
+  localField: 'commentBy',
+  foreignField: 'username',
+  justOne: true,
+});
 
 export default commentSchema;

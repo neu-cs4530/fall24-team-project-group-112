@@ -20,7 +20,7 @@ interface ConfirmationDisplayProps {
  * @param onClose A function that closes the dialog.
  * @param onConfirm A function that is called when the user confirms the action.
  *
- * @returns A React component that display an error.
+ * @returns A React component that displays a confirmation message.
  */
 const ConfirmationDisplay = ({ open, onClose, onConfirm }: ConfirmationDisplayProps) => {
   const styles = {
@@ -40,7 +40,12 @@ const ConfirmationDisplay = ({ open, onClose, onConfirm }: ConfirmationDisplayPr
           <button className={styles.button} onClick={() => onClose()}>
             Cancel
           </button>
-          <button className={styles.button} onClick={() => onConfirm()}>
+          <button
+            className={styles.button}
+            onClick={async () => {
+              await onConfirm();
+              onClose();
+            }}>
             Delete
           </button>
         </div>

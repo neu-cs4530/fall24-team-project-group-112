@@ -25,7 +25,7 @@ interface ProfileTextProps {
  * Profile text component that displays the user's editable "text" information - their username, first name and last name,
  * and optional information - their github link, school, city, state, company, profile headline, and bio.
  *
- * @param userProfile `User` object that contains the user's information.
+ * @param user `User` object that contains the user's information.
  *
  * @returns A React component that displays the user's text information.
  */

@@ -18,7 +18,6 @@ const useProfile = () => {
   const [error, setError] = useState<string>('');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-
   const fetchUser = useCallback(async () => {
     if (username) {
       try {
@@ -29,15 +28,10 @@ const useProfile = () => {
         setFollowing(result.following);
       } catch (err) {
         setError('An error occurred while fetching the user and/or followers.');
-
         console.log(err); // eslint-disable-line no-console
       }
     }
-  }
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  }, [username]);
 
   const postFollow = async (followerUsername: string, followeeUsername: string) => {
     if (!followerUsername || !followeeUsername) {

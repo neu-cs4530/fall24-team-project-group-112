@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Follow, User } from '../types';
 import { getFollowers, getUser, addFollow } from '../services/userService';

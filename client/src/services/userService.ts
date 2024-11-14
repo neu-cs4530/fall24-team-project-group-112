@@ -68,4 +68,26 @@ const getFollowers = async (username: string): Promise<Follows> => {
   }
   return res.data;
 };
-export { addUser, getUser, getFollowers, updateProfile };
+
+/**
+ * Adds or deletes a follow relationship given a specific follower username and followee username.
+ *
+ * @param followerUsername - The username of the user who is issuing a follow.
+ * @param followeeUsername - The username of the user who is being followed.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns a success or error message depending on the succesful addition or deletion of the follow.
+ */
+const addFollow = async (
+  followerUsername: string,
+  followeeUsername: string,
+): Promise<{ success: string } | { error: string }> => {
+  const data = { followerUsername, followeeUsername };
+
+  const res = await api.post(`${USER_API_URL}/follow`, data);
+  if (res.status !== 200) {
+    throw new Error('Error while adding or deleting follows');
+  }
+  return res.data;
+};
+
+export { addUser, getUser, getFollowers, addFollow, updateProfile };

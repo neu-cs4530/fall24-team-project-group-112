@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
+import Profile from './main/profile';
 import { FakeSOSocket, User } from '../types';
 import LoginContext from '../contexts/LoginContext';
 import UserContext from '../contexts/UserContext';
@@ -46,6 +47,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     <LoginContext.Provider value={{ setUser }}>
       <Routes>
         {/* Public Routes */}
+        {/* <Route path='/login' element={user ? <Navigate to='/home' /> : <Login />} /> */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 
@@ -53,7 +55,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         <Route
           element={
             <ProtectedRoute user={user} socket={socket}>
-              <Layout />
+              <Layout user={user} />
             </ProtectedRoute>
           }>
           <Route path='/home' element={<QuestionPage />} />
@@ -61,6 +63,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
           <Route path='/question/:qid' element={<AnswerPage />} />
           <Route path='/new/question' element={<NewQuestionPage />} />
           <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
+          <Route path='/profile/:username' element={<Profile loggedInUser={user} />} />
         </Route>
       </Routes>
     </LoginContext.Provider>

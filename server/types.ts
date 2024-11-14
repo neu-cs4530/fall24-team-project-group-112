@@ -52,6 +52,8 @@ export interface UpdateUserRequest extends Request {
 
 /**
  * Interface for updating a user's profile, which contains:
+ * - firstName - The user's first name. Optional field.
+ * - lastName - The user's last name. Optional field.
  * - headline - The user's one-liner headline. Optional field.
  * - bio - The user's full bio. Optional field.
  * - githubUrl - The user's GitHub profile. Optional field.
@@ -62,6 +64,8 @@ export interface UpdateUserRequest extends Request {
  * - avatarName - The name of the user's avatar image. Optional field.
  */
 export interface UpdateUserPayload {
+  firstName?: string;
+  lastName?: string;
   headline?: string;
   bio?: string;
   githubUrl?: string;
@@ -91,6 +95,7 @@ export interface Answer {
   ansBy: string;
   ansDateTime: Date;
   comments: Comment[] | ObjectId[];
+  // user?: User;
 }
 
 /**
@@ -215,6 +220,7 @@ export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
+  // user?: User;
 }
 
 /**
@@ -242,13 +248,16 @@ export type CommentResponse = Comment | { error: string };
  * - followerUsername - The username of the user who followed a user.
  * - followeeUsername - The username of the user who was followed by a user.
  * - followDateTime - The date and time when the follow was posted.
- *
+ * - followee? - The user object of the followee. Optional field.
+ * - follower? - The user object of the follower. Optional field.
  */
 export interface Follow {
   _id?: ObjectId;
   followerUsername: string;
   followeeUsername: string;
   followDateTime: Date;
+  followee?: User;
+  follower?: User;
 }
 
 /**
@@ -292,6 +301,7 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: QuestionResponse) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
+  profileUpdate: (user: User) => void;
 }
 
 /**
@@ -338,6 +348,45 @@ export interface GetNotificationRequest extends Request {
 }
 
 /**
+ * Enum representing the possible event types for feed posts.
+ */
+export enum FeedPostType {
+  QUESTION = 'Question',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - postType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ */
+
+export interface FeedPost {
+  _id?: ObjectId;
+  postType: FeedPostType;
+  event: ObjectId | Question | Answer | Comment | Badge | Follow;
+  date: Date;
+}
+
+/**
+ * Interface for the request parameters when retrieving a user's following feed.
+ * - username - The user's unique username.
+ * - postType - The type of post to retrieve. Optional.
+ */
+export interface GetFeedRequest extends Request {
+  params: {
+    username: string;
+  };
+  query: {
+    postType: FeedPostType;
+  };
+}
+
+/**
  * Type representing the possible responses for a User-related operation.
  */
 export type UserResponse = User | { error: string };
@@ -351,6 +400,16 @@ export interface CreateUserRequest extends Request {
   body: {
     user: User;
     password: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding questions answered by a given user.
+ * - username - The user's unique username.
+ */
+export interface FindQuestionsAnsweredByRequest extends Request {
+  params: {
+    username: string;
   };
 }
 
@@ -440,6 +499,16 @@ export interface FollowRequest extends Request {
   body: {
     followerUsername: string;
     followeeUsername: string;
+  };
+}
+
+/**
+ * Interface for the request parameters when finding followers and following for a given user.
+ * - username - The user's unique username.
+ */
+export interface FindFollowersAndFollowingRequest extends Request {
+  params: {
+    username: string;
   };
 }
 

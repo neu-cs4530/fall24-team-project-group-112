@@ -3,14 +3,73 @@ import { Socket } from 'socket.io-client';
 export type FakeSOSocket = Socket<ServerToClientEvents>;
 
 /**
- * Represents a user in the application.
+ * Interface representing a User, which contains:
+ * - username - The unique identifier of the user.
+ * - firstName - The user's first name
+ * - lastName - The user's last name
+ * - email - The user's email address
+ * - headline? - The user's one-liner headline. Optional field.
+ * - bio? - The user's full bio. Optional field.
+ * - githubUrl? - The user's GitHub profile. Optional field.
+ * - company? - The company a user currently works at. Optional field.
+ * - school? - The school a user currently attends. Optional field.
+ * - city? - The city a user lives in. Optional field.
+ * - state? - The country a user lives in. Optional field.
+ * - badges - The list of badges a user has earned.
+ * - avatarName? - The name of the user's avatar image. Optional field.
+ * - createdAt - The date the user created their account.
+ *
  */
 export interface User {
   username: string;
   firstName: string;
   lastName: string;
   email: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  badges: Badge[];
+  avatarName?: string;
   createdAt: Date;
+}
+
+/**
+ * Interface representing a Badge, which contains:
+ * - _id - The unique identifier for the badge. Optional field.
+ * - name - The name of the badge.
+ * - description - The description of the badge.
+ * - color - The color of the badge.
+ */
+export interface Badge {
+  _id?: string;
+  name: BadgeName;
+  description: string;
+  color: BadgeColor;
+}
+
+/**
+ * Enum representing the possible colors for a badge.
+ */
+export enum BadgeColor {
+  GOLD = 'gold',
+  SILVER = 'silver',
+  BRONZE = 'bronze',
+}
+
+/**
+ * Enum representing the possible types of badges.
+ */
+export enum BadgeName {
+  FIRST_COMMENTER = 'First Commenter',
+  VOTER = 'Voter',
+  DISCUSSION_STARTER = 'Discussion Starter',
+  COMMUNITY_HELPER = 'Community Helper',
+  INFLUENCER = 'Influencer',
+  LIFESAVER = 'Lifesaver',
 }
 
 /**
@@ -142,6 +201,18 @@ export interface CommentUpdatePayload {
   type: 'question' | 'answer';
 }
 
+export interface Follow {
+  followerUsername: string;
+  followeeUsername: string;
+  followDateTime: Date;
+  user: User;
+}
+
+export interface Follows {
+  followers: Follow[];
+  following: Follow[];
+}
+
 /**
  * Interface representing the possible events that the server can emit to the client.
  */
@@ -151,4 +222,42 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: Question) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (update: CommentUpdatePayload) => void;
+  profileUpdate: (update: User) => void;
+}
+
+/**
+ * Enum representing the avatars a user can choose from.
+ */
+export enum AvatarNames {
+  AVATAR_1 = 'avatar1',
+  AVATAR_2 = 'avatar2',
+  AVATAR_3 = 'avatar3',
+  AVATAR_4 = 'avatar4',
+  AVATAR_5 = 'avatar5',
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
+ * - firstName - The user's first name. Optional field.
+ * - lastName - The user's last name. Optional field.
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  firstName?: string;
+  lastName?: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
 }

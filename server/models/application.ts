@@ -16,6 +16,8 @@ import {
   UpdateUserPayload,
   User,
   UserResponse,
+  FeedPost,
+  FeedPostType,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -908,9 +910,41 @@ export const addUser = async (user: User): Promise<UserResponse> => {
 };
 
 /**
+ * Finds all questions answered by a given user.
+ *
+ * @param {string} username - The username of the user to filter questions by
+ *
+ * @returns {Promise<Question[]>} - The list of questions answered by the provided user,
+ */
+export const findQuestionAnsweredBy = async (
+  username: string,
+): Promise<Question[] | { error: string }> => {
+  try {
+    const answers = await AnswerModel.find({ ansBy: username });
+
+    const answerIds = answers.map(answer => answer._id);
+
+    return await QuestionModel.find({ answers: { $in: answerIds } }).populate([
+      {
+        path: 'tags',
+        model: TagModel,
+      },
+      {
+        path: 'answers',
+        model: AnswerModel,
+      },
+    ]);
+  } catch (error) {
+    return {
+      error: `Error when finding questions answered by specified user: ${(error as Error).message}`,
+    };
+  }
+};
+
+/**
  * Finds all questions asked by a given user.
  *
- * @param {User} user - The user to add
+ * @param {string} username - The username of the user to filter questions by
  *
  * @returns {Promise<Question[]>} - The list of questions asked by the provided user,
  */
@@ -1082,8 +1116,8 @@ export const deleteNotificationsForUser = async (
 export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
   try {
     if (
-      (await UserModel.findOne({ username: follow.followerUsername })) === undefined ||
-      (await UserModel.findOne({ username: follow.followeeUsername })) === undefined
+      (await UserModel.findOne({ username: follow.followerUsername })) === null ||
+      (await UserModel.findOne({ username: follow.followeeUsername })) === null
     ) {
       throw new Error('Follower or followee does not exist');
     }
@@ -1093,7 +1127,7 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
       followeeUsername: follow.followeeUsername,
     });
 
-    if (existingFollow !== undefined) {
+    if (existingFollow !== null) {
       await FollowModel.deleteOne({
         followerUsername: follow.followerUsername,
         followeeUsername: follow.followeeUsername,
@@ -1140,5 +1174,215 @@ export const getNotificationsForUser = async (
     return notifications;
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Retrieves all followers and following for a given user.
+ * If the provided user is invalid, an error will be returned.
+ *
+ * @param username the username of the user whose followers and following should be retrieved
+ * @returns a Promise resolving to void, or an error message if the operation fails
+ */
+export const getFollowersAndFollowingForUser = async (
+  username: string,
+): Promise<{ followers: Follow[]; following: Follow[] } | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+
+    const followers = await FollowModel.find({ followeeUsername: username })
+      .populate('follower')
+      .exec();
+    const following = await FollowModel.find({ followerUsername: username })
+      .populate('followee')
+      .exec();
+
+    return {
+      followers: followers.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.follower,
+      })),
+      following: following.map(follow => ({
+        followeeUsername: follow.followeeUsername,
+        followerUsername: follow.followerUsername,
+        followDateTime: follow.followDateTime,
+        user: follow.followee,
+      })),
+    };
+  } catch (error) {
+    return { error: `Error when getting followers and following: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Retrieves the 10 most recent questions asked by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
+ *
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing questions asked by these users
+ */
+const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const result = await QuestionModel.find({
+    askedBy: { $in: followingUsernames },
+  })
+    .populate([{ path: 'user', select: 'username firstName lastName avatarName' }])
+    .select('title text askedBy askDateTime')
+    .sort({ askDateTime: -1 })
+    .limit(10);
+
+  return result.map(question => ({
+    postType: FeedPostType.QUESTION,
+    event: question,
+    date: question.askDateTime,
+  }));
+};
+
+/**
+ * Retrieves the 10 most recent questions answered by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing questions answered by these users
+ */
+const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const answersByFollowing = await AnswerModel.find({ ansBy: { $in: followingUsernames } });
+  const questions = await QuestionModel.find({
+    answers: { $in: answersByFollowing.map(a => a._id) },
+  })
+    .select('title text askDateTime askedBy answers user')
+    .populate([
+      {
+        path: 'answers',
+        match: { ansBy: { $in: followingUsernames } },
+        select: 'ansBy ansDateTime text',
+        populate: { path: 'user', select: 'username firstName lastName avatarName' },
+      },
+      { path: 'user', select: 'username firstName lastName avatarName' },
+    ]);
+
+  // Find 10 most recent answers. Each answer gets its own feed post, even if part of the same question.
+  const allAnswersAsFeedPosts = questions.flatMap(question =>
+    question.answers.map(answer => {
+      const ans = answer as Answer;
+      const questionWithSingleAnswer = { ...question.toObject(), answers: [ans] };
+
+      return {
+        postType: FeedPostType.ANSWER,
+        event: questionWithSingleAnswer,
+        date: ans.ansDateTime,
+      };
+    }),
+  );
+
+  return allAnswersAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+};
+
+/**
+ * Retrieves the 10 most recent comments made by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose comments should be retrieved
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing comments made by these users
+ */
+const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
+  const questions = await QuestionModel.find({
+    comments: { $in: commentsByFollowing.map(a => a._id) },
+  })
+    .select('title text askDateTime askedBy comments user')
+    .populate([
+      {
+        path: 'comments',
+        match: { commentBy: { $in: followingUsernames } },
+        populate: { path: 'user', select: 'username firstName lastName avatarName' },
+      },
+      { path: 'user', select: 'username firstName lastName avatarName' },
+    ]);
+
+  // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
+  const allCommentsAsFeedPosts = questions.flatMap(question =>
+    question.comments.map(comment => {
+      const com = comment as Comment;
+      const questionWithSingleComment = { ...question.toObject(), comments: [com] };
+
+      return {
+        postType: FeedPostType.COMMENT,
+        event: questionWithSingleComment,
+        date: com.commentDateTime,
+      };
+    }),
+  );
+
+  return allCommentsAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+};
+
+/**
+ * Retrieves the 10 most recent follows made by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose follows should be retrieved
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing follows initiated by these users
+ */
+const getFollowsByFollowing = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  const follows = await FollowModel.find({ followerUsername: { $in: followingUsernames } })
+    .populate([
+      { path: 'follower', select: 'username firstName lastName avatarName' },
+      { path: 'followee', select: 'username firstName lastName avatarName' },
+    ])
+    .sort({ followDateTime: -1 })
+    .limit(10);
+
+  return follows.map(follow => ({
+    postType: FeedPostType.FOLLOW,
+    event: follow,
+    date: follow.followDateTime,
+  }));
+};
+
+/**
+ * Retrieves the feed for a given user, containing the 10 most recent posts of the specified type.
+ *
+ * @param {string} username user whose feed is being retrieved
+ * @param {FeedPostType} postType type of post to retrieve, or undefined to retrieve all types
+ * @returns {Promise<FeedPost[]>} - The list of feed posts for the user
+ */
+export const getFeedForUser = async (
+  username: string,
+  postType?: FeedPostType,
+): Promise<FeedPost[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+
+    const following = await FollowModel.find({ followerUsername: username });
+    const followingUsernames = following.map(f => f.followeeUsername);
+
+    const fetchTasks = [];
+    // Only fetch data the user has requested
+    if (!postType || postType === FeedPostType.QUESTION) {
+      fetchTasks.push(getQuestionsAskedByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.ANSWER) {
+      fetchTasks.push(getQuestionsAnsweredByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.COMMENT) {
+      fetchTasks.push(getCommentsMadeByUsers(followingUsernames));
+    }
+    if (!postType || postType === FeedPostType.FOLLOW) {
+      fetchTasks.push(getFollowsByFollowing(followingUsernames));
+    }
+
+    // Execute only the necessary data fetches, and do this concurrently
+    const fetchedData = await Promise.all(fetchTasks);
+
+    const result = fetchedData.flat();
+
+    return result.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+  } catch (error) {
+    return { error: `Error when getting feed: ${(error as Error).message}` };
   }
 };

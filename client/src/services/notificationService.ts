@@ -25,4 +25,22 @@ const getNotifications = async (username: string, type?: string): Promise<Notifi
   return res.data;
 };
 
-export default getNotifications;
+/**
+ * Function to get all notifications for a user.
+ *
+ * @param username - The username of the user whose notifications are being deleted.
+ * @throws Error if there is an issue deleting the notifications.
+ */
+const clearAllNotifications = async (username: string): Promise<void> => {
+  const url = `${NOTIFICATION_API_URL}/${username}`;
+
+  const res = await api.delete(url);
+
+  if (res.status !== 200) {
+    throw new Error('Error when deleting notifications');
+  }
+
+  return res.data;
+};
+
+export { getNotifications, clearAllNotifications };

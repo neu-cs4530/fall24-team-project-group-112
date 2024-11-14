@@ -457,15 +457,3 @@ export interface FindUserRequest extends Request {
     username: string;
   };
 }
-
-/**
- * Interface for the request parameters when adding a badge to a user.
- * - badgeId - The type of badge to add.
- * - username - The user's unique username.
- */
-export interface AddBadgeRequest extends Request {
-  params: {
-    badgeId: string;
-    username: string;
-  };
-}

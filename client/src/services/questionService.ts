@@ -92,6 +92,14 @@ const getQuestionsAskedBy = async (username: string): Promise<Question[]> => {
   return res.data;
 };
 
+const getQuestionsAnsweredBy = async (username: string): Promise<Question[]> => {
+  const res = await api.get(`${QUESTION_API_URL}/answeredBy/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching questions answered by user');
+  }
+  return res.data;
+};
+
 export {
   getQuestionsByFilter,
   getQuestionById,
@@ -99,4 +107,5 @@ export {
   upvoteQuestion,
   downvoteQuestion,
   getQuestionsAskedBy,
+  getQuestionsAnsweredBy,
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import useProfile from '../../../hooks/useProfile';
 import ProfileText from './profileText';
-import { getQuestionsAskedBy } from '../../../services/questionService';
+import { getQuestionsAnsweredBy, getQuestionsAskedBy } from '../../../services/questionService';
 import { User, Question } from '../../../types';
 import QuestionList from './questions/questionList';
 import './index.css';
@@ -14,12 +14,16 @@ import './index.css';
 const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const { user, error } = useProfile();
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
+  const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
 
   useEffect(() => {
     const fetchData = async (username: string) => {
       try {
-        const res = await getQuestionsAskedBy(username);
-        setQuestionsAsked(res || []);
+        const askedByRes = await getQuestionsAskedBy(username);
+        setQuestionsAsked(askedByRes || []);
+
+        const answeredByRes = await getQuestionsAnsweredBy(username);
+        setQuestionsAnswered(answeredByRes || []);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
@@ -45,6 +49,10 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
         <>
           <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
           <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
+          <QuestionList
+            questions={questionsAnswered}
+            title={`Questions answered by @${user.username}`}
+          />
         </>
       ) : null}
     </>

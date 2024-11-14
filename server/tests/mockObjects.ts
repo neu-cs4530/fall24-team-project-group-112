@@ -1,3 +1,12 @@
+export const feedUser = {
+  username: 'user1',
+  firstName: 'User',
+  lastName: 'One',
+  email: 'user1@email.com',
+  badges: [],
+  createdAt: new Date('2024-06-04'),
+};
+
 export const populatedQuestion1 = {
   _id: '67344ba3ddbe5d4e5923898e',
   title: 'question 10',
@@ -10,6 +19,7 @@ export const populatedQuestion1 = {
     firstName: 'aarohi',
     lastName: 'nad',
   },
+  answers: [],
 };
 
 export const populatedQuestionPost1 = {

@@ -49,6 +49,7 @@ import NotificationModel from '../models/notifications';
 import FollowModel from '../models/follows';
 import CommentModel from '../models/comments';
 import {
+  feedUser,
   populatedAnswer1,
   //  populatedAnswerPost1,
   populatedComment1,
@@ -1666,7 +1667,7 @@ describe('application module', () => {
     });
 
     it('should return an error if there is a database issue', async () => {
-      jest.spyOn(UserModel, 'findOne').mockImplementation(() => {
+      jest.spyOn(UserModel, 'findOne').mockImplementationOnce(() => {
         throw new Error('Database error');
       });
 
@@ -1685,10 +1686,11 @@ describe('application module', () => {
 
     beforeEach(() => {
       mockingoose.resetAll();
+      jest.clearAllMocks();
     });
 
     it('should return an error if the user does not exist', async () => {
-      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
+      mockingoose(UserModel).toReturn(null, 'findOne');
 
       const result = await getFeedForUser('nonExistentUser');
 
@@ -1696,21 +1698,19 @@ describe('application module', () => {
     });
 
     test('should return a feed with all types of posts for a valid user', async () => {
-      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
       mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
       mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
       mockingoose(CommentModel).toReturn([populatedComment1], 'find');
-
       const feedPosts = await getFeedForUser('user1');
-
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
       expect(posts.length).toBe(5);
     });
 
     test('should return a feed with only questions asked when the question filter is applied', async () => {
-      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
       mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
 
@@ -1725,7 +1725,7 @@ describe('application module', () => {
     it('should return an error if there is an error fetching questions asked', async () => {});
 
     test('should return a feed with only questions answered when the answer filter is applied', async () => {
-      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
       mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
       mockingoose(QuestionModel).toReturn([populatedAnswer1], 'find');
@@ -1740,7 +1740,7 @@ describe('application module', () => {
     it('should return an error if there is an error fetching questions answered', async () => {});
 
     test('should return a feed with only comments posted when the comment filter is applied', async () => {
-      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
       mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
       mockingoose(CommentModel).toReturn([populatedComment1], 'find');
@@ -1755,7 +1755,7 @@ describe('application module', () => {
     it('should return an error if there is an error fetching comments posted', async () => {});
 
     test('should return a feed with only follow events when the follow filter is applied', async () => {
-      mockingoose(UserModel).toReturn(USERS[1], 'findOne');
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
 
       const feedPosts = await getFeedForUser('user1', FeedPostType.FOLLOW);

@@ -1142,7 +1142,9 @@ export const getFeedForUser = async (
 
     // Execute only the necessary data fetches, and do this concurrently
     const fetchedData = await Promise.all(fetchTasks);
+
     const result = fetchedData.flat();
+
     return result.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
   } catch (error) {
     return { error: `Error when getting feed: ${(error as Error).message}` };

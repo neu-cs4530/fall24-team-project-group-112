@@ -22,7 +22,14 @@ const answerSchema: Schema = new Schema(
     },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   },
-  { collection: 'Answer' },
+  { collection: 'Answer', toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+answerSchema.virtual('user', {
+  ref: 'User',
+  localField: 'ansBy',
+  foreignField: 'username',
+  justOne: true,
+});
 
 export default answerSchema;

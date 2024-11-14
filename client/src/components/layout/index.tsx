@@ -22,10 +22,16 @@ const Layout = ({ user }: { user: User | null }) => {
     <>
       <Header user={user} />
       <div id='main' className='main'>
-        {!isNotificationsPage && !isFeedPage && <SideBarNav />}
-        <div id='right_main' className='right_main'>
-          <Outlet />
-        </div>
+        {!isNotificationsPage && <SideBarNav />}
+        {!isNotificationsPage ? (
+          <div id='right_main' className='right_main'>
+            <Outlet />
+          </div>
+        ) : (
+          <div id='right_main'>
+            <Outlet />
+          </div>
+        )}
       </div>
     </>
   );

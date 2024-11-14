@@ -13,7 +13,7 @@ import AvatarDisplay from '../avatarDisplay';
 /**
  * Interface representing the props for the ProfileTextProps component.
  *
- * - q: The user object that contains the user's information.
+ * - user: The user object that contains the user's information.
  * - loggedInUser: The logged in user object that contains the logged in user's information, or null if a user is not logged in.
  */
 interface ProfileTextProps {

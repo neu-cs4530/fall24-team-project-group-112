@@ -42,6 +42,12 @@ const useProfile = () => {
         setError('First Name and Last Name cannot be empty');
         return;
       }
+
+      const checkGithubUrl = /^https?:\/\/github\.com\/([a-zA-Z0-9._-]+)$/;
+      if (formData.githubUrl && !checkGithubUrl.test(formData.githubUrl)) {
+        setError('Enter a valid GitHub URL');
+        return;
+      }
       try {
         const updatedUser = await updateProfile(user.username, {
           ...Object.fromEntries(

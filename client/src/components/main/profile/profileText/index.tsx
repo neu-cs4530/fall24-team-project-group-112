@@ -78,7 +78,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
           onClose={() => {
             setError('');
           }}>
-          First Name and Last Name cannot be empty
+          {error}
         </Alert>
       )}
       <div className={styles.header}>

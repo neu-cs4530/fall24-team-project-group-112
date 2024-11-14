@@ -25,15 +25,15 @@ const useProfile = () => {
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
-    username: user?.username || undefined,
+    username: user?.username,
     avatarName: user?.avatarName || 'avatar1',
-    headline: user?.headline || undefined,
-    githubUrl: user?.githubUrl || undefined,
-    school: user?.school || undefined,
-    city: user?.city || undefined,
-    state: user?.state || undefined,
-    company: user?.company || undefined,
-    bio: user?.bio || undefined,
+    headline: user?.headline,
+    githubUrl: user?.githubUrl,
+    school: user?.school,
+    city: user?.city,
+    state: user?.state,
+    company: user?.company,
+    bio: user?.bio,
   });
 
   const handleSave = async () => {
@@ -88,13 +88,13 @@ const useProfile = () => {
         lastName: user.lastName,
         username: user.username,
         avatarName: user?.avatarName || 'avatar1',
-        headline: user.headline !== undefined ? user.headline : undefined,
-        githubUrl: user.githubUrl !== undefined ? user.githubUrl : undefined,
-        school: user.school !== undefined ? user.school : undefined,
-        city: user.city !== undefined ? user.city : undefined,
-        state: user.state !== undefined ? user.state : undefined,
-        company: user.company !== undefined ? user.company : undefined,
-        bio: user.bio !== undefined ? user.bio : undefined,
+        headline: user.headline,
+        githubUrl: user.githubUrl,
+        school: user.school,
+        city: user.city,
+        state: user.state,
+        company: user.company,
+        bio: user.bio,
       });
     }
   }, [user]);
@@ -116,20 +116,16 @@ const useProfile = () => {
   }, [username]);
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  const handleProfileUpdate = useCallback(
-    async (updatedUser: User) => {
+    const handleProfileUpdate = async (updatedUser: User) => {
       setUser(updatedUser);
+    };
+    fetchUser();
 
-      socket.on('profileUpdate', handleProfileUpdate);
-      return () => {
-        socket.off('profileUpdate', handleProfileUpdate);
-      };
-    },
-    [socket],
-  );
+    socket.on('profileUpdate', handleProfileUpdate);
+    return () => {
+      socket.off('profileUpdate', handleProfileUpdate);
+    };
+  }, [fetchUser, socket]);
 
   const postFollow = async (followerUsername: string, followeeUsername: string) => {
     if (!followerUsername || !followeeUsername) {

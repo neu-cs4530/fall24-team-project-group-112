@@ -994,7 +994,7 @@ export const getFollowersAndFollowingForUser = async (
  *
  * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
  *
- * @returns {Promise<Question[]>} - The list of questions asked by these users
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing questions asked by these users
  */
 const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
   const result = await QuestionModel.find({
@@ -1016,7 +1016,7 @@ const getQuestionsAskedByUsers = async (followingUsernames: string[]): Promise<F
  * Retrieves the 10 most recent questions answered by the given users.
  *
  * @param {string[]} followingUsernames - The usernames of the users whose questions should be retrieved
- * @returns {Promise<Question[]>} - The list of questions answered by these users
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing questions answered by these users
  */
 const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
   const answersByFollowing = await AnswerModel.find({ ansBy: { $in: followingUsernames } });
@@ -1055,7 +1055,7 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
  * Retrieves the 10 most recent comments made by the given users.
  *
  * @param {string[]} followingUsernames - The usernames of the users whose comments should be retrieved
- * @returns {Promise<Question[]>} - The list of comments made by these users
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing comments made by these users
  */
 const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
   const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
@@ -1089,6 +1089,12 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
   return allCommentsAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 
+/**
+ * Retrieves the 10 most recent follows made by the given users.
+ *
+ * @param {string[]} followingUsernames - The usernames of the users whose follows should be retrieved
+ * @returns {Promise<FeedPost[]>} - The list of feed posts representing follows initiated by these users
+ */
 const getFollowsByFollowing = async (followingUsernames: string[]): Promise<FeedPost[]> => {
   const follows = await FollowModel.find({ followerUsername: { $in: followingUsernames } })
     .populate([
@@ -1105,6 +1111,13 @@ const getFollowsByFollowing = async (followingUsernames: string[]): Promise<Feed
   }));
 };
 
+/**
+ * Retrieves the feed for a given user, containing the 10 most recent posts of the specified type.
+ *
+ * @param {string} username user whose feed is being retrieved
+ * @param {FeedPostType} postType type of post to retrieve, or undefined to retrieve all types
+ * @returns {Promise<FeedPost[]>} - The list of feed posts for the user
+ */
 export const getFeedForUser = async (
   username: string,
   postType?: FeedPostType,

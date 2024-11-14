@@ -267,6 +267,13 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets the feed for a given user. The feed can be filtered by post type.
+   * If the provided user is invalid, an error will be returned.
+   *
+   * @param req The request object containing the username and optional feed post type as parameters.
+   * @param res The HTTP response object used to send back the user's feed posts.
+   */
   const getFeed = async (req: GetFeedRequest, res: Response): Promise<void> => {
     const { username } = req.params;
     const { postType } = req.query;

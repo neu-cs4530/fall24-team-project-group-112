@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Follow, User } from '../types';
 import { getFollowers, getUser, updateProfile } from '../services/userService';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to user profiles.
  *
+ * @param userProfile - The initial user object for the profile page.
+ *
  * @returns user - The user object for the profile page.
  */
 const useProfile = () => {
-  // const { socket } = useUserContext();
-
+  const { socket } = useUserContext();
   const { username } = useParams();
   const [user, setUser] = useState<User>();
   const [followers, setFollowers] = useState<Follow[]>([]);
@@ -33,6 +35,30 @@ const useProfile = () => {
     company: user?.company || undefined,
     bio: user?.bio || undefined,
   });
+
+  const handleSave = async () => {
+    if (user) {
+      if (formData.firstName.trim() === '' || formData.lastName.trim() === '') {
+        setError('First Name and Last Name cannot be empty');
+        return;
+      }
+      try {
+        const updatedUser = await updateProfile(user.username, {
+          ...Object.fromEntries(
+            Object.entries(formData).filter(([_, value]) => value !== undefined),
+          ),
+        });
+        setIsEditing(false);
+        setUser(updatedUser);
+        setError('');
+      } catch (err) {
+        setError('An error occurred while saving the profile data.');
+
+        // eslint-disable-next-line no-console
+        console.log(err);
+      }
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -69,33 +95,18 @@ const useProfile = () => {
         }
       }
     };
-    const handleSave = async () => {
-      try {
-        if (user !== undefined) {
-          const updatedUser = await updateProfile(user.username, {
-            ...Object.fromEntries(
-              Object.entries(formData).filter(([_, value]) => value !== undefined),
-            ),
-          });
-          console.log(formData);
-          setIsEditing(false);
-          setUser(updatedUser);
-        }
-      } catch (err) {
-        setError('An error occurred while saving the profile data.');
 
-        // eslint-disable-next-line no-console
-        console.log(err);
-      }
+    const handleProfileUpdate = (updatedUser: User) => {
+      setUser(updatedUser);
     };
 
     fetchUser();
 
-    // socket.on('profileUpdate', handleSave);
+    socket.on('profileUpdate', handleProfileUpdate);
     return () => {
-      // socket.off('profileUpdate', handleSave);
+      socket.off('profileUpdate', handleProfileUpdate);
     };
-  }, [username]);
+  }, [username, socket]);
 
   return {
     user,
@@ -114,6 +125,7 @@ const useProfile = () => {
     setIsEditing,
     formData,
     setFormData,
+    handleSave,
   };
 };
 

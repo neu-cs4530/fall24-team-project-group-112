@@ -7,12 +7,11 @@ import FollowDisplay from '../followDisplay';
 import useProfile from '../../../../hooks/useProfile';
 import './index.css';
 import AvatarDisplay from '../avatarDisplay';
-import { updateProfile } from '../../../../services/userService';
 
 /**
  * Interface representing the props for the ProfileTextProps component.
  *
- * - user: The user object that contains the user's information.
+ * - q: The user object that contains the user's information.
  * - loggedInUser: The logged in user object that contains the logged in user's information, or null if a user is not logged in.
  */
 interface ProfileTextProps {
@@ -24,13 +23,12 @@ interface ProfileTextProps {
  * Profile text component that displays the user's editable "text" information - their username, first name and last name,
  * and optional information - their github link, school, city, state, company, profile headline, and bio.
  *
- * @param user `User` object that contains the user's information.
+ * @param userProfile `User` object that contains the user's information.
  *
  * @returns A React component that displays the user's text information.
  */
 const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
   const {
-    setUser,
     followers,
     following,
     followersOpen,
@@ -45,6 +43,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     setIsEditing,
     formData,
     setFormData,
+    handleSave,
   } = useProfile();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -53,26 +52,6 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
       ...prevState,
       [name]: value,
     }));
-  };
-
-  const handleSave = async () => {
-    if (formData.firstName.trim() === '' || formData.lastName.trim() === '') {
-      setError('First Name and Last Name cannot be empty');
-      return;
-    }
-    try {
-      const updatedUser = await updateProfile(user.username, {
-        ...Object.fromEntries(Object.entries(formData).filter(([_, value]) => value !== undefined)),
-      });
-      setIsEditing(false);
-      setUser(updatedUser);
-      setError('');
-    } catch (err) {
-      setError('An error occurred while saving the profile data.');
-
-      // eslint-disable-next-line no-console
-      console.log(err);
-    }
   };
 
   const handleSelectAvatar = (avatarName: string) => {
@@ -174,7 +153,12 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             {isEditing && loggedInUser && loggedInUser.username === user.username && (
               <>
                 <div>
-                  <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => {
+                      setError('');
+                      setIsEditing(!isEditing);
+                    }}>
                     <MdCancel className={styles.editIcon} />
                   </button>
                 </div>

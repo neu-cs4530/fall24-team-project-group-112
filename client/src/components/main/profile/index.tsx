@@ -5,6 +5,7 @@ import { getQuestionsAskedBy } from '../../../services/questionService';
 import { User, Question } from '../../../types';
 import QuestionList from './questions/questionList';
 import './index.css';
+import BadgeDisplay from './badgeDisplay';
 
 /**
  * Profile Component displays the full content on a user's profile page. It also includes functionality for a user to edit the information on their own profile page.
@@ -44,6 +45,9 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
       {user ? (
         <>
           <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
+          <div>
+            <BadgeDisplay user={user} />
+          </div>
           <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
         </>
       ) : null}

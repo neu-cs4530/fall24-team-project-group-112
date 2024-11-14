@@ -51,10 +51,6 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 
-        <Route element={<Layout user={user} />}>
-          <Route path='/profile/:username' element={<Profile loggedInUser={user} />} />
-        </Route>
-
         {/* Protected Routes */}
         <Route
           element={
@@ -67,6 +63,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
           <Route path='/question/:qid' element={<AnswerPage />} />
           <Route path='/new/question' element={<NewQuestionPage />} />
           <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
+          <Route path='/profile/:username' element={<Profile loggedInUser={user} />} />
         </Route>
       </Routes>
     </LoginContext.Provider>

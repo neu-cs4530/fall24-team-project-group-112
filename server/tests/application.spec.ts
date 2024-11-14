@@ -1689,7 +1689,7 @@ describe('application module', () => {
       jest.clearAllMocks();
     });
 
-    it('should return an error if the user does not exist', async () => {
+    test('should return an error if the user does not exist', async () => {
       mockingoose(UserModel).toReturn(null, 'findOne');
 
       const result = await getFeedForUser('nonExistentUser');
@@ -1722,8 +1722,15 @@ describe('application module', () => {
       expect(posts[0].postType).toEqual(FeedPostType.QUESTION);
     });
 
-    it('should return an error if there is an error fetching questions asked', async () => {});
+    test('should return an error if there is an error fetching questions asked', async () => {
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn(new Error('Error fetching questions'), 'find');
 
+      const result = await getFeedForUser('user1', FeedPostType.QUESTION);
+
+      expect(result).toEqual({ error: 'Error when getting feed: Error fetching questions' });
+    });
     test('should return a feed with only questions answered when the answer filter is applied', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
@@ -1737,7 +1744,16 @@ describe('application module', () => {
       expect(posts.length).toBe(1);
       expect(posts[0].postType).toEqual(FeedPostType.ANSWER);
     });
-    it('should return an error if there is an error fetching questions answered', async () => {});
+
+    test('should return an error if there is an error fetching questions answered', async () => {
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(AnswerModel).toReturn(new Error('Error fetching answers'), 'find');
+
+      const result = await getFeedForUser('user1', FeedPostType.ANSWER);
+
+      expect(result).toEqual({ error: 'Error when getting feed: Error fetching answers' });
+    });
 
     test('should return a feed with only comments posted when the comment filter is applied', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
@@ -1752,7 +1768,16 @@ describe('application module', () => {
       expect(posts.length).toBe(1);
       expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
     });
-    it('should return an error if there is an error fetching comments posted', async () => {});
+
+    test('should return an error if there is an error fetching comments posted', async () => {
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(CommentModel).toReturn(new Error('Error fetching comments'), 'find');
+
+      const result = await getFeedForUser('user1', FeedPostType.COMMENT);
+
+      expect(result).toEqual({ error: 'Error when getting feed: Error fetching comments' });
+    });
 
     test('should return a feed with only follow events when the follow filter is applied', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
@@ -1767,7 +1792,31 @@ describe('application module', () => {
         expect(post.postType).toEqual(FeedPostType.FOLLOW);
       }
     });
-    it('should return an error if there is an error fetching follows', async () => {});
-    it('should return a feed sorted from most to least recent', async () => {});
+
+    test('should return an error if there is an error fetching follows', async () => {
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(new Error('Error fetching follows'), 'find');
+
+      const result = await getFeedForUser('user1', FeedPostType.FOLLOW);
+
+      expect(result).toEqual({ error: 'Error when getting feed: Error fetching follows' });
+    });
+  });
+
+  test('should return a feed sorted from most to least recent', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+    mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+    mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+    const feedPosts = await getFeedForUser('user1');
+
+    expect(Array.isArray(feedPosts)).toBe(true);
+    const posts = feedPosts as FeedPost[];
+    expect(posts.length).toBe(5);
+    for (let i = 0; i < posts.length - 1; i++) {
+      expect(posts[i].date.getSeconds()).toBeGreaterThanOrEqual(posts[i + 1].date.getSeconds());
+    }
   });
 });

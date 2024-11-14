@@ -5,6 +5,17 @@ import { app } from '../app';
 import UserModel from '../models/users';
 import FollowModel from '../models/follows';
 import * as util from '../models/application';
+import {
+  feedUser,
+  follows,
+  fullFeed,
+  populatedAnswer1,
+  populatedComment1,
+  populatedQuestion1,
+} from './mockObjects';
+import QuestionModel from '../models/questions';
+import AnswerModel from '../models/answers';
+import CommentModel from '../models/comments';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -328,10 +339,6 @@ describe('GET /follow/:username', () => {
 
     jest.spyOn(util, 'isUsernameUnique').mockResolvedValue(true);
 
-    jest.spyOn(FollowModel, 'find').mockImplementation(() => {
-      throw new Error('Database error');
-    });
-
     const response = await supertest(app).get(`/user/follow/${mockReqParams.username}`);
 
     expect(response.status).toBe(500);
@@ -467,5 +474,105 @@ describe('GET /getUserByName/:name', () => {
     const response = await supertest(app).get('/user/');
 
     expect(response.status).toBe(404);
+  });
+});
+
+describe('GET /getFeed/:username', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure connection is properly closed
+  });
+
+  it('should return the feed for a user with no filter provided', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+    mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+    mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+    const response = await supertest(app).get('/user/feed/user1');
+    console.log(' FAILING RESOPNSE ', response);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(fullFeed);
+  });
+
+  it('should return the feed for a user with the question filter provided', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+
+    const expectedResult = fullFeed.filter(post => post.postType === 'Question');
+
+    const response = await supertest(app).get('/user/feed/user1?postType=Question');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResult);
+  });
+
+  it('should return the feed for a user with the answer filter provided', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+    mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+
+    const expectedResult = fullFeed.filter(post => post.postType === 'Answer');
+
+    const response = await supertest(app).get('/user/feed/user1?postType=Answer');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResult);
+  });
+
+  it('should return the feed for a user with the comment filter provided', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+    mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+    const expectedResult = fullFeed.filter(post => post.postType === 'Comment');
+
+    const response = await supertest(app).get('/user/feed/user1?postType=Comment');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResult);
+  });
+
+  it('should return the feed for a user with the follow filter provided', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+
+    const expectedResult = fullFeed.filter(post => post.postType === 'Follow');
+
+    const response = await supertest(app).get('/user/feed/user1?postType=Follow');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResult);
+  });
+
+  it('should return an error if the user does not exist', async () => {
+    mockingoose(UserModel).toReturn(null, 'findOne');
+
+    const response = await supertest(app).get('/user/feed/fakeUser');
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching user feed');
+  });
+
+  it('should return an error if there is an issue fetching the feed', async () => {
+    mockingoose(UserModel).toReturn(feedUser, 'findOne');
+    mockingoose(FollowModel).toReturn(follows, 'find');
+    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+    mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+    mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+    jest.spyOn(util, 'getFeedForUser').mockRejectedValueOnce(new Error('Error fetching feed'));
+
+    const response = await supertest(app).get('/user/feed/user1');
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Error when fetching user feed');
   });
 });

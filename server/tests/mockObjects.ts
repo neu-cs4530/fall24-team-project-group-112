@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 export const feedUser = {
   username: 'user1',
   firstName: 'User',
@@ -6,6 +8,33 @@ export const feedUser = {
   badges: [],
   createdAt: new Date('2024-06-04'),
 };
+
+export const follows = [
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
+    followerUsername: 'user1',
+    followeeUsername: 'user2',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user2',
+    followeeUsername: 'user1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user1',
+    followeeUsername: 'com_by1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e7de'),
+    followerUsername: 'user1',
+    followeeUsername: 'ansBy1',
+    followDateTime: new Date('2023-11-19T09:24:00'),
+  },
+];
 
 export const populatedQuestion1 = {
   _id: '67344ba3ddbe5d4e5923898e',
@@ -20,6 +49,7 @@ export const populatedQuestion1 = {
     lastName: 'nad',
   },
   answers: [],
+  comments: [],
 };
 
 export const populatedQuestionPost1 = {
@@ -206,3 +236,74 @@ export const populatedFollowPost1 = {
   },
   date: new Date('2024-11-13T18:12:17.902Z'),
 };
+
+export const fullFeed = [
+  {
+    date: '2024-11-13T06:48:03.273Z',
+    event: {
+      _id: '67344ba3ddbe5d4e5923898e',
+      answers: [],
+      askDateTime: '2024-11-13T06:48:03.273Z',
+      askedBy: 'ro',
+      comments: [],
+      downVotes: [],
+      id: '67344ba3ddbe5d4e5923898e',
+      tags: [],
+      text: 'question 10 text',
+      title: 'question 10',
+      upVotes: [],
+      user: {
+        _id: '6723db97653dc38b6311243d',
+        firstName: 'aarohi',
+        lastName: 'nad',
+        username: 'ro',
+      },
+      views: [],
+    },
+    postType: 'Question',
+  },
+  {
+    date: '2023-11-19T14:24:00.000Z',
+    event: {
+      _id: '65e9b58910afe6e94fc6e6df',
+      followDateTime: '2023-11-19T14:24:00.000Z',
+      followeeUsername: 'user2',
+      followerUsername: 'user1',
+      id: '65e9b58910afe6e94fc6e6df',
+    },
+    postType: 'Follow',
+  },
+  {
+    date: '2023-11-19T14:24:00.000Z',
+    event: {
+      _id: '65e9b58910afe6e94fc6e7de',
+      followDateTime: '2023-11-19T14:24:00.000Z',
+      followeeUsername: 'user1',
+      followerUsername: 'user2',
+      id: '65e9b58910afe6e94fc6e7de',
+    },
+    postType: 'Follow',
+  },
+  {
+    date: '2023-11-19T14:24:00.000Z',
+    event: {
+      _id: '65e9b58910afe6e94fc6e7de',
+      followDateTime: '2023-11-19T14:24:00.000Z',
+      followeeUsername: 'com_by1',
+      followerUsername: 'user1',
+      id: '65e9b58910afe6e94fc6e7de',
+    },
+    postType: 'Follow',
+  },
+  {
+    date: '2023-11-19T14:24:00.000Z',
+    event: {
+      _id: '65e9b58910afe6e94fc6e7de',
+      followDateTime: '2023-11-19T14:24:00.000Z',
+      followeeUsername: 'ansBy1',
+      followerUsername: 'user1',
+      id: '65e9b58910afe6e94fc6e7de',
+    },
+    postType: 'Follow',
+  },
+];

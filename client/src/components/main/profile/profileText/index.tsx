@@ -50,7 +50,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
   const styles = {
     container: 'flex-col ',
     header: 'bg-white p-5 shadow-md flex flex-row',
-    avatarContainer: 'flex flex-col ml-4',
+    avatarContainer: 'flex flex-col ml-5',
     nameUsernameContainer: 'flex flex-row items-end',
     name: 'text-4xl font-bold text-gray-800',
     username: 'text-2xl text-gray-600 ml-12',

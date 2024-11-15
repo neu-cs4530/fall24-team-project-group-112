@@ -6,11 +6,11 @@ import useUserContext from './useUserContext';
 
 /**
  * Custom hook to user profiles.
- *
+ * @param loggedInUser - The logged-in user, or null if a user is not logged in.
  *
  * @returns user - The user object for the profile page.
  */
-const useProfile = () => {
+const useProfile = (loggedInUser: User | null) => {
   const { socket } = useUserContext();
   const { username } = useParams();
   const [user, setUser] = useState<User>();
@@ -22,6 +22,7 @@ const useProfile = () => {
   const [error, setError] = useState<string>('');
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -35,6 +36,10 @@ const useProfile = () => {
     company: user?.company,
     bio: user?.bio,
   });
+
+  useEffect(() => {
+    setIsFollowing(followers.some(follow => follow.user.username === loggedInUser?.username));
+  }, [followers, loggedInUser]);
 
   const handleSave = async () => {
     if (user) {
@@ -127,6 +132,16 @@ const useProfile = () => {
     };
   }, [fetchUser, socket]);
 
+  useEffect(() => {
+    const handleFollowUpdate = async () => {
+      setIsFollowing(!isFollowing);
+    };
+    socket.on('followUpdate', handleFollowUpdate);
+    return () => {
+      socket.off('followUpdate', handleFollowUpdate);
+    };
+  }, [socket, isFollowing]);
+
   const postFollow = async (followerUsername: string, followeeUsername: string) => {
     if (!followerUsername || !followeeUsername) {
       setError('An error occurred while following the user.');
@@ -170,6 +185,8 @@ const useProfile = () => {
     showErrorModal,
     setShowErrorModal,
     postFollow,
+    isFollowing,
+    setIsFollowing,
   };
 };
 

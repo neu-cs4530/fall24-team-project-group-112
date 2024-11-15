@@ -52,9 +52,8 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     showErrorModal,
     setShowErrorModal,
     postFollow,
-  } = useProfile();
-
-  const isFollowing = followers.some(follow => follow.user.username === loggedInUser?.username);
+    isFollowing,
+  } = useProfile(loggedInUser);
 
   const styles = {
     container: 'flex-col ',

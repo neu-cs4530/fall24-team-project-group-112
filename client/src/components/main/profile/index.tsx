@@ -12,7 +12,7 @@ import './index.css';
  * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
 const Profile = (loggedInUser: { loggedInUser: User | null }) => {
-  const { user, error } = useProfile();
+  const { user, error } = useProfile(loggedInUser.loggedInUser);
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
 

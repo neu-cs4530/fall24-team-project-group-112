@@ -34,7 +34,7 @@ export interface User {
   school?: string;
   city?: string;
   state?: string;
-  badges: Badge[];
+  badges: Badge[] | ObjectId[];
   avatarName?: string;
   createdAt: Date;
 }
@@ -478,11 +478,11 @@ export enum BadgeColor {
  * Enum representing the possible types of badges.
  */
 export enum BadgeName {
-  FIRST_COMMENTER = 'First Commenter',
+  AUTOBIOGRAPHER = 'Autobiographer',
   VOTER = 'Voter',
-  DISCUSSION_STARTER = 'Discussion Starter',
+  SPEEDY_ANSWERER = 'Speedy Answerer',
   COMMUNITY_HELPER = 'Community Helper',
-  INFLUENCER = 'Influencer',
+  TOP_ANSWERER = 'Top Answerer',
   LIFESAVER = 'Lifesaver',
 }
 

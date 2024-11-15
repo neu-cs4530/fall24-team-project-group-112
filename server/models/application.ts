@@ -26,6 +26,207 @@ import CommentModel from './comments';
 import NotificationModel from './notifications';
 import UserModel from './users';
 import FollowModel from './follows';
+import BadgeModel from './badges';
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Autobiographer badge.
+ *
+ * @param user the user to check if they can receive the badge
+ * @returns true if the provided user can earn the Autobiographer badge
+ */
+export const checkAutobiographerBadge = (user: User): boolean => {
+  const profileCompleted =
+    user.firstName &&
+    user.lastName &&
+    user.email &&
+    user.headline &&
+    user.bio &&
+    user.githubUrl &&
+    user.company &&
+    user.school &&
+    user.city &&
+    user.state;
+
+  return Boolean(profileCompleted);
+};
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Voter badge.
+ *
+ * @param username the username of the user to check if they can receive the badge
+ * @returns true if the provided user can earn the Voter badge
+ */
+export const checkVoterBadge = async (username: string): Promise<boolean> => {
+  try {
+    const voteCount = await QuestionModel.countDocuments({
+      $or: [{ upVotes: username }, { downVotes: username }],
+    });
+
+    return voteCount === 1;
+  } catch (error) {
+    throw new Error('Error checking voter badge eligibility');
+  }
+};
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Speedy Answerer badge.
+ *
+ * @param qid the id of the question to check if it's been answered in enough time
+ * @returns true if the provided user can earn the Speedy Answerer badge
+ */
+export const checkSpeedyAnswererBadge = async (qid: string): Promise<boolean> => {
+  try {
+    const question = await QuestionModel.findById(qid);
+    if (!question) return false;
+
+    const now = new Date();
+    return now.getTime() - question.askDateTime.getTime() <= 30 * 60 * 1000;
+  } catch (error) {
+    throw new Error('Error checking speedy voter badge eligibility');
+  }
+};
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Community Helper badge.
+ *
+ * @param username the username of the user to check if they can receive the badge
+ * @returns true if the provided user can earn the Community Helper badge
+ */
+export const checkCommunityHelperBadge = async (username: string): Promise<boolean> => {
+  try {
+    const result = await AnswerModel.countDocuments({ ansBy: username });
+
+    return result >= 10;
+  } catch (error) {
+    throw new Error('Error checking community helper badge eligibility');
+  }
+};
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Top Answerer badge.
+ *
+ * @param username the username of the user to check if they can receive the badge
+ * @returns true if the provided user can earn the Top Answerer badge
+ */
+export const checkTopAnswererBadge = async (username: string): Promise<boolean> => {
+  try {
+    const questions = await QuestionModel.find().populate({
+      path: 'answers',
+      match: { ansBy: username },
+    });
+
+    const totalAnswers = questions.reduce(
+      (count, question) => count + (question.answers ? question.answers.length : 0),
+      0,
+    );
+    return totalAnswers >= 20;
+  } catch (error) {
+    throw new Error('Error checking top answerer badge eligibility');
+  }
+};
+
+/**
+ * Checks if the provided user has satisfied the requirements to receive the Lifesaver badge.
+ *
+ * @param qid the id of the question to check if it has received enough answers
+ * @returns true if the provided user can earn the Lifesaver badge
+ */
+export const checkLifesaverBadge = async (qid: string): Promise<boolean> => {
+  try {
+    const question = await QuestionModel.findById(qid);
+    if (!question) return false;
+
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    return question.upVotes.length >= 50 && question.askDateTime >= weekAgo;
+  } catch (error) {
+    throw new Error('Error checking lifesaver badge eligibility');
+  }
+};
+
+/**
+ * Retrieves the object id of the corresponding badge given the badge name.
+ *
+ * @param badgeName the name of the badge to lookup
+ * @returns {Promise<UserResponse> | null} The object id of the matching badge, or null if there is no matching badge with the provided name.
+ */
+export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | null> => {
+  const badge = await BadgeModel.findOne({ name: badgeName });
+  return badge ? badge._id : null;
+};
+
+/**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
+ */
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification | { error: string }> => {
+  try {
+    if (!eventId || !type || !receiverUsername) {
+      throw new Error('Invalid request');
+    }
+
+    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+    const notif: Notification = {
+      notificationType: type,
+      eventId,
+      receiverUsername,
+      notificationDate: new Date(),
+      seen: false,
+    };
+
+    return await NotificationModel.create(notif);
+  } catch (error) {
+    return { error: `Error when adding notification: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * Adds the specified badge to the provided user.
+ *
+ * @param {string} username - The username of the user to add the badge to
+ * @param {string} badgeId - The identifier of the badge to add
+ *
+ * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
+ */
+export const addBadge = async (username: string, badgeName: string): Promise<UserResponse> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+
+    const badgeObjectId = await getBadgeIdFromName(badgeName);
+    if (badgeObjectId === null) {
+      throw new Error('Invalid badge name');
+    }
+
+    const userWithBadge = await UserModel.findOne({
+      username,
+      badges: badgeObjectId,
+    });
+
+    if (userWithBadge) {
+      return user as UserResponse;
+    }
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { username },
+      { $addToSet: { badges: badgeObjectId } },
+      { new: true },
+    );
+    await addNotifications(badgeObjectId, username, NotificationType.BADGE);
+    return updatedUser as UserResponse;
+  } catch (error) {
+    return { error: `Error when adding badge to user: ${(error as Error).message}` };
+  }
+};
 
 /**
  * Parses tags from a search string.
@@ -201,40 +402,6 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
     return savedTag as Tag;
   } catch (error) {
     return null;
-  }
-};
-
-/**
- * Adds a notification to the database for the given event and user.
- * @param {ObjectId} eventId id of event associated with this notification
- * @param {string} receiverUsername username of user who will receive this notification
- * @param {NotificationType} type type of event associated with this notification
- * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
- */
-const addNotifications = async (
-  eventId: ObjectId,
-  receiverUsername: string,
-  type: NotificationType,
-): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
-
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
-
-    return await NotificationModel.create(notif);
-  } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
   }
 };
 
@@ -573,6 +740,16 @@ export const addVoteToQuestion = async (
         : 'Downvote cancelled successfully';
     }
 
+    const shouldReceiveVoterbadge = await checkVoterBadge(username);
+    if (shouldReceiveVoterbadge) {
+      await addBadge(username, 'VOTER');
+    }
+
+    const shouldReceiveLifesaverBadge = await checkLifesaverBadge(qid);
+    if (shouldReceiveLifesaverBadge) {
+      await addBadge(result.askedBy, 'LIFESAVER');
+    }
+
     return {
       msg,
       upVotes: result.upVotes || [],
@@ -609,6 +786,22 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
     if (result === null) {
       throw new Error('Error when adding answer to question');
     }
+
+    const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
+    if (shouldReceiveSpeedyAnswererBadge) {
+      await addBadge(ans.ansBy, 'SPEEDY_ANSWERER');
+    }
+
+    const shouldReceiveCommunityHelperBadge = await checkCommunityHelperBadge(ans.ansBy);
+    if (shouldReceiveCommunityHelperBadge) {
+      await addBadge(ans.ansBy, 'COMMUNITY_HELPER');
+    }
+
+    const shouldReceiveTopAnswererBadge = await checkTopAnswererBadge(ans.ansBy);
+    if (shouldReceiveTopAnswererBadge) {
+      await addBadge(ans.ansBy, 'TOP_ANSWERER');
+    }
+
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
@@ -860,6 +1053,11 @@ export const updateUser = async (
 
   Object.assign(existingUser, userUpdate);
   await existingUser.save();
+
+  const shouldReceiveAutobiographerBadge = await checkAutobiographerBadge(existingUser);
+  if (shouldReceiveAutobiographerBadge) {
+    await addBadge(existingUser.username, 'AUTOBIOGRAPHER');
+  }
 
   return existingUser as User;
 };

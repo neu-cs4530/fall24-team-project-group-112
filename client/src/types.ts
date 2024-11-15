@@ -246,4 +246,42 @@ export interface Notification {
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
+  profileUpdate: (update: User) => void;
+}
+
+/**
+ * Enum representing the avatars a user can choose from.
+ */
+export enum AvatarNames {
+  AVATAR_1 = 'avatar1',
+  AVATAR_2 = 'avatar2',
+  AVATAR_3 = 'avatar3',
+  AVATAR_4 = 'avatar4',
+  AVATAR_5 = 'avatar5',
+}
+
+/**
+ * Interface for updating a user's profile, which contains:
+ * - firstName - The user's first name. Optional field.
+ * - lastName - The user's last name. Optional field.
+ * - headline - The user's one-liner headline. Optional field.
+ * - bio - The user's full bio. Optional field.
+ * - githubUrl - The user's GitHub profile. Optional field.
+ * - company - The company a user currently works at. Optional field.
+ * - school - The school a user currently attends. Optional field.
+ * - city - The city a user lives in. Optional field.
+ * - state - The country a user lives in. Optional field.
+ * - avatarName - The name of the user's avatar image. Optional field.
+ */
+export interface UpdateUserPayload {
+  firstName?: string;
+  lastName?: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  company?: string;
+  school?: string;
+  city?: string;
+  state?: string;
+  avatarName?: string;
 }

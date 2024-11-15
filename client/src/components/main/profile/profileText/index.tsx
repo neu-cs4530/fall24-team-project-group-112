@@ -1,12 +1,14 @@
 import React from 'react';
-import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
-import { MdWork } from 'react-icons/md';
+import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit, FaSave } from 'react-icons/fa';
+import { Alert } from '@mui/material';
+import { MdWork, MdCancel } from 'react-icons/md';
 import { User } from '../../../../types';
 import Avatar from '../../baseComponents/avatar';
 import FollowDisplay from '../followDisplay';
 import ErrorDisplay from '../errorDisplay';
 import useProfile from '../../../../hooks/useProfile';
 import './index.css';
+import AvatarDisplay from '../avatarDisplay';
 
 /**
  * Interface representing the props for the ProfileTextProps component.
@@ -32,33 +34,45 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     followers,
     following,
     followersOpen,
-    followingOpen,
-    showErrorModal,
     setFollowersOpen,
+    error,
+    setError,
+    followingOpen,
     setFollowingOpen,
+    avatarOpen,
+    setAvatarOpen,
+    isEditing,
+    setIsEditing,
+    formData,
+    handleSave,
+    handleChange,
+    handleSelectAvatar,
+    showErrorModal,
     setShowErrorModal,
     postFollow,
-    error,
   } = useProfile();
 
   const isFollowing = followers.some(follow => follow.user.username === loggedInUser?.username);
 
   const styles = {
-    container: 'flex-col',
-    header: 'bg-white p-5 shadow-md flex flex-row border border-gray-500',
+    container: 'flex-col ',
+    header: 'bg-white p-5 shadow-md flex flex-row',
     avatarContainer: 'flex flex-col ml-4',
     nameUsernameContainer: 'flex flex-row items-end',
     name: 'text-4xl font-bold text-gray-800',
     username: 'text-2xl text-gray-600 ml-12',
-    editButton: 'bg-white text-black border border-black text-lg ml-4',
-    headline: 'mt-3 text-xl text-gray-500',
-    infoContainer: 'flex gap-4',
+    editAvatarContainer: 'flex flex-col ml-4',
+    editButton: 'bg-white text-black text-lg ml-8',
+    editIcon: 'text-2xl',
+    headline: 'mt-1 text-xl text-gray-500',
+    infoContainer: 'flex gap-4 mt-3',
     infoItem: 'flex gap-2 items-center',
     icon: 'text-sm mb-1',
+    input: 'border',
     github: 'no-underline hover:underline',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
-    bioContainer: 'bg-white p-5 shadow-md flex flex-col border border-gray-500',
+    bioContainer: 'bg-white p-5 shadow-md flex flex-col',
     bioHeader: 'ml-3 text-2xl font-bold text-gray-500',
     bioContent: 'ml-3 text-xl text-gray-500',
     followButton: 'bg-blue-800 text-white rounded-md p-2 ml-4',
@@ -69,18 +83,88 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
 
   return (
     <div className={styles.container}>
+      {error && (
+        <Alert
+          severity='error'
+          onClose={() => {
+            setError('');
+          }}>
+          {error}
+        </Alert>
+      )}
       <div className={styles.header}>
-        <Avatar avatarName={user.avatarName || 'avatar1'} />
+        {isEditing ? (
+          <div className={styles.editAvatarContainer}>
+            <Avatar avatarName={formData.avatarName} />
+            <div>
+              <button className={styles.editButton} onClick={() => setAvatarOpen(true)}>
+                <FaEdit className={styles.editIcon} />
+              </button>
+
+              <AvatarDisplay
+                open={avatarOpen}
+                onClose={() => setAvatarOpen(false)}
+                onSelectAvatar={handleSelectAvatar}
+              />
+            </div>
+          </div>
+        ) : (
+          <Avatar avatarName={user.avatarName || 'avatar1'} />
+        )}
         <div className={styles.avatarContainer}>
           <div className={styles.nameUsernameContainer}>
-            <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>
-            <div className={styles.username}>{`@${user.username}`}</div>
-            {loggedInUser && loggedInUser.username === user.username && (
+            {isEditing ? (
+              <>
+                <input
+                  type='text'
+                  name='firstName'
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className={`${styles.name} border w-1/4`}
+                  placeholder='First Name'
+                />
+                <input
+                  type='text'
+                  name='lastName'
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className={`${styles.name} border w-1/4 ml-4`}
+                  placeholder='Last Name'
+                />
+                <div className={styles.username}>{`@${user.username}`}</div>
+              </>
+            ) : (
+              <>
+                <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>
+                <div className={styles.username}>{`@${user.username}`}</div>
+              </>
+            )}
+            {!isEditing && loggedInUser && loggedInUser.username === user.username && (
               <div>
-                <button className={styles.editButton}>
-                  <FaEdit className={styles.icon} />
+                <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
+                  <FaEdit className={styles.editIcon} />
                 </button>
               </div>
+            )}
+
+            {isEditing && loggedInUser && loggedInUser.username === user.username && (
+              <>
+                <div>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => {
+                      setError('');
+                      setIsEditing(!isEditing);
+                    }}>
+                    <MdCancel className={styles.editIcon} />
+                  </button>
+                </div>
+                <div>
+                  <button className={styles.editButton} onClick={() => handleSave()}>
+                    <FaSave className={styles.editIcon} />
+                  </button>
+                </div>
+              </>
             )}
             {loggedInUser && loggedInUser?.username !== user.username && (
               <div>
@@ -101,35 +185,109 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             )}
           </div>
 
-          <div className={styles.headline}>{user.headline && <div>{user.headline}</div>}</div>
+          <div className={styles.headline}>
+            {isEditing ? (
+              <input
+                type='text'
+                name='headline'
+                value={formData.headline}
+                onChange={handleChange}
+                className={`${styles.headline} border`}
+                placeholder='Headline'
+              />
+            ) : (
+              user.headline && <div>{user.headline}</div>
+            )}
+          </div>
           <div className={styles.infoContainer}>
-            {user.githubUrl && (
-              <div className={styles.github}>
-                <a
-                  className={styles.infoItem}
-                  href={user.githubUrl}
-                  target='_blank'
-                  rel='noreferrer'>
+            {isEditing ? (
+              <>
+                <div className={styles.infoItem}>
                   <FaGithub className={styles.icon} />
-                  GitHub
-                </a>
-              </div>
-            )}
-            {user.school && (
-              <div className={styles.infoItem}>
-                <FaSchool className={styles.icon} /> {user.school}
-              </div>
-            )}
-            {user.city && user.state && (
-              <div className={styles.infoItem}>
-                <FaMapMarkerAlt className={styles.icon} /> {`${user.city}, ${user.state}`}
-              </div>
-            )}
-            {user.company && (
-              <div className={styles.infoItem}>
-                <MdWork className={styles.icon} />
-                <p>{user.company}</p>
-              </div>
+                  <input
+                    type='url'
+                    name='githubUrl'
+                    value={formData.githubUrl}
+                    onChange={handleChange}
+                    className={styles.input}
+                    placeholder='Github URL'
+                  />
+                </div>
+                <div className={styles.infoItem}>
+                  <FaSchool className={styles.icon} />
+                  <input
+                    type='text'
+                    name='school'
+                    value={formData.school}
+                    onChange={handleChange}
+                    className={styles.input}
+                    placeholder='School'
+                  />
+                </div>
+                <div className={styles.infoItem}>
+                  <FaMapMarkerAlt className={styles.icon} />
+                  <input
+                    type='text'
+                    name='city'
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={styles.input}
+                    autoComplete='addressLevel2'
+                    placeholder='City'
+                  />
+                  <input
+                    type='text'
+                    name='state'
+                    value={formData.state}
+                    onChange={handleChange}
+                    className={styles.input}
+                    autoComplete='addressLevel1'
+                    placeholder='State'
+                  />
+                </div>
+                <div className={styles.infoItem}>
+                  <MdWork className={styles.icon} />
+                  <input
+                    type='text'
+                    name='company'
+                    value={formData.company}
+                    onChange={handleChange}
+                    className={styles.input}
+                    placeholder='Company'
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {user.githubUrl && (
+                  <div className={styles.github}>
+                    <a
+                      className={styles.infoItem}
+                      href={user.githubUrl}
+                      target='_blank'
+                      rel='noreferrer'>
+                      <FaGithub className={styles.icon} />
+                      GitHub
+                    </a>
+                  </div>
+                )}
+                {user.school && (
+                  <div className={styles.infoItem}>
+                    <FaSchool className={styles.icon} /> {user.school}
+                  </div>
+                )}
+                {user.city && user.state && (
+                  <div className={styles.infoItem}>
+                    <FaMapMarkerAlt className={styles.icon} /> {`${user.city}, ${user.state}`}
+                  </div>
+                )}
+                {user.company && (
+                  <div className={styles.infoItem}>
+                    <MdWork className={styles.icon} />
+                    <p>{user.company}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
           <div className={styles.followersContainer}>
@@ -158,11 +316,26 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
           </div>
         </div>
       </div>
-      {user.bio && (
-        <div className={styles.bioContainer}>
+      <hr></hr>
+      {isEditing ? (
+        <>
           <div className={styles.bioHeader}>Bio</div>
-          <div className={styles.bioContent}>{user.bio}</div>
-        </div>
+          <textarea
+            name='bio'
+            value={formData.bio}
+            onChange={handleChange}
+            className={`${styles.bioContainer} border w-full`}
+            rows={10}
+            placeholder='Write a bio here!'
+          />
+        </>
+      ) : (
+        user.bio && (
+          <div className={styles.bioContainer}>
+            <div className={styles.bioHeader}>Bio</div>
+            <div className={styles.bioContent}>{user.bio}</div>
+          </div>
+        )
       )}
       {showErrorModal && (
         <ErrorDisplay

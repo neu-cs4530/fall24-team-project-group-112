@@ -10,6 +10,7 @@ import {
   UpdateUserPayload,
   FindFollowersAndFollowingRequest,
   FindUserRequest,
+  GetFeedRequest,
 } from '../types';
 import {
   addUser,
@@ -17,6 +18,7 @@ import {
   updateUser,
   addFollow,
   getFollowersAndFollowingForUser,
+  getFeedForUser,
 } from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/users';
@@ -194,7 +196,7 @@ const userController = (socket: FakeSOSocket) => {
       if (updatedUser && 'error' in updatedUser) {
         throw new Error(updatedUser.error);
       }
-
+      socket.emit('profileUpdate', updatedUser);
       res.json(updatedUser);
     } catch (err) {
       res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);
@@ -266,12 +268,37 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Gets the feed for a given user. The feed can be filtered by post type.
+   * If the provided user is invalid, an error will be returned.
+   *
+   * @param req The request object containing the username and optional feed post type as parameters.
+   * @param res The HTTP response object used to send back the user's feed posts.
+   */
+  const getFeed = async (req: GetFeedRequest, res: Response): Promise<void> => {
+    const { username } = req.params;
+    const { postType } = req.query;
+
+    try {
+      const result = await getFeedForUser(username, postType);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when fetching user feed: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
   router.post('/login', loginUser);
   router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
   router.get('/follow/:username', getFollowersAndFollowing);
+  router.get('/feed/:username', getFeed);
 
   return router;
 };

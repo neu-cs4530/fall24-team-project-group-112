@@ -1,7 +1,7 @@
 import React from 'react';
-import { FaGithub, FaSchool, FaMapMarkerAlt, FaEdit, FaSave } from 'react-icons/fa';
+import { FaEdit, FaSave } from 'react-icons/fa';
 import { Alert } from '@mui/material';
-import { MdWork, MdCancel } from 'react-icons/md';
+import { MdCancel } from 'react-icons/md';
 import { User } from '../../../../types';
 import Avatar from '../../baseComponents/avatar';
 import FollowDisplay from '../followDisplay';
@@ -9,6 +9,8 @@ import ErrorDisplay from '../errorDisplay';
 import useProfile from '../../../../hooks/useProfile';
 import './index.css';
 import AvatarDisplay from '../avatarDisplay';
+import ProfileHeader from '../profileHeader';
+import ProfileInfo from '../profileInfo';
 
 /**
  * Interface representing the props for the ProfileTextProps component.
@@ -59,17 +61,11 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     header: 'bg-white p-5 shadow-md flex flex-row',
     avatarContainer: 'flex flex-col ml-4',
     nameUsernameContainer: 'flex flex-row items-end',
-    name: 'text-4xl font-bold text-gray-800',
-    username: 'text-2xl text-gray-600 ml-12',
     editAvatarContainer: 'flex flex-col ml-4',
     editButton: 'bg-white text-black text-lg ml-8',
     editIcon: 'text-2xl',
     headline: 'mt-1 text-xl text-gray-500',
-    infoContainer: 'flex gap-4 mt-3',
-    infoItem: 'flex gap-2 items-center',
-    icon: 'text-sm mb-1',
     input: 'border',
-    github: 'no-underline hover:underline',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
     bioContainer: 'bg-white p-5 shadow-md flex flex-col',
@@ -113,32 +109,14 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
         )}
         <div className={styles.avatarContainer}>
           <div className={styles.nameUsernameContainer}>
-            {isEditing ? (
-              <>
-                <input
-                  type='text'
-                  name='firstName'
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className={`${styles.name} border w-1/4`}
-                  placeholder='First Name'
-                />
-                <input
-                  type='text'
-                  name='lastName'
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className={`${styles.name} border w-1/4 ml-4`}
-                  placeholder='Last Name'
-                />
-                <div className={styles.username}>{`@${user.username}`}</div>
-              </>
-            ) : (
-              <>
-                <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>
-                <div className={styles.username}>{`@${user.username}`}</div>
-              </>
-            )}
+            <ProfileHeader
+              isEditing={isEditing}
+              firstName={formData.firstName}
+              lastName={formData.lastName}
+              username={user.username}
+              handleChange={handleChange}
+            />
+
             {!isEditing && loggedInUser && loggedInUser.username === user.username && (
               <div>
                 <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
@@ -199,97 +177,18 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
               user.headline && <div>{user.headline}</div>
             )}
           </div>
-          <div className={styles.infoContainer}>
-            {isEditing ? (
-              <>
-                <div className={styles.infoItem}>
-                  <FaGithub className={styles.icon} />
-                  <input
-                    type='url'
-                    name='githubUrl'
-                    value={formData.githubUrl}
-                    onChange={handleChange}
-                    className={styles.input}
-                    placeholder='Github URL'
-                  />
-                </div>
-                <div className={styles.infoItem}>
-                  <FaSchool className={styles.icon} />
-                  <input
-                    type='text'
-                    name='school'
-                    value={formData.school}
-                    onChange={handleChange}
-                    className={styles.input}
-                    placeholder='School'
-                  />
-                </div>
-                <div className={styles.infoItem}>
-                  <FaMapMarkerAlt className={styles.icon} />
-                  <input
-                    type='text'
-                    name='city'
-                    value={formData.city}
-                    onChange={handleChange}
-                    className={styles.input}
-                    autoComplete='addressLevel2'
-                    placeholder='City'
-                  />
-                  <input
-                    type='text'
-                    name='state'
-                    value={formData.state}
-                    onChange={handleChange}
-                    className={styles.input}
-                    autoComplete='addressLevel1'
-                    placeholder='State'
-                  />
-                </div>
-                <div className={styles.infoItem}>
-                  <MdWork className={styles.icon} />
-                  <input
-                    type='text'
-                    name='company'
-                    value={formData.company}
-                    onChange={handleChange}
-                    className={styles.input}
-                    placeholder='Company'
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                {user.githubUrl && (
-                  <div className={styles.github}>
-                    <a
-                      className={styles.infoItem}
-                      href={user.githubUrl}
-                      target='_blank'
-                      rel='noreferrer'>
-                      <FaGithub className={styles.icon} />
-                      GitHub
-                    </a>
-                  </div>
-                )}
-                {user.school && (
-                  <div className={styles.infoItem}>
-                    <FaSchool className={styles.icon} /> {user.school}
-                  </div>
-                )}
-                {user.city && user.state && (
-                  <div className={styles.infoItem}>
-                    <FaMapMarkerAlt className={styles.icon} /> {`${user.city}, ${user.state}`}
-                  </div>
-                )}
-                {user.company && (
-                  <div className={styles.infoItem}>
-                    <MdWork className={styles.icon} />
-                    <p>{user.company}</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+
+          <ProfileInfo
+            isEditing={isEditing}
+            user={user}
+            editingGithubUrl={formData.githubUrl}
+            editingSchool={formData.school}
+            editingCity={formData.city}
+            editingState={formData.state}
+            editingCompany={formData.company}
+            handleChange={handleChange}
+          />
+
           <div className={styles.followersContainer}>
             <div>
               <p onClick={() => setFollowersOpen(true)}>

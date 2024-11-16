@@ -231,7 +231,7 @@ const userController = (socket: FakeSOSocket) => {
       if (response && 'error' in response) {
         throw new Error(response.error);
       }
-
+      socket.emit('followUpdate', response.success);
       res.json(response);
     } catch (err) {
       res

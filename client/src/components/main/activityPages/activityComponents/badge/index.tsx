@@ -10,21 +10,27 @@ interface BadgeNotificationProps {
 const BadgeNotification: React.FC<BadgeNotificationProps> = ({ badge }) => {
   const getCircleColor = () => {
     switch (badge.color) {
-      case 'gold':
+      case 'GOLD':
         return '#FFD700';
-      case 'silver':
+      case 'SILVER':
         return '#C0C0C0';
-      case 'bronze':
-        return '#CD7F32';
+      case 'BRONZE':
+        return '#803b06';
       default:
         return '#000';
     }
   };
+
+  const styles = {
+    badgeContainer: 'flex items-center',
+    circle: 'w-3 h-3 rounded-full mr-2',
+  };
+
   return (
     <div className='notification'>
       <div className='notification-header'>
-        <div>
-          <div className='circle' style={{ backgroundColor: getCircleColor() }}></div>
+        <div className={styles.badgeContainer}>
+          <div className={styles.circle} style={{ backgroundColor: getCircleColor() }}></div>
           <div>You earned the {badge.name} badge</div>
         </div>
         <RiDeleteBin5Line className='trash-icon' />

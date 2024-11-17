@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { Answer, AnswerRequest, AnswerResponse, FakeSOSocket } from '../types';
+import { Answer, AnswerRequest, AnswerResponse, FakeSOSocket, NotificationType } from '../types';
 import { addAnswerToQuestion, populateDocument, saveAnswer } from '../models/application';
 
 const answerController = (socket: FakeSOSocket) => {
@@ -73,6 +73,14 @@ const answerController = (socket: FakeSOSocket) => {
       socket.emit('answerUpdate', {
         qid,
         answer: populatedAns as AnswerResponse,
+      });
+      socket.emit('notificationUpdate', {
+        _id: populatedAns._id,
+        notificationType: NotificationType.ANSWER,
+        eventId: populatedAns as Answer,
+        receiverUsername: ansInfo.ansBy,
+        notificationDate: new Date(),
+        seen: false,
       });
       res.json(ansFromDb);
     } catch (err) {

@@ -52,9 +52,9 @@ export interface Badge {
  * Enum representing the possible colors for a badge.
  */
 export enum BadgeColor {
-  GOLD = 'gold',
-  SILVER = 'silver',
-  BRONZE = 'bronze',
+  GOLD = 'GOLD',
+  SILVER = 'SILVER',
+  BRONZE = 'BRONZE',
 }
 /**
  * Enum representing the possible types of badges.
@@ -199,29 +199,6 @@ export interface Follows {
 }
 
 /**
- * Interface representing the payload for a notification update event, which contains:
- * - username - The username of which the notification is for.
- * - type - The type of notificiation, either comment, answer, badge, or follow.
- */
-export interface NotificationUpdatePayload {
-  notification: Notification;
-}
-
-/**
- * Interface representing the possible events that the server can emit to the client.
- */
-export interface ServerToClientEvents {
-  questionUpdate: (question: Question) => void;
-  answerUpdate: (update: AnswerUpdatePayload) => void;
-  viewsUpdate: (question: Question) => void;
-  voteUpdate: (vote: VoteUpdatePayload) => void;
-  commentUpdate: (update: CommentUpdatePayload) => void;
-  notificationUpdate: (notification: NotificationUpdatePayload) => void;
-  profileUpdate: (update: User) => void;
-  followUpdate: (follow: string) => void;
-}
-
-/**
  * Enum representing the possible event types for notifications.
  */
 export enum NotificationType {
@@ -248,6 +225,18 @@ export interface Notification {
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
+}
+
+/**
+ * Interface representing the possible events that the server can emit to the client.
+ */
+export interface ServerToClientEvents {
+  questionUpdate: (question: Question) => void;
+  answerUpdate: (update: AnswerUpdatePayload) => void;
+  viewsUpdate: (question: Question) => void;
+  voteUpdate: (vote: VoteUpdatePayload) => void;
+  commentUpdate: (update: CommentUpdatePayload) => void;
+  notificationUpdate: (notification: Notification) => void;
   profileUpdate: (update: User) => void;
   followUpdate: (follow: string) => void;
 }

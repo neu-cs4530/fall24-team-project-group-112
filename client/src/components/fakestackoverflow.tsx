@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Snackbar } from '@mui/material';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
@@ -44,12 +45,34 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     const userItem = getItem('user');
     return userItem ? JSON.parse(userItem) : null;
   });
+  const [notification, setNotification] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!socket) {
+      return () => {};
+    }
+    const handleNotificationUpdate = async () => {
+      setNotification(true);
+    };
+
+    socket.on('notificationUpdate', handleNotificationUpdate);
+
+    return () => {
+      socket.off('notificationUpdate', handleNotificationUpdate);
+    };
+  }, [socket]);
 
   return (
     <LoginContext.Provider value={{ setUser }}>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={notification}
+        autoHideDuration={5000}
+        onClose={() => setNotification(false)}
+        message='You have a new notification!'
+      />
       <Routes>
         {/* Public Routes */}
-        {/* <Route path='/login' element={user ? <Navigate to='/home' /> : <Login />} /> */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 

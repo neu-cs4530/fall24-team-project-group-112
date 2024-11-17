@@ -36,8 +36,10 @@ const useNotifications = (initialType?: string) => {
      *
      * @param notification - The new or updated notification object.
      */
-    const handleNotificationUpdate = ({ notification }: { notification: Notification }) => {
-      setNotifications(prevNotifications => [notification, ...prevNotifications]);
+    const handleNotificationUpdate = (notification: Notification) => {
+      if (notificationType && notificationType === notification.notificationType) {
+        setNotifications(prevNotifications => [notification, ...prevNotifications]);
+      }
     };
 
     fetchData();

@@ -247,6 +247,7 @@ export interface Notification {
   notificationDate: Date;
   seen: boolean;
   profileUpdate: (update: User) => void;
+  followUpdate: (follow: string) => void;
 }
 
 /**

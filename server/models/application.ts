@@ -16,8 +16,11 @@ import {
   UpdateUserPayload,
   User,
   UserResponse,
+  QuestionNotificationResponse,
   FeedPost,
   FeedPostType,
+  Badge,
+  UserBadgeResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -155,48 +158,14 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
 };
 
 /**
- * Adds a notification to the database for the given event and user.
- * @param {ObjectId} eventId id of event associated with this notification
- * @param {string} receiverUsername username of user who will receive this notification
- * @param {NotificationType} type type of event associated with this notification
- * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
- */
-const addNotifications = async (
-  eventId: ObjectId,
-  receiverUsername: string,
-  type: NotificationType,
-): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
-
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
-
-    return await NotificationModel.create(notif);
-  } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
-  }
-};
-
-/**
  * Adds the specified badge to the provided user.
  *
  * @param {string} username - The username of the user to add the badge to
  * @param {string} badgeId - The identifier of the badge to add
  *
- * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
+ * @returns {Promise<UserBadgeResponse>} - The user with the added badge, or an error message if the addition failed.
  */
-export const addBadge = async (username: string, badgeName: string): Promise<UserResponse> => {
+export const addBadge = async (username: string, badgeName: string): Promise<UserBadgeResponse> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
@@ -214,15 +183,16 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
     });
 
     if (userWithBadge) {
-      return user as UserResponse;
+      return { user, badgeEarned: undefined };
     }
     const updatedUser = await UserModel.findOneAndUpdate(
       { username },
       { $addToSet: { badges: badgeObjectId } },
       { new: true },
     );
+    const badge = await BadgeModel.findById(badgeObjectId);
     await addNotifications(badgeObjectId, username, NotificationType.BADGE);
-    return updatedUser as UserResponse;
+    return { user: updatedUser as User, badgeEarned: badge as Badge };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -403,6 +373,36 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
   } catch (error) {
     return null;
   }
+};
+
+/**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification>} - The added notification or an error message
+ */
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification> => {
+  if (!eventId || !type || !receiverUsername) {
+    throw new Error('Invalid request');
+  }
+
+  /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+  const notif: Notification = {
+    notificationType: type,
+    eventId,
+    receiverUsername,
+    notificationDate: new Date(),
+    seen: false,
+  };
+
+  return await NotificationModel.create(notif);
 };
 
 /**
@@ -672,7 +672,10 @@ export const addVoteToQuestion = async (
   qid: string,
   username: string,
   type: 'upvote' | 'downvote',
-): Promise<{ msg: string; upVotes: string[]; downVotes: string[] } | { error: string }> => {
+): Promise<
+  | { msg: string; upVotes: string[]; downVotes: string[]; earnedBadges: Badge[] | ObjectId[] }
+  | { error: string }
+> => {
   let updateOperation: QueryOptions;
 
   if (type === 'upvote') {
@@ -741,19 +744,35 @@ export const addVoteToQuestion = async (
     }
 
     const shouldReceiveVoterbadge = await checkVoterBadge(username);
+    var newBadges = [];
     if (shouldReceiveVoterbadge) {
-      await addBadge(username, 'VOTER');
+      const userBadgeResponse = await addBadge(username, 'VOTER');
+      if ('error' in userBadgeResponse) {
+        return { error: 'error adding badge to user' };
+      }
+      if (userBadgeResponse.badgeEarned) {
+        newBadges.push(userBadgeResponse.badgeEarned);
+      }
     }
 
     const shouldReceiveLifesaverBadge = await checkLifesaverBadge(qid);
     if (shouldReceiveLifesaverBadge) {
-      await addBadge(result.askedBy, 'LIFESAVER');
+      const userBadgeResponse = await addBadge(result.askedBy, 'LIFESAVER');
+      if ('error' in userBadgeResponse) {
+        return { error: 'error adding badge to user' };
+      }
+      if (userBadgeResponse.badgeEarned) {
+        newBadges.push(userBadgeResponse.badgeEarned);
+      }
     }
+
+    console.log(newBadges);
 
     return {
       msg,
       upVotes: result.upVotes || [],
       downVotes: result.downVotes || [],
+      earnedBadges: newBadges,
     };
   } catch (err) {
     return {
@@ -773,21 +792,24 @@ export const addVoteToQuestion = async (
  *
  * @returns Promise<QuestionResponse> - The updated question or an error message
  */
-export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<QuestionResponse> => {
+export const addAnswerToQuestion = async (
+  qid: string,
+  ans: Answer,
+): Promise<QuestionNotificationResponse> => {
   try {
     if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime || !ans._id) {
       throw new Error('Invalid answer');
     }
-    const result = await QuestionModel.findOneAndUpdate(
+    const question = await QuestionModel.findOneAndUpdate(
       { _id: qid },
       { $push: { answers: { $each: [ans._id], $position: 0 } } },
       { new: true },
     );
-    if (result === null) {
+    if (question === null) {
       throw new Error('Error when adding answer to question');
     }
 
-    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER);
+    const notification = await addNotifications(ans._id, question.askedBy, NotificationType.ANSWER);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
@@ -804,7 +826,7 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
       await addBadge(ans.ansBy, 'TOP_ANSWERER');
     }
 
-    return result;
+    return { question, notification };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }
@@ -1190,9 +1212,9 @@ export const getNotificationsForUser = async (
     }
 
     // otherwise, find all notifications for the user
-    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
-      'eventId',
-    );
+    const notifications = await NotificationModel.find({ receiverUsername: username })
+      .populate('eventId')
+      .sort({ notificationDate: -1 });
     return notifications;
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };

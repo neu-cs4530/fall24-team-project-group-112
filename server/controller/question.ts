@@ -11,6 +11,7 @@ import {
   FindQuestionsDownvotedByRequest,
   FindQuestionsUpvotedByRequest,
   FakeSOSocket,
+  NotificationType,
 } from '../types';
 import {
   addVoteToQuestion,
@@ -204,6 +205,15 @@ const questionController = (socket: FakeSOSocket) => {
 
       // Emit the updated vote counts to all connected clients
       socket.emit('voteUpdate', { qid, upVotes: status.upVotes, downVotes: status.downVotes });
+      for (const badge of status.earnedBadges) {
+        socket.emit('notificationUpdate', {
+          notificationType: NotificationType.BADGE,
+          eventId: badge,
+          receiverUsername: username,
+          notificationDate: new Date(),
+          seen: false,
+        });
+      }
       res.json({ msg: status.msg, upVotes: status.upVotes, downVotes: status.downVotes });
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);

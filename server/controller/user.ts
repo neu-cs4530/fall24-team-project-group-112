@@ -11,6 +11,7 @@ import {
   FindFollowersAndFollowingRequest,
   FindUserRequest,
   GetFeedRequest,
+  NotificationType,
 } from '../types';
 import {
   addUser,
@@ -232,6 +233,18 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(response.error);
       }
       socket.emit('followUpdate', response.success);
+
+      // only send socket update if a follow was created (not if one was deleted)
+      if (response.success.includes('created')) {
+        socket.emit('notificationUpdate', {
+          notificationType: NotificationType.FOLLOW,
+          eventId: follow,
+          receiverUsername: followeeUsername,
+          notificationDate: new Date(),
+          seen: false,
+        });
+      }
+
       res.json(response);
     } catch (err) {
       res

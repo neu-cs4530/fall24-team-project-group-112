@@ -1212,12 +1212,16 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
         followerUsername: follow.followerUsername,
         followeeUsername: follow.followeeUsername,
       });
+      await NotificationModel.deleteOne({
+        eventId: existingFollow._id,
+      });
       return { success: 'Follow request deleted' };
     }
-    await FollowModel.create(follow);
+    const followResponse = await FollowModel.create(follow);
 
-    if (follow._id) {
-      await addNotifications(follow._id, follow.followeeUsername, NotificationType.FOLLOW);
+    if (followResponse._id) {
+      console.log('Follow id: ', followResponse._id);
+      await addNotifications(followResponse._id, follow.followeeUsername, NotificationType.FOLLOW);
     }
 
     return { success: 'Follow request created' };

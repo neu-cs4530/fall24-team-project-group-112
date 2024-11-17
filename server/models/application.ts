@@ -587,7 +587,7 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
 export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
   try {
     const result = await AnswerModel.create(answer);
-    await addNotifications(result._id, answer.ansBy, NotificationType.ANSWER);
+
     return result;
   } catch (error) {
     return { error: 'Error when saving an answer' };
@@ -775,7 +775,7 @@ export const addVoteToQuestion = async (
  */
 export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<QuestionResponse> => {
   try {
-    if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime) {
+    if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime || !ans._id) {
       throw new Error('Invalid answer');
     }
     const result = await QuestionModel.findOneAndUpdate(
@@ -786,6 +786,8 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
     if (result === null) {
       throw new Error('Error when adding answer to question');
     }
+
+    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
@@ -823,7 +825,13 @@ export const addComment = async (
   comment: Comment,
 ): Promise<QuestionResponse | AnswerResponse> => {
   try {
-    if (!comment || !comment.text || !comment.commentBy || !comment.commentDateTime) {
+    if (
+      !comment ||
+      !comment.text ||
+      !comment.commentBy ||
+      !comment.commentDateTime ||
+      !comment._id
+    ) {
       throw new Error('Invalid comment');
     }
     let result: QuestionResponse | AnswerResponse | null;
@@ -843,6 +851,15 @@ export const addComment = async (
     if (result === null) {
       throw new Error('Failed to add comment');
     }
+
+    if (type === 'question') {
+      result = result as Question;
+      await addNotifications(comment._id, result.askedBy, NotificationType.COMMENT);
+    } else {
+      result = result as Answer;
+      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT);
+    }
+
     return result;
   } catch (error) {
     return { error: `Error when adding comment: ${(error as Error).message}` };
@@ -1135,6 +1152,11 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
       return { success: 'Follow request deleted' };
     }
     await FollowModel.create(follow);
+
+    if (follow._id) {
+      await addNotifications(follow._id, follow.followeeUsername, NotificationType.FOLLOW);
+    }
+
     return { success: 'Follow request created' };
   } catch (error) {
     return { error: 'Error when creating or deleting a follow request' };
@@ -1162,7 +1184,7 @@ export const getNotificationsForUser = async (
     if (type) {
       const notifications = await NotificationModel.find({
         receiverUsername: username,
-        notificationType: type,
+        notificationType: new RegExp(type, 'i'),
       }).populate('eventId');
       return notifications;
     }

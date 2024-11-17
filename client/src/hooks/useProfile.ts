@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Follow, User } from '../types';
 import { getFollowers, getUser, updateProfile, addFollow } from '../services/userService';
@@ -114,7 +114,6 @@ const useProfile = (loggedInUser: User | null) => {
         setFollowing(result.following);
       } catch (err) {
         setError('An error occurred while fetching the user and/or followers.');
-
         console.log(err); // eslint-disable-line no-console
       }
     }

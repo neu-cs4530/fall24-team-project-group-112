@@ -1,7 +1,6 @@
 import { Socket } from 'socket.io-client';
 
 export type FakeSOSocket = Socket<ServerToClientEvents>;
-
 /**
  * Interface representing a User, which contains:
  * - username - The unique identifier of the user.
@@ -36,7 +35,6 @@ export interface User {
   avatarName?: string;
   createdAt: Date;
 }
-
 /**
  * Interface representing a Badge, which contains:
  * - _id - The unique identifier for the badge. Optional field.
@@ -50,7 +48,6 @@ export interface Badge {
   description: string;
   color: BadgeColor;
 }
-
 /**
  * Enum representing the possible colors for a badge.
  */
@@ -59,7 +56,6 @@ export enum BadgeColor {
   SILVER = 'silver',
   BRONZE = 'bronze',
 }
-
 /**
  * Enum representing the possible types of badges.
  */
@@ -71,7 +67,6 @@ export enum BadgeName {
   INFLUENCER = 'Influencer',
   LIFESAVER = 'Lifesaver',
 }
-
 /**
  * Enum representing the possible ordering options for questions.
  * and their display names.
@@ -82,13 +77,11 @@ export const orderTypeDisplayName = {
   active: 'Active',
   mostViewed: 'Most Viewed',
 } as const;
-
 /**
  * Type representing the keys of the orderTypeDisplayName object.
  * This type can be used to restrict values to the defined order types.
  */
 export type OrderType = keyof typeof orderTypeDisplayName;
-
 /**
  * Interface represents a comment.
  *
@@ -101,7 +94,6 @@ export interface Comment {
   commentBy: string;
   commentDateTime: Date;
 }
-
 /**
  * Interface representing a tag associated with a question.
  *
@@ -113,7 +105,6 @@ export interface Tag {
   name: string;
   description: string;
 }
-
 /**
  * Interface represents the data for a tag.
  *
@@ -124,7 +115,6 @@ export interface TagData {
   name: string;
   qcnt: number;
 }
-
 /**
  * Interface representing the voting data for a question, which contains:
  * - qid - The ID of the question being voted on
@@ -136,7 +126,6 @@ export interface VoteData {
   upVotes: string[];
   downVotes: string[];
 }
-
 /**
  * Interface representing an Answer document, which contains:
  * - _id - The unique identifier for the answer. Optional field
@@ -152,7 +141,6 @@ export interface Answer {
   ansDateTime: Date;
   comments: Comment[];
 }
-
 /**
  * Interface representing the structure of a Question object.
  *
@@ -181,7 +169,6 @@ export interface Question {
   downVotes: string[];
   comments: Comment[];
 }
-
 /**
  * Interface representing the payload for a vote update socket event.
  */
@@ -190,12 +177,10 @@ export interface VoteUpdatePayload {
   upVotes: string[];
   downVotes: string[];
 }
-
 export interface AnswerUpdatePayload {
   qid: string;
   answer: Answer;
 }
-
 export interface CommentUpdatePayload {
   result: Question | Answer;
   type: 'question' | 'answer';
@@ -214,6 +199,15 @@ export interface Follows {
 }
 
 /**
+ * Interface representing the payload for a notification update event, which contains:
+ * - username - The username of which the notification is for.
+ * - type - The type of notificiation, either comment, answer, badge, or follow.
+ */
+export interface NotificationUpdatePayload {
+  notification: Notification;
+}
+
+/**
  * Interface representing the possible events that the server can emit to the client.
  */
 export interface ServerToClientEvents {
@@ -222,6 +216,38 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: Question) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (update: CommentUpdatePayload) => void;
+  notificationUpdate: (notification: NotificationUpdatePayload) => void;
+  profileUpdate: (update: User) => void;
+  followUpdate: (follow: string) => void;
+}
+
+/**
+ * Enum representing the possible event types for notifications.
+ */
+export enum NotificationType {
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  BADGE = 'Badge',
+  FOLLOW = 'Follow',
+}
+
+/**
+ * Interface representing a Notification, which contains:
+ * - _id: The unique identifier for the notification.
+ * - notificationType: The type of notification, one of NotificationType.
+ * - eventId: The unique identifier of the event that triggered the notification.
+ * - receiverUsername: The username of the user who will receive the notification.
+ * - notificationDate: The date and time when the notification was created.
+ * - seen: A boolean value indicating whether the notification has been seen by the user.
+ */
+
+export interface Notification {
+  _id?: string;
+  notificationType: NotificationType;
+  eventId: Answer | Comment | Badge | Follow;
+  receiverUsername: string;
+  notificationDate: Date;
+  seen: boolean;
   profileUpdate: (update: User) => void;
   followUpdate: (follow: string) => void;
 }

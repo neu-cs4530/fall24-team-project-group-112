@@ -1,6 +1,6 @@
 import React from 'react';
 import './index.css';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import SideBarNav from '../main/sideBarNav';
 import Header from '../header';
 import { User } from '../../types';
@@ -10,16 +10,23 @@ import { User } from '../../types';
  *
  * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
-const Layout = ({ user }: { user: User | null }) => (
-  <>
-    <Header user={user} />
-    <div id='main' className='main'>
-      <SideBarNav />
-      <div id='right_main' className='right_main'>
-        <Outlet />
+const Layout = ({ user }: { user: User | null }) => {
+  const location = useLocation(); // Get current route location
+
+  // Check if the current path is '/notifications'
+  const isNotificationsPage = location.pathname === '/notification';
+
+  return (
+    <>
+      <Header user={user} />
+      <div id='main' className='main'>
+        {!isNotificationsPage && <SideBarNav />}
+        <div id='right_main' className='right_main'>
+          <Outlet />
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 export default Layout;

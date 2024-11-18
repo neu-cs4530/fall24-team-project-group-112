@@ -51,10 +51,10 @@ const ProfileInfo = ({
   handleChange,
 }: ProfileInfoProps) => {
   const styles = {
-    infoContainer: 'flex gap-4 mt-3',
+    infoContainer: 'flex gap-4 mt-3 mb-3',
     infoItem: 'flex gap-2 items-center',
     icon: 'text-sm mb-1',
-    input: 'border',
+    input: 'border p-1',
     github: 'no-underline hover:underline',
   };
 

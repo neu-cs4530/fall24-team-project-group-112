@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaEdit, FaSave } from 'react-icons/fa';
-import { Alert } from '@mui/material';
+import { Alert, Tooltip } from '@mui/material';
 import { MdCancel } from 'react-icons/md';
 import { User } from '../../../../types';
 import Avatar from '../../baseComponents/avatar';
@@ -59,19 +59,19 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     container: 'flex-col ',
     header: 'bg-white p-5 shadow-md flex flex-row',
     avatarContainer: 'flex flex-col ml-4',
-    nameUsernameContainer: 'flex flex-row items-end',
+    nameUsernameContainer: 'flex flex-row items-end justify-between',
     editAvatarContainer: 'flex flex-col ml-4',
-    editButton: 'bg-white text-black text-lg ml-8',
-    editIcon: 'text-2xl',
+    editButton: 'bg-white text-black text-lg rounded-md p-2',
+    editIcon: 'text-2xl mt-1',
     headline: 'mt-1 text-xl text-gray-500',
     input: 'border',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
-    bioContainer: 'bg-white p-5 shadow-md flex flex-col',
-    bioHeader: 'ml-3 text-2xl font-bold text-gray-500',
+    bioContainer: 'bg-white p-5 shadow-md flex flex-col h-48',
+    bioHeader: 'ml-3 text-2xl font-bold text-gray-500 mb-2',
     bioContent: 'ml-3 text-xl text-gray-500',
-    followButton: 'bg-blue-800 text-white rounded-md p-2 ml-4',
-    followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4',
+    followButton: 'bg-blue-800 text-white rounded-md py-2 px-5 ml-4 mb-1',
+    followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4 mb-1',
     errorModal: 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50',
     modalContent: 'bg-white p-6 rounded-md shadow-lg text-center',
   };
@@ -108,21 +108,23 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
         )}
         <div className={styles.avatarContainer}>
           <div className={styles.nameUsernameContainer}>
-            <ProfileHeader
-              isEditing={isEditing}
-              firstName={formData.firstName}
-              lastName={formData.lastName}
-              username={user.username}
-              handleChange={handleChange}
-            />
+            <div className='flex flex-row items-end'>
+              <ProfileHeader
+                isEditing={isEditing}
+                firstName={formData.firstName}
+                lastName={formData.lastName}
+                username={user.username}
+                handleChange={handleChange}
+              />
 
-            {!isEditing && loggedInUser && loggedInUser.username === user.username && (
-              <div>
-                <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
-                  <FaEdit className={styles.editIcon} />
-                </button>
-              </div>
-            )}
+              {!isEditing && loggedInUser && loggedInUser.username === user.username && (
+                <div>
+                  <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
+                    <FaEdit className={styles.editIcon} />
+                  </button>
+                </div>
+              )}
+            </div>
 
             {isEditing && loggedInUser && loggedInUser.username === user.username && (
               <>
@@ -145,19 +147,38 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             )}
             {loggedInUser && loggedInUser?.username !== user.username && (
               <div>
-                <button
-                  onClick={async () => {
-                    try {
-                      if (loggedInUser) {
-                        await postFollow(loggedInUser.username, user.username);
+                {/* Conditionally render Tooltip only for "Follow" button */}
+                {!isFollowing ? (
+                  <Tooltip title='Click here to follow the user' arrow>
+                    <button
+                      onClick={async () => {
+                        try {
+                          if (loggedInUser) {
+                            await postFollow(loggedInUser.username, user.username);
+                          }
+                        } catch (err) {
+                          setShowErrorModal(true);
+                        }
+                      }}
+                      className={styles.followButton}>
+                      Follow
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        if (loggedInUser) {
+                          await postFollow(loggedInUser.username, user.username);
+                        }
+                      } catch (err) {
+                        setShowErrorModal(true);
                       }
-                    } catch (err) {
-                      setShowErrorModal(true);
-                    }
-                  }}
-                  className={isFollowing ? styles.followingButton : styles.followButton}>
-                  {isFollowing ? 'Following' : 'Follow'}
-                </button>
+                    }}
+                    className={styles.followingButton}>
+                    Following
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -169,7 +190,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                 name='headline'
                 value={formData.headline}
                 onChange={handleChange}
-                className={`${styles.headline} border`}
+                className={`${styles.headline} border p-1`}
                 placeholder='Headline'
               />
             ) : (
@@ -217,7 +238,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
       <hr></hr>
       {isEditing ? (
         <>
-          <div className={styles.bioHeader}>Bio</div>
+          <div className={`${styles.bioHeader} mt-5 mb-3 ml-4`}>Bio</div>
           <textarea
             name='bio'
             value={formData.bio}

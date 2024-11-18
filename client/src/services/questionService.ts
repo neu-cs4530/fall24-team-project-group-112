@@ -84,6 +84,12 @@ const downvoteQuestion = async (qid: string, username: string) => {
   return res.data;
 };
 
+/**
+ * Function to get questions asked by a user.
+ *
+ * @param username - The username of the user who's information we need.
+ * @throws Error if there is an issue fetching questions asked by the user.
+ */
 const getQuestionsAskedBy = async (username: string): Promise<Question[]> => {
   const res = await api.get(`${QUESTION_API_URL}/askedBy/${username}`);
   if (res.status !== 200) {
@@ -92,6 +98,12 @@ const getQuestionsAskedBy = async (username: string): Promise<Question[]> => {
   return res.data;
 };
 
+/**
+ * Function to get questions answered by a user.
+ *
+ * @param username - The username of the user who's information we need.
+ * @throws Error if there is an issue fetching questions answered by the user.
+ */
 const getQuestionsAnsweredBy = async (username: string): Promise<Question[]> => {
   const res = await api.get(`${QUESTION_API_URL}/answeredBy/${username}`);
   if (res.status !== 200) {
@@ -100,6 +112,12 @@ const getQuestionsAnsweredBy = async (username: string): Promise<Question[]> => 
   return res.data;
 };
 
+/**
+ * Function to get questions upvoted by a user.
+ *
+ * @param username - The username of the user who's information we need.
+ * @throws Error if there is an issue fetching questions upvoted by the user.
+ */
 const getQuestionsUpvotedBy = async (username: string): Promise<Question[]> => {
   const res = await api.get(`${QUESTION_API_URL}/upvotedBy/${username}`);
   if (res.status !== 200) {

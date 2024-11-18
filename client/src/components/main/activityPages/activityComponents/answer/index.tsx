@@ -1,28 +1,30 @@
 import React from 'react';
 import { RiDeleteBin5Line } from 'react-icons/ri';
-import { Answer } from '../../../../types';
+import { Answer } from '../../../../../types';
 import './index.css';
 
-interface AnswerNotificationProps {
+interface AnswerItemProps {
   answer: Answer;
+  itemType: 'notification' | 'feed';
 }
 
-const AnswerNotification: React.FC<AnswerNotificationProps> = ({ answer }) => (
+const AnswerItem: React.FC<AnswerItemProps> = ({ answer, itemType }) => (
   <div className='notification'>
     <div>
       <div className='notification-header'>
         <div>
-          <span className='user-in-notification'>{answer.ansBy}</span> answered your question.
+          <span className='user-in-notification'>{answer.ansBy}</span>
+          {` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
         </div>
         <RiDeleteBin5Line className='trash-icon' />
       </div>
       <hr />
       <div className='answer'>
         <div className='user-in-answer'>{answer.ansBy}</div>
-        <div>{answer.text}</div>
+        {answer.text}
       </div>
     </div>
   </div>
 );
 
-export default AnswerNotification;
+export default AnswerItem;

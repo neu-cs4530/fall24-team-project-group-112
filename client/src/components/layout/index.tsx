@@ -16,11 +16,13 @@ const Layout = ({ user }: { user: User | null }) => {
   // Check if the current path is '/notifications'
   const isNotificationsPage = location.pathname === '/notification';
 
+  // Check if the current path is '/feed'
+  const isFeedPage = location.pathname === '/feed';
   return (
     <>
       <Header user={user} />
       <div id='main' className='main'>
-        {!isNotificationsPage && <SideBarNav />}
+        {!isNotificationsPage && !isFeedPage && <SideBarNav />}
         <div id='right_main' className='right_main'>
           <Outlet />
         </div>

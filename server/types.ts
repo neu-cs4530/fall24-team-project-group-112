@@ -339,6 +339,7 @@ export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
   eventId: ObjectId | Answer | Comment | Badge | Follow;
+  questionId?: ObjectId;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
@@ -380,6 +381,7 @@ export interface FeedPost {
   _id?: ObjectId;
   postType: FeedPostType;
   event: ObjectId | Question | Answer | Comment | Badge | Follow;
+  question?: Question; // Optional field, provided for Answer and Comment events
   date: Date;
 }
 

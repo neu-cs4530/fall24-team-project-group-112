@@ -165,6 +165,7 @@ const addNotifications = async (
   eventId: ObjectId,
   receiverUsername: string,
   type: NotificationType,
+  questionId?: ObjectId,
 ): Promise<Notification | { error: string }> => {
   try {
     if (!eventId || !type || !receiverUsername) {
@@ -177,6 +178,7 @@ const addNotifications = async (
     const notif: Notification = {
       notificationType: type,
       eventId,
+      questionId,
       receiverUsername,
       notificationDate: new Date(),
       seen: false,
@@ -787,7 +789,7 @@ export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<Que
       throw new Error('Error when adding answer to question');
     }
 
-    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER);
+    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER, new ObjectId(qid));
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
@@ -854,10 +856,15 @@ export const addComment = async (
 
     if (type === 'question') {
       result = result as Question;
-      await addNotifications(comment._id, result.askedBy, NotificationType.COMMENT);
+      await addNotifications(
+        comment._id,
+        result.askedBy,
+        NotificationType.COMMENT,
+        new ObjectId(id),
+      );
     } else {
       result = result as Answer;
-      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT);
+      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
     }
 
     return result;
@@ -1185,14 +1192,18 @@ export const getNotificationsForUser = async (
       const notifications = await NotificationModel.find({
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
-      }).populate('eventId');
+      }).populate([{ path: 'user' }, { path: 'eventId' }, { path: 'questionId' }]);
+
       return notifications;
     }
 
     // otherwise, find all notifications for the user
-    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
-      'eventId',
-    );
+    const notifications = await NotificationModel.find({ receiverUsername: username }).populate([
+      { path: 'user' },
+      { path: 'eventId' },
+      { path: 'questionId', populate: 'user' },
+    ]);
+
     return notifications;
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };

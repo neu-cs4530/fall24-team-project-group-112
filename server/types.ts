@@ -154,10 +154,20 @@ export interface Question {
   comments: Comment[] | ObjectId[];
 }
 
+export interface QuestionWithNotification {
+  question: Question;
+  notifications: Notification[];
+}
+
 /**
  * Type representing the possible responses for a Question-related operation.
  */
 export type QuestionResponse = Question | { error: string };
+
+/**
+ * Type representing the possible responses for a Question-related operation with a notification.
+ */
+export type QuestionNotificationResponse = QuestionWithNotification | { error: string };
 
 /**
  * Interface for the request query to find questions using a search string, which contains:
@@ -293,15 +303,6 @@ export interface AnswerUpdatePayload {
 }
 
 /**
- * Interface representing the payload for a notification update event, which contains:
- * - username - The username of which the notification is for.
- * - type - The type of notificiation, either comment, answer, badge, or follow.
- */
-export interface NotificationUpdatePayload {
-  notification: Notification;
-}
-
-/**
  * Interface representing the possible events that the server can emit to the client.
  */
 export interface ServerToClientEvents {
@@ -310,7 +311,7 @@ export interface ServerToClientEvents {
   viewsUpdate: (question: QuestionResponse) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
-  notificationUpdate: (notification: NotificationUpdatePayload) => void;
+  notificationUpdate: (notification: Notification) => void;
   profileUpdate: (user: User) => void;
   followUpdate: (follow: String) => void;
 }
@@ -402,6 +403,13 @@ export interface GetFeedRequest extends Request {
  * Type representing the possible responses for a User-related operation.
  */
 export type UserResponse = User | { error: string };
+
+/**
+ * Type representing the possible responses for a User and Badge-related operation.
+ */
+export type UserNotificationResponse =
+  | { user: User; notification: Notification | undefined }
+  | { error: string };
 
 /**
  * Interface extending the request body when creating a new user, which contains:

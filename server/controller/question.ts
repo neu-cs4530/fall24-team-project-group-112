@@ -204,7 +204,10 @@ const questionController = (socket: FakeSOSocket) => {
 
       // Emit the updated vote counts to all connected clients
       socket.emit('voteUpdate', { qid, upVotes: status.upVotes, downVotes: status.downVotes });
-      res.json({ msg: status.msg, upVotes: status.upVotes, downVotes: status.downVotes });
+      for (const notif of status.notifications) {
+        socket.emit('notificationUpdate', notif);
+      }
+      res.json(status);
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
     }

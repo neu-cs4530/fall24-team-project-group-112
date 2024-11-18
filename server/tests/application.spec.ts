@@ -738,6 +738,7 @@ describe('application module', () => {
           msg: 'Question upvoted successfully',
           upVotes: ['testUser'],
           downVotes: [],
+          notifications: [],
         });
       });
 
@@ -759,6 +760,7 @@ describe('application module', () => {
           msg: 'Question upvoted successfully',
           upVotes: ['testUser'],
           downVotes: [],
+          notifications: [],
         });
       });
 
@@ -780,6 +782,7 @@ describe('application module', () => {
           msg: 'Upvote cancelled successfully',
           upVotes: [],
           downVotes: [],
+          notifications: [],
         });
       });
 
@@ -817,6 +820,7 @@ describe('application module', () => {
           msg: 'Question downvoted successfully',
           upVotes: [],
           downVotes: ['testUser'],
+          notifications: [],
         });
       });
 
@@ -838,6 +842,7 @@ describe('application module', () => {
           msg: 'Question downvoted successfully',
           upVotes: [],
           downVotes: ['testUser'],
+          notifications: [],
         });
       });
 
@@ -859,6 +864,7 @@ describe('application module', () => {
           msg: 'Downvote cancelled successfully',
           upVotes: [],
           downVotes: [],
+          notifications: [],
         });
       });
 
@@ -1108,10 +1114,15 @@ describe('application module', () => {
           'find',
         );
 
-        const result = (await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1)) as Question;
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+        if (result && 'error' in result) {
+          fail();
+        }
 
-        expect(result.answers.length).toEqual(4);
-        expect(result.answers).toContain(ans4);
+        const questionResult = result.question as Question;
+
+        expect(questionResult.answers.length).toEqual(4);
+        expect(questionResult.answers).toContain(ans4);
       });
 
       test('addAnswerToQuestion should return an object with error if findOneAndUpdate throws an error', async () => {
@@ -1456,7 +1467,7 @@ describe('application module', () => {
         firstName: 'Dummy',
         lastName: 'User',
         email: 'dummy@gmail.com',
-        createdAt: new Date('2024-06-03').toISOString(),
+        createdAt: new Date('2024-06-03'),
         headline: 'Software engineer',
         bio: 'Software engineer in Boston',
       };
@@ -1474,11 +1485,12 @@ describe('application module', () => {
         };
 
         mockingoose(UserModel).toReturn(mockUser, 'findOne');
-        const expectedResult = { ...mockUser, ...mockReqBody };
+        const expectedResult = { user: { ...mockUser, ...mockReqBody } };
         mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+        mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
 
         const result = await updateUser(username, mockReqBody);
-        expect(result).toMatchObject(mockReqBody);
+        expect(result).toMatchObject(expectedResult);
       });
 
       it('updateUser should handle partial updates properly', async () => {
@@ -1492,10 +1504,14 @@ describe('application module', () => {
         const expectedResult = { ...mockUser, ...mockReqBody };
         mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
 
-        const result = (await updateUser(username, mockReqBody)) as User;
-        expect(result).toMatchObject(mockReqBody);
-        expect(result.headline).toEqual(mockUser.headline);
-        expect(result.bio).toEqual(mockUser.bio);
+        const result = await updateUser(username, mockReqBody);
+        if (result && 'error' in result) {
+          fail();
+        }
+        const userResult = result.user as User;
+        expect(userResult).toMatchObject(mockReqBody);
+        expect(userResult.headline).toEqual(mockUser.headline);
+        expect(userResult.bio).toEqual(mockUser.bio);
       });
 
       it('updateUser should return an error when the provided username is invalid', async () => {
@@ -1639,9 +1655,13 @@ describe('application module', () => {
           .spyOn(UserModel, 'findOneAndUpdate')
           .mockResolvedValueOnce({ ...mockUser, badges: [badgeId] });
 
-        const result = (await addBadge('dummyUser', 'AUTOBIOGRAPHER')) as User;
+        const result = await addBadge('dummyUser', 'AUTOBIOGRAPHER');
+        if (result && 'error' in result) {
+          fail();
+        }
+        const user = result.user as User;
 
-        expect(result.badges).toContainEqual(badgeId);
+        expect(user.badges).toContainEqual(badgeId);
         expect(UserModel.findOneAndUpdate).toHaveBeenCalledWith(
           { username: 'dummyUser' },
           { $addToSet: { badges: badgeId } },
@@ -1651,14 +1671,16 @@ describe('application module', () => {
 
       test('should return the user as-is if they already have the badge', async () => {
         const badgeId = new ObjectId('673425329c00935604e19ea6');
-        const userWithBadge = { ...mockUser, badges: [badgeId] };
+        const user = { ...mockUser, badges: [badgeId] };
+
+        const userWithBadge = { user: { ...mockUser, badges: [badgeId] }, badgeEarned: undefined };
 
         jest
           .spyOn(UserModel, 'findOne')
-          .mockResolvedValueOnce(userWithBadge)
+          .mockResolvedValueOnce(user)
           .mockResolvedValueOnce(userWithBadge);
         jest.spyOn(BadgeModel, 'findOne').mockResolvedValueOnce(badgeId);
-        // (getBadgeIdFromName as jest.Mock).mockResolvedValue(badgeId);
+        // .mockResolvedValueOnce({ name: 'AUTOBIOGRAPHER', description: 'Completed profile' });
 
         const result = await addBadge('dummyUser', 'AUTOBIOGRAPHER');
 

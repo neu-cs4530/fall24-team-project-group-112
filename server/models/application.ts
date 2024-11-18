@@ -1211,7 +1211,9 @@ export const getNotificationsForUser = async (
       const notifications = await NotificationModel.find({
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
-      }).populate('eventId');
+      })
+        .populate('eventId')
+        .sort({ notificationDate: -1 });
       return notifications;
     }
 

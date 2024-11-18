@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useUserContext from './useUserContext';
-import getNotifications from '../services/notificationService';
 import { Notification } from '../types';
+import { getNotifications, clearAllNotifications } from '../services/notificationService';
 
 const useNotifications = (initialType?: string) => {
   const { user, socket } = useUserContext();
@@ -9,6 +9,7 @@ const useNotifications = (initialType?: string) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<string | undefined>(initialType);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
   useEffect(() => {
     /**
@@ -51,10 +52,22 @@ const useNotifications = (initialType?: string) => {
     };
   }, [user.username, notificationType, socket]);
 
+  const deleteNotifications = async () => {
+    try {
+      await clearAllNotifications(user.username);
+      setNotifications([]);
+    } catch (err) {
+      setError('Failed to delete notifications');
+    }
+  };
+
   return {
     notifications,
     error,
     setNotificationType,
+    deleteNotifications,
+    showConfirmationModal,
+    setShowConfirmationModal,
   };
 };
 

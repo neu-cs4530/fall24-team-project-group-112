@@ -24,7 +24,7 @@ const notificationSchema: Schema = new Schema(
       required: true,
       refPath: 'notificationType',
     },
-    questionId: {
+    question: {
       type: Schema.Types.ObjectId,
       ref: 'Question',
     },

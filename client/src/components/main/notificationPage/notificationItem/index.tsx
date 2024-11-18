@@ -1,5 +1,5 @@
 import React from 'react';
-import { Notification, Answer, Follow, Comment, Badge, Question } from '../../../../types';
+import { Notification, Answer, Follow, Comment, Badge } from '../../../../types';
 import './index.css';
 import AnswerNotification from '../answer';
 import CommentNotification from '../comment';
@@ -16,8 +16,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   switch (notification.notificationType) {
     case 'Answer': {
       const answer = notification.eventId as Answer;
-      const question = notification.questionId as Question;
-      content = <AnswerNotification answer={answer} question={question} />;
+      content = <AnswerNotification answer={answer} />;
       break;
     }
     case 'Comment': {

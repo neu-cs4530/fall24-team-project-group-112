@@ -21,7 +21,7 @@ const Layout = ({ user }: { user: User | null }) => {
       <Header user={user} />
       <div id='main' className='main'>
         {!isNotificationsPage && <SideBarNav />}
-        <div id='right_main' className='right_main'>
+        <div id='right_main' className={!isNotificationsPage ? 'right_main' : ''}>
           <Outlet />
         </div>
       </div>

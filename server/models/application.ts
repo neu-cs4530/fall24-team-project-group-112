@@ -169,22 +169,18 @@ const addNotification = async (
   type: NotificationType,
   questionId?: ObjectId,
 ): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
+  if (!eventId || !type || !receiverUsername) {
+    throw new Error('Invalid request');
+  }
 
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      question: questionId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
+  const notif: Notification = {
+    notificationType: type,
+    eventId,
+    question: questionId,
+    receiverUsername,
+    notificationDate: new Date(),
+    seen: false,
+  };
 
     return await NotificationModel.create(notif);
   } catch (error) {
@@ -229,7 +225,7 @@ export const addBadge = async (
       { new: true },
     );
     const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
-    return { user: updatedUser as User, notification };
+    return { user: updatedUser as User, notification: notification as Notification };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -854,7 +850,7 @@ export const addAnswerToQuestion = async (
       }
     }
 
-    return { question, notifications };
+    return { question, notifications: notifications as Notification[] };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }
@@ -904,7 +900,7 @@ export const addComment = async (
 
     if (type === 'question') {
       result = result as Question;
-      await addNotifications(
+      await addNotification(
         comment._id,
         result.askedBy,
         NotificationType.COMMENT,
@@ -912,7 +908,7 @@ export const addComment = async (
       );
     } else {
       result = result as Answer;
-      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
+      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
     }
 
     return result;

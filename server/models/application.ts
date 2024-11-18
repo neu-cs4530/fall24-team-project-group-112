@@ -190,7 +190,7 @@ const addNotification = async (
  * @param {string} username - The username of the user to add the badge to
  * @param {string} badgeId - The identifier of the badge to add
  *
- * @returns {Promise<UserBadgeResponse>} - The user with the added badge, or an error message if the addition failed.
+ * @returns {Promise<UserNotificationResponse>} - The user with an optional badge notification, or an error message if the addition failed.
  */
 export const addBadge = async (
   username: string,

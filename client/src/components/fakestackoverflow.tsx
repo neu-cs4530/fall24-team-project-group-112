@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Snackbar } from '@mui/material';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Button, IconButton, Snackbar } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
@@ -48,19 +49,33 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
   const [notification, setNotification] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!socket) {
-      return () => {};
-    }
     const handleNotificationUpdate = async () => {
       setNotification(true);
     };
 
-    socket.on('notificationUpdate', handleNotificationUpdate);
+    socket?.on('notificationUpdate', handleNotificationUpdate);
 
     return () => {
-      socket.off('notificationUpdate', handleNotificationUpdate);
+      socket?.off('notificationUpdate', handleNotificationUpdate);
     };
   }, [socket]);
+
+  const snackbarAction = (
+    <React.Fragment>
+      <Link to='/notification'>
+        <Button color='primary' size='small' onClick={() => setNotification(false)}>
+          View
+        </Button>
+      </Link>
+      <IconButton
+        size='small'
+        aria-label='close'
+        color='inherit'
+        onClick={() => setNotification(false)}>
+        <CloseIcon fontSize='small' />
+      </IconButton>
+    </React.Fragment>
+  );
 
   return (
     <LoginContext.Provider value={{ setUser }}>
@@ -70,6 +85,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         autoHideDuration={5000}
         onClose={() => setNotification(false)}
         message='You have a new notification!'
+        action={snackbarAction}
       />
       <Routes>
         {/* Public Routes */}

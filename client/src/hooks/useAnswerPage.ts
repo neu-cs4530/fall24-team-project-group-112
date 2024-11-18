@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Comment, Answer, Question, VoteData, Notification } from '../types';
+import { Comment, Answer, Question, VoteData } from '../types';
 import useUserContext from './useUserContext';
 import addComment from '../services/commentService';
 import { getQuestionById } from '../services/questionService';
@@ -86,7 +86,6 @@ const useAnswerPage = () => {
      * @param answer - The updated answer object.
      */
     const handleAnswerUpdate = ({ qid: id, answer }: { qid: string; answer: Answer }) => {
-      console.log('RUNNING HANDLEANSWERUPDATE');
       if (id === questionID) {
         setQuestion(prevQuestion =>
           prevQuestion

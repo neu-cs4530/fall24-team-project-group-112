@@ -10,11 +10,11 @@ interface BadgeNotificationProps {
 const BadgeNotification: React.FC<BadgeNotificationProps> = ({ badge }) => {
   const getCircleColor = () => {
     switch (badge.color) {
-      case 'GOLD':
+      case 'gold':
         return '#FFD700';
-      case 'SILVER':
+      case 'silver':
         return '#C0C0C0';
-      case 'BRONZE':
+      case 'bronze':
         return '#803b06';
       default:
         return '#000';

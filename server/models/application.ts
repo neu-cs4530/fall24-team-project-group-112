@@ -169,22 +169,18 @@ const addNotification = async (
   type: NotificationType,
   questionId?: ObjectId,
 ): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
+  if (!eventId || !type || !receiverUsername) {
+    throw new Error('Invalid request');
+  }
 
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      question: questionId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
+  const notif: Notification = {
+    notificationType: type,
+    eventId,
+    question: questionId,
+    receiverUsername,
+    notificationDate: new Date(),
+    seen: false,
+  };
 
   const notification = await NotificationModel.create(notif);
   return (await NotificationModel.findById(notification._id)
@@ -229,7 +225,7 @@ export const addBadge = async (
       { new: true },
     );
     const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
-    return { user: updatedUser as User, notification };
+    return { user: updatedUser as User, notification: notification as Notification };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -824,7 +820,7 @@ export const addAnswerToQuestion = async (
       ans._id,
       question.askedBy,
       NotificationType.ANSWER,
-      new ObjectId(qid)
+      new ObjectId(qid),
     );
     notifications.push(answerNotification);
 
@@ -861,7 +857,7 @@ export const addAnswerToQuestion = async (
       }
     }
 
-    return { question, notifications };
+    return { question, notifications: notifications as Notification[] };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }
@@ -911,7 +907,7 @@ export const addComment = async (
 
     if (type === 'question') {
       result = result as Question;
-      await addNotifications(
+      await addNotification(
         comment._id,
         result.askedBy,
         NotificationType.COMMENT,
@@ -919,7 +915,7 @@ export const addComment = async (
       );
     } else {
       result = result as Answer;
-      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
+      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
     }
 
     return result;
@@ -1254,19 +1250,23 @@ export const getNotificationsForUser = async (
       return await NotificationModel.find({
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
-      }).populate([
-        { path: 'user' },
-        { path: 'eventId', populate: 'user' },
-        { path: 'question', populate: 'user' },
-      ]).sort({ notificationDate: -1 });
+      })
+        .populate([
+          { path: 'user' },
+          { path: 'eventId', populate: 'user' },
+          { path: 'question', populate: 'user' },
+        ])
+        .sort({ notificationDate: -1 });
     }
 
     // otherwise, find all notifications for the user
-    return await NotificationModel.find({ receiverUsername: username }).populate([
-      { path: 'user' },
-      { path: 'eventId', populate: 'user' },
-      { path: 'question', populate: 'user' },
-    ]).sort({ notificationDate: -1 });
+    return await NotificationModel.find({ receiverUsername: username })
+      .populate([
+        { path: 'user' },
+        { path: 'eventId', populate: 'user' },
+        { path: 'question', populate: 'user' },
+      ])
+      .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
   }

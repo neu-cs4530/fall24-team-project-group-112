@@ -74,14 +74,10 @@ const answerController = (socket: FakeSOSocket) => {
         qid,
         answer: populatedAns as AnswerResponse,
       });
-      socket.emit('notificationUpdate', {
-        _id: populatedAns._id,
-        notificationType: NotificationType.ANSWER,
-        eventId: populatedAns as Answer,
-        receiverUsername: ansInfo.ansBy,
-        notificationDate: new Date(),
-        seen: false,
-      });
+
+      for (const notification of status.notifications) {
+        socket.emit('notificationUpdate', notification);
+      }
       res.json(ansFromDb);
     } catch (err) {
       res.status(500).send(`Error when adding answer: ${(err as Error).message}`);

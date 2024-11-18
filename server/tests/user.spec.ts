@@ -16,6 +16,7 @@ import {
 import QuestionModel from '../models/questions';
 import AnswerModel from '../models/answers';
 import CommentModel from '../models/comments';
+import BadgeModel from '../models/badges';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -123,6 +124,8 @@ describe('PATCH /:username', () => {
 
   const username = 'dummyUser';
   const mockUser = {
+    _id: '67325222c2afe26a6ab97909',
+    badges: [],
     username,
     firstName: 'Dummy',
     lastName: 'User',
@@ -139,20 +142,22 @@ describe('PATCH /:username', () => {
     };
 
     mockingoose(UserModel).toReturn(mockUser, 'findOne');
-    const expectedResult = { ...mockUser, city: cityUpdate };
+    const expectedResult = { user: { ...mockUser, city: cityUpdate } };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+    mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
 
     const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
 
     expect(response.status).toBe(200);
+    expect(response.body).toMatchObject(expectedResult);
     // updated user should have the provided user
-    expect(response.body.username).toBe(username);
+    expect(response.body.user.username).toBe(username);
     // city should have been updated
-    expect(response.body.city).toBe(cityUpdate);
+    expect(response.body.user.city).toBe(cityUpdate);
     // other fields should not have changed
-    expect(response.body.email).toBe(mockUser.email);
-    expect(response.body.firstName).toBe(mockUser.firstName);
-    expect(response.body.lastName).toBe(mockUser.lastName);
+    expect(response.body.user.email).toBe(mockUser.email);
+    expect(response.body.user.firstName).toBe(mockUser.firstName);
+    expect(response.body.user.lastName).toBe(mockUser.lastName);
   });
 
   it('should return an error if no user is provided', async () => {
@@ -181,7 +186,7 @@ describe('PATCH /:username', () => {
     const response = await supertest(app).patch(`/user/${username}`).send();
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject(mockUser);
+    expect(response.body.user).toMatchObject(mockUser);
   });
 
   it('should update all fields properly', async () => {
@@ -199,9 +204,10 @@ describe('PATCH /:username', () => {
     mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const expectedResult = { ...mockUser, ...mockReqBody };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+    mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
 
     const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
-    expect(response.body).toMatchObject(expectedResult);
+    expect(response.body.user).toMatchObject(expectedResult);
   });
   it('should handle a partial update properly', async () => {
     const cityUpdate = 'Boston';
@@ -212,17 +218,18 @@ describe('PATCH /:username', () => {
     mockingoose(UserModel).toReturn(mockUser, 'findOne');
     const expectedResult = { ...mockUser, city: cityUpdate };
     mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+    mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
 
     const response = await supertest(app).patch(`/user/${username}`).send(mockReqBody);
 
     expect(response.status).toBe(200);
     // updated user should have the provided user
-    expect(response.body.username).toBe(username);
+    expect(response.body.user.username).toBe(username);
     // city should have been updated
-    expect(response.body.city).toBe(cityUpdate);
+    expect(response.body.user.city).toBe(cityUpdate);
     // other updatable fields should not have changed
-    expect(response.body.headline).toBe(mockUser.headline);
-    expect(response.body.bio).toBe(mockUser.bio);
+    expect(response.body.user.headline).toBe(mockUser.headline);
+    expect(response.body.user.bio).toBe(mockUser.bio);
   });
 });
 

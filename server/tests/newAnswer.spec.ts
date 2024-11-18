@@ -54,13 +54,15 @@ describe('POST /addAnswer', () => {
 
     const mockQuestionWithNotification: QuestionNotificationResponse = {
       question: mockQuestion,
-      notification: {
-        notificationType: NotificationType.ANSWER,
-        eventId: mockAnswer,
-        receiverUsername: 'dummyUserId',
-        notificationDate: new Date(),
-        seen: false,
-      },
+      notifications: [
+        {
+          notificationType: NotificationType.ANSWER,
+          eventId: mockAnswer,
+          receiverUsername: 'dummyUserId',
+          notificationDate: new Date(),
+          seen: false,
+        },
+      ],
     };
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
 
@@ -234,13 +236,15 @@ describe('POST /addAnswer', () => {
 
     const mockQuestionWithNotification: QuestionNotificationResponse = {
       question: mockQuestion,
-      notification: {
-        notificationType: NotificationType.ANSWER,
-        eventId: mockAnswer,
-        receiverUsername: 'dummyUserId',
-        notificationDate: new Date(),
-        seen: false,
-      },
+      notifications: [
+        {
+          notificationType: NotificationType.ANSWER,
+          eventId: mockAnswer,
+          receiverUsername: 'dummyUserId',
+          notificationDate: new Date(),
+          seen: false,
+        },
+      ],
     };
 
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);

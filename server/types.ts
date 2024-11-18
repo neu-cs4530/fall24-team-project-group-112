@@ -156,7 +156,7 @@ export interface Question {
 
 export interface QuestionWithNotification {
   question: Question;
-  notification: Notification;
+  notifications: Notification[];
 }
 
 /**
@@ -406,7 +406,9 @@ export type UserResponse = User | { error: string };
 /**
  * Type representing the possible responses for a User and Badge-related operation.
  */
-export type UserBadgeResponse = { user: User; badgeEarned: Badge | undefined } | { error: string };
+export type UserNotificationResponse =
+  | { user: User; notification: Notification | undefined }
+  | { error: string };
 
 /**
  * Interface extending the request body when creating a new user, which contains:

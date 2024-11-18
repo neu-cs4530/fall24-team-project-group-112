@@ -168,7 +168,7 @@ const addNotification = async (
   receiverUsername: string,
   type: NotificationType,
   questionId?: ObjectId,
-): Promise<Notification | { error: string }> => {
+): Promise<Notification> => {
   if (!eventId || !type || !receiverUsername) {
     throw new Error('Invalid request');
   }
@@ -225,7 +225,7 @@ export const addBadge = async (
       { new: true },
     );
     const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
-    return { user: updatedUser as User, notification: notification as Notification };
+    return { user: updatedUser as User, notification };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -850,7 +850,7 @@ export const addAnswerToQuestion = async (
       }
     }
 
-    return { question, notifications: notifications as Notification[] };
+    return { question, notifications };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }

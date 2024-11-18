@@ -24,7 +24,10 @@ const notificationSchema: Schema = new Schema(
       required: true,
       refPath: 'notificationType',
     },
-
+    question: {
+      type: Schema.Types.ObjectId,
+      ref: 'Question',
+    },
     receiverUsername: {
       type: String,
       required: true,
@@ -39,7 +42,14 @@ const notificationSchema: Schema = new Schema(
       required: true,
     },
   },
-  { collection: 'Notification' },
+  { collection: 'Notification', toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+notificationSchema.virtual('user', {
+  ref: 'User',
+  localField: 'receiverUsername',
+  foreignField: 'username',
+  justOne: true,
+});
 
 export default notificationSchema;

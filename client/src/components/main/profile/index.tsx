@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import useProfile from '../../../hooks/useProfile';
 import ProfileText from './profileText';
-import { getQuestionsAnsweredBy, getQuestionsAskedBy } from '../../../services/questionService';
+import {
+  getQuestionsAnsweredBy,
+  getQuestionsAskedBy,
+  getQuestionsUpvotedBy,
+} from '../../../services/questionService';
 import { User, Question } from '../../../types';
 import QuestionList from './questions/questionList';
 import './index.css';
@@ -16,6 +20,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const { user, error } = useProfile(loggedInUser.loggedInUser);
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
+  const [questionsUpvoted, setQuestionsUpvoted] = useState<Question[]>([]);
 
   useEffect(() => {
     const fetchData = async (username: string) => {
@@ -25,6 +30,9 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
 
         const answeredByRes = await getQuestionsAnsweredBy(username);
         setQuestionsAnswered(answeredByRes || []);
+
+        const upvotedByRes = await getQuestionsUpvotedBy(username);
+        setQuestionsUpvoted(upvotedByRes || []);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
@@ -56,6 +64,10 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
           <QuestionList
             questions={questionsAnswered}
             title={`Questions answered by @${user.username}`}
+          />
+          <QuestionList
+            questions={questionsUpvoted}
+            title={`Questions upvoted by @${user.username}`}
           />
         </>
       ) : null}

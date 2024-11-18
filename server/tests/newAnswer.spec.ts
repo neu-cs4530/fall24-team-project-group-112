@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { ObjectId } from 'mongodb';
 import { app } from '../app';
 import * as util from '../models/application';
+import { NotificationType, QuestionNotificationResponse } from '../types';
 
 const saveAnswerSpy = jest.spyOn(util, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(util, 'addAnswerToQuestion');
@@ -36,9 +37,8 @@ describe('POST /addAnswer', () => {
       ansDateTime: new Date('2024-06-03'),
       comments: [],
     };
-    saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
 
-    addAnswerToQuestionSpy.mockResolvedValueOnce({
+    const mockQuestion = {
       _id: validQid,
       title: 'This is a test question',
       text: 'This is a test question',
@@ -50,7 +50,21 @@ describe('POST /addAnswer', () => {
       downVotes: [],
       answers: [mockAnswer._id],
       comments: [],
-    });
+    };
+
+    const mockQuestionWithNotification: QuestionNotificationResponse = {
+      question: mockQuestion,
+      notification: {
+        notificationType: NotificationType.ANSWER,
+        eventId: mockAnswer,
+        receiverUsername: 'dummyUserId',
+        notificationDate: new Date(),
+        seen: false,
+      },
+    };
+    saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
+
+    addAnswerToQuestionSpy.mockResolvedValueOnce(mockQuestionWithNotification);
 
     popDocSpy.mockResolvedValueOnce({
       _id: validQid,
@@ -218,8 +232,19 @@ describe('POST /addAnswer', () => {
       comments: [],
     };
 
+    const mockQuestionWithNotification: QuestionNotificationResponse = {
+      question: mockQuestion,
+      notification: {
+        notificationType: NotificationType.ANSWER,
+        eventId: mockAnswer,
+        receiverUsername: 'dummyUserId',
+        notificationDate: new Date(),
+        seen: false,
+      },
+    };
+
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
-    addAnswerToQuestionSpy.mockResolvedValueOnce(mockQuestion);
+    addAnswerToQuestionSpy.mockResolvedValueOnce(mockQuestionWithNotification);
     popDocSpy.mockResolvedValueOnce({ error: 'Error when populating document' });
 
     const response = await supertest(app).post('/answer/addAnswer').send(mockReqBody);

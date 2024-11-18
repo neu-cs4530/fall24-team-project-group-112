@@ -19,7 +19,6 @@ import {
   QuestionNotificationResponse,
   FeedPost,
   FeedPostType,
-  Badge,
   UserNotificationResponse,
 } from '../types';
 import AnswerModel from './answers';
@@ -162,7 +161,7 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
  * @param {ObjectId} eventId id of event associated with this notification
  * @param {string} receiverUsername username of user who will receive this notification
  * @param {NotificationType} type type of event associated with this notification
- * @returns {Promise<Notification>} - The added notification or an error message
+ * @returns {Notification} - The added notification or an error message
  */
 const addNotification = async (
   eventId: ObjectId,
@@ -181,7 +180,10 @@ const addNotification = async (
     seen: false,
   };
 
-  return NotificationModel.create(notif);
+  const notification = await NotificationModel.create(notif);
+  return (await NotificationModel.findById(notification._id)
+    .populate('eventId')
+    .exec()) as Notification;
 };
 
 /**
@@ -220,7 +222,6 @@ export const addBadge = async (
       { $addToSet: { badges: badgeObjectId } },
       { new: true },
     );
-    const badge = await BadgeModel.findById(badgeObjectId);
     const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
     return { user: updatedUser as User, notification };
   } catch (error) {
@@ -813,7 +814,6 @@ export const addAnswerToQuestion = async (
     }
 
     const notifications = [];
-
     const answerNotification = await addNotification(
       ans._id,
       question.askedBy,

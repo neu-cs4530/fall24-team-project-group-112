@@ -37,8 +37,12 @@ const useNotifications = (initialType?: string) => {
      * @param notification - The new or updated notification object.
      */
     const handleNotificationUpdate = (notification: Notification) => {
-      // only update notification list if the notification type matches the current filter
-      if (!notificationType || notificationType === notification.notificationType) {
+      // only update notification list if the notification is for the specified user and
+      // the type matches the current filter
+      if (
+        notification.receiverUsername === user.username &&
+        (!notificationType || notificationType === notification.notificationType)
+      ) {
         setNotifications(prevNotifications => [notification, ...prevNotifications]);
       }
     };

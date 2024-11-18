@@ -11,7 +11,6 @@ import {
   FindQuestionsDownvotedByRequest,
   FindQuestionsUpvotedByRequest,
   FakeSOSocket,
-  NotificationType,
 } from '../types';
 import {
   addVoteToQuestion,

@@ -214,7 +214,7 @@ const questionController = (socket: FakeSOSocket) => {
           seen: false,
         });
       }
-      res.json({ msg: status.msg, upVotes: status.upVotes, downVotes: status.downVotes });
+      res.json(status);
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
     }

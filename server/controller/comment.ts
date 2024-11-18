@@ -102,7 +102,7 @@ const commentController = (socket: FakeSOSocket) => {
       const receiver =
         type === 'question' ? (populatedDoc as Question).askedBy : (populatedDoc as Answer).ansBy;
       socket.emit('notificationUpdate', {
-        notificationType: NotificationType.ANSWER,
+        notificationType: NotificationType.COMMENT,
         eventId: comFromDb as Comment,
         receiverUsername: receiver,
         notificationDate: new Date(),

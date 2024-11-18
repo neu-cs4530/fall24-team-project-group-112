@@ -2,7 +2,8 @@ import supertest from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
-import { Question } from '../types';
+import { Badge, Question } from '../types';
+import { ObjectId } from 'mongodb';
 
 const addVoteToQuestionSpy = jest.spyOn(util, 'addVoteToQuestion');
 
@@ -10,6 +11,7 @@ interface MockResponse {
   msg: string;
   upVotes: string[];
   downVotes: string[];
+  earnedBadges: Badge[] | ObjectId[];
 }
 
 const tag1 = {
@@ -124,6 +126,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       upVotes: ['new-user'],
       downVotes: [],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -144,6 +147,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Upvote cancelled successfully',
       upVotes: [],
       downVotes: [],
+      earnedBadges: [],
     };
 
     await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
@@ -167,6 +171,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       upVotes: ['new-user'],
       downVotes: [],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponseWithBothVotes);
@@ -181,6 +186,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question downvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponseWithBothVotes);
@@ -231,6 +237,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -251,6 +258,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Downvote cancelled successfully',
       downVotes: [],
       upVotes: [],
+      earnedBadges: [],
     };
 
     await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
@@ -274,6 +282,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question downvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -288,6 +297,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       downVotes: [],
       upVotes: ['new-user'],
+      earnedBadges: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);

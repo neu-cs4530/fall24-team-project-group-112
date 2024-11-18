@@ -164,7 +164,7 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
  * @param {NotificationType} type type of event associated with this notification
  * @returns {Promise<Notification>} - The added notification or an error message
  */
-const addNotifications = async (
+const addNotification = async (
   eventId: ObjectId,
   receiverUsername: string,
   type: NotificationType,
@@ -172,9 +172,6 @@ const addNotifications = async (
   if (!eventId || !type || !receiverUsername) {
     throw new Error('Invalid request');
   }
-
-  /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
 
   const notif: Notification = {
     notificationType: type,
@@ -221,7 +218,7 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
       { new: true },
     );
     const badge = await BadgeModel.findById(badgeObjectId);
-    await addNotifications(badgeObjectId, username, NotificationType.BADGE);
+    await addNotification(badgeObjectId, username, NotificationType.BADGE);
     return { user: updatedUser as User, badgeEarned: badge as Badge };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
@@ -807,7 +804,7 @@ export const addAnswerToQuestion = async (
       throw new Error('Error when adding answer to question');
     }
 
-    const notification = await addNotifications(ans._id, question.askedBy, NotificationType.ANSWER);
+    const notification = await addNotification(ans._id, question.askedBy, NotificationType.ANSWER);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
@@ -874,10 +871,10 @@ export const addComment = async (
 
     if (type === 'question') {
       result = result as Question;
-      await addNotifications(comment._id, result.askedBy, NotificationType.COMMENT);
+      await addNotification(comment._id, result.askedBy, NotificationType.COMMENT);
     } else {
       result = result as Answer;
-      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT);
+      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT);
     }
 
     return result;
@@ -1177,7 +1174,7 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
     const followResponse = await FollowModel.create(follow);
 
     if (followResponse._id) {
-      await addNotifications(followResponse._id, follow.followeeUsername, NotificationType.FOLLOW);
+      await addNotification(followResponse._id, follow.followeeUsername, NotificationType.FOLLOW);
     }
 
     return { success: 'Follow request created' };

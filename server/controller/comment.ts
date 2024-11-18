@@ -1,6 +1,13 @@
 import express, { Response } from 'express';
 import { ObjectId } from 'mongodb';
-import { Comment, AddCommentRequest, FakeSOSocket } from '../types';
+import {
+  Comment,
+  AddCommentRequest,
+  FakeSOSocket,
+  NotificationType,
+  Question,
+  Answer,
+} from '../types';
 import { addComment, populateDocument, saveComment } from '../models/application';
 
 const commentController = (socket: FakeSOSocket) => {
@@ -91,6 +98,15 @@ const commentController = (socket: FakeSOSocket) => {
       socket.emit('commentUpdate', {
         result: populatedDoc,
         type,
+      });
+      const receiver =
+        type === 'question' ? (populatedDoc as Question).askedBy : (populatedDoc as Answer).ansBy;
+      socket.emit('notificationUpdate', {
+        notificationType: NotificationType.COMMENT,
+        eventId: comFromDb as Comment,
+        receiverUsername: receiver,
+        notificationDate: new Date(),
+        seen: false,
       });
       res.json(comFromDb);
     } catch (err: unknown) {

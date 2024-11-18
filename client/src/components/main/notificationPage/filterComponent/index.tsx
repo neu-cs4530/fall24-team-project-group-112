@@ -30,7 +30,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
           className='mr-1'
           type='radio'
           name='filter'
-          value='ANSWER'
+          value='Answer'
           onChange={handleRadioChange}
         />
         Answers
@@ -41,7 +41,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
           className='mr-1'
           type='radio'
           name='filter'
-          value='COMMENT'
+          value='Comment'
           onChange={handleRadioChange}
         />
         Comments
@@ -52,7 +52,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
           className='mr-1'
           type='radio'
           name='filter'
-          value='BADGE'
+          value='Badge'
           onChange={handleRadioChange}
         />
         Badges
@@ -63,7 +63,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
           className='mr-1'
           type='radio'
           name='filter'
-          value='FOLLOW'
+          value='Follow'
           onChange={handleRadioChange}
         />
         Follows

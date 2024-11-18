@@ -20,7 +20,7 @@ import {
   FeedPost,
   FeedPostType,
   Badge,
-  UserBadgeResponse,
+  UserNotificationResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -192,7 +192,10 @@ const addNotification = async (
  *
  * @returns {Promise<UserBadgeResponse>} - The user with the added badge, or an error message if the addition failed.
  */
-export const addBadge = async (username: string, badgeName: string): Promise<UserBadgeResponse> => {
+export const addBadge = async (
+  username: string,
+  badgeName: string,
+): Promise<UserNotificationResponse> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
@@ -210,7 +213,7 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
     });
 
     if (userWithBadge) {
-      return { user, badgeEarned: undefined };
+      return { user, notification: undefined };
     }
     const updatedUser = await UserModel.findOneAndUpdate(
       { username },
@@ -218,8 +221,8 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
       { new: true },
     );
     const badge = await BadgeModel.findById(badgeObjectId);
-    await addNotification(badgeObjectId, username, NotificationType.BADGE);
-    return { user: updatedUser as User, badgeEarned: badge as Badge };
+    const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
+    return { user: updatedUser as User, notification };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -670,7 +673,12 @@ export const addVoteToQuestion = async (
   username: string,
   type: 'upvote' | 'downvote',
 ): Promise<
-  | { msg: string; upVotes: string[]; downVotes: string[]; earnedBadges: Badge[] | ObjectId[] }
+  | {
+      msg: string;
+      upVotes: string[];
+      downVotes: string[];
+      notifications: Notification[];
+    }
   | { error: string }
 > => {
   let updateOperation: QueryOptions;
@@ -741,14 +749,14 @@ export const addVoteToQuestion = async (
     }
 
     const shouldReceiveVoterbadge = await checkVoterBadge(username);
-    const newBadges = [];
+    const newBadgeNotifications = [];
     if (shouldReceiveVoterbadge) {
       const userBadgeResponse = await addBadge(username, 'VOTER');
       if ('error' in userBadgeResponse) {
         return { error: 'error adding badge to user' };
       }
-      if (userBadgeResponse.badgeEarned) {
-        newBadges.push(userBadgeResponse.badgeEarned);
+      if (userBadgeResponse.notification) {
+        newBadgeNotifications.push(userBadgeResponse.notification);
       }
     }
 
@@ -758,8 +766,8 @@ export const addVoteToQuestion = async (
       if ('error' in userBadgeResponse) {
         return { error: 'error adding badge to user' };
       }
-      if (userBadgeResponse.badgeEarned) {
-        newBadges.push(userBadgeResponse.badgeEarned);
+      if (userBadgeResponse.notification) {
+        newBadgeNotifications.push(userBadgeResponse.notification);
       }
     }
 
@@ -767,7 +775,7 @@ export const addVoteToQuestion = async (
       msg,
       upVotes: result.upVotes || [],
       downVotes: result.downVotes || [],
-      earnedBadges: newBadges,
+      notifications: newBadgeNotifications,
     };
   } catch (err) {
     return {
@@ -804,24 +812,49 @@ export const addAnswerToQuestion = async (
       throw new Error('Error when adding answer to question');
     }
 
-    const notification = await addNotification(ans._id, question.askedBy, NotificationType.ANSWER);
+    const notifications = [];
+
+    const answerNotification = await addNotification(
+      ans._id,
+      question.askedBy,
+      NotificationType.ANSWER,
+    );
+    notifications.push(answerNotification);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
-      await addBadge(ans.ansBy, 'SPEEDY_ANSWERER');
+      const badge = await addBadge(ans.ansBy, 'SPEEDY_ANSWERER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
     const shouldReceiveCommunityHelperBadge = await checkCommunityHelperBadge(ans.ansBy);
     if (shouldReceiveCommunityHelperBadge) {
-      await addBadge(ans.ansBy, 'COMMUNITY_HELPER');
+      const badge = await addBadge(ans.ansBy, 'COMMUNITY_HELPER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
     const shouldReceiveTopAnswererBadge = await checkTopAnswererBadge(ans.ansBy);
     if (shouldReceiveTopAnswererBadge) {
-      await addBadge(ans.ansBy, 'TOP_ANSWERER');
+      const badge = await addBadge(ans.ansBy, 'TOP_ANSWERER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
-    return { question, notification };
+    return { question, notifications };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }
@@ -1079,7 +1112,7 @@ export const findQuestionUpvotedBy = async (
 export const updateUser = async (
   username: string,
   userUpdate: UpdateUserPayload,
-): Promise<UserResponse> => {
+): Promise<UserNotificationResponse> => {
   const existingUser = await UserModel.findOne({ username });
   if (!existingUser) {
     return { error: 'User does not exist' };
@@ -1089,11 +1122,15 @@ export const updateUser = async (
   await existingUser.save();
 
   const shouldReceiveAutobiographerBadge = await checkAutobiographerBadge(existingUser);
+  let user;
   if (shouldReceiveAutobiographerBadge) {
-    await addBadge(existingUser.username, 'AUTOBIOGRAPHER');
+    user = await addBadge(existingUser.username, 'AUTOBIOGRAPHER');
+    if ('error' in user) {
+      return { error: 'error adding badge to user' };
+    }
   }
 
-  return existingUser as User;
+  return { user: existingUser as User, notification: user?.notification };
 };
 
 /**

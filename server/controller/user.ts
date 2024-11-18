@@ -197,7 +197,10 @@ const userController = (socket: FakeSOSocket) => {
       if (updatedUser && 'error' in updatedUser) {
         throw new Error(updatedUser.error);
       }
-      socket.emit('profileUpdate', updatedUser);
+      socket.emit('profileUpdate', updatedUser.user);
+      if (updatedUser.notification) {
+        socket.emit('notificationUpdate', updatedUser.notification);
+      }
       res.json(updatedUser);
     } catch (err) {
       res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);

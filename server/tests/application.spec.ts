@@ -738,7 +738,7 @@ describe('application module', () => {
           msg: 'Question upvoted successfully',
           upVotes: ['testUser'],
           downVotes: [],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -760,7 +760,7 @@ describe('application module', () => {
           msg: 'Question upvoted successfully',
           upVotes: ['testUser'],
           downVotes: [],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -782,7 +782,7 @@ describe('application module', () => {
           msg: 'Upvote cancelled successfully',
           upVotes: [],
           downVotes: [],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -820,7 +820,7 @@ describe('application module', () => {
           msg: 'Question downvoted successfully',
           upVotes: [],
           downVotes: ['testUser'],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -842,7 +842,7 @@ describe('application module', () => {
           msg: 'Question downvoted successfully',
           upVotes: [],
           downVotes: ['testUser'],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -864,7 +864,7 @@ describe('application module', () => {
           msg: 'Downvote cancelled successfully',
           upVotes: [],
           downVotes: [],
-          earnedBadges: [],
+          notifications: [],
         });
       });
 
@@ -1467,7 +1467,7 @@ describe('application module', () => {
         firstName: 'Dummy',
         lastName: 'User',
         email: 'dummy@gmail.com',
-        createdAt: new Date('2024-06-03').toISOString(),
+        createdAt: new Date('2024-06-03'),
         headline: 'Software engineer',
         bio: 'Software engineer in Boston',
       };
@@ -1485,11 +1485,12 @@ describe('application module', () => {
         };
 
         mockingoose(UserModel).toReturn(mockUser, 'findOne');
-        const expectedResult = { ...mockUser, ...mockReqBody };
+        const expectedResult = { user: { ...mockUser, ...mockReqBody } };
         mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+        mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
 
         const result = await updateUser(username, mockReqBody);
-        expect(result).toMatchObject(mockReqBody);
+        expect(result).toMatchObject(expectedResult);
       });
 
       it('updateUser should handle partial updates properly', async () => {
@@ -1503,10 +1504,14 @@ describe('application module', () => {
         const expectedResult = { ...mockUser, ...mockReqBody };
         mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
 
-        const result = (await updateUser(username, mockReqBody)) as User;
-        expect(result).toMatchObject(mockReqBody);
-        expect(result.headline).toEqual(mockUser.headline);
-        expect(result.bio).toEqual(mockUser.bio);
+        const result = await updateUser(username, mockReqBody);
+        if (result && 'error' in result) {
+          fail();
+        }
+        const userResult = result.user as User;
+        expect(userResult).toMatchObject(mockReqBody);
+        expect(userResult.headline).toEqual(mockUser.headline);
+        expect(userResult.bio).toEqual(mockUser.bio);
       });
 
       it('updateUser should return an error when the provided username is invalid', async () => {

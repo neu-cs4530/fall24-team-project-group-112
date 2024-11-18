@@ -288,3 +288,27 @@ export interface UpdateUserPayload {
   state?: string;
   avatarName?: string;
 }
+
+/**
+ * Enum representing the possible event types for feed posts.
+ */
+export enum FeedPostType {
+  QUESTION = 'Question',
+  ANSWER = 'Answer',
+  COMMENT = 'Comment',
+  FOLLOW = 'Follow',
+}
+
+/**
+ * Interface representing a Feed item, which contains:
+ * - _id: The unique identifier for the feed.
+ * - postType: The type of feed item, one of FeedPostType.
+ * - event: The unique identifier of the event that triggered the feed item.
+ */
+
+export interface FeedPost {
+  _id?: string;
+  postType: FeedPostType;
+  event: string | Question | Answer | Comment | Follow;
+  date: Date;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { RiDeleteBin5Line } from 'react-icons/ri';
-import { Badge } from '../../../../types';
+import { Badge } from '../../../../../types';
 import './index.css';
 
 interface BadgeNotificationProps {

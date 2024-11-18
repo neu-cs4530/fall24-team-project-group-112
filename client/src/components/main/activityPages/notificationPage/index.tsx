@@ -1,5 +1,5 @@
 import React from 'react';
-import useNotifications from '../../../hooks/useNotifications';
+import useNotifications from '../../../../hooks/useNotifications';
 import NotificationList from './notificationList';
 import NotificationFilter from './filterComponent';
 import ConfirmationDisplay from './confirmation';

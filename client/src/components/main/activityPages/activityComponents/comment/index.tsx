@@ -1,18 +1,20 @@
 import React from 'react';
 import { RiDeleteBin5Line } from 'react-icons/ri';
-import { Comment } from '../../../../types';
+import { Comment } from '../../../../../types';
 import './index.css';
 
-interface CommentNotificationProps {
+interface CommentItemProps {
   comment: Comment;
+  itemType: 'notification' | 'feed';
 }
 
-const CommentNotification: React.FC<CommentNotificationProps> = ({ comment }) => (
+const CommentItem: React.FC<CommentItemProps> = ({ comment, itemType }) => (
   <div className='notification'>
     <div>
       <div className='notification-header'>
         <div>
-          <span className='user-in-notification'>{comment.commentBy}</span> commented on your post.
+          <span className='user-in-notification'>{comment.commentBy}</span>
+          {` commented on ${itemType === 'notification' ? 'your' : 'a'} post.`}
         </div>
         <RiDeleteBin5Line className='trash-icon' />
       </div>
@@ -25,4 +27,4 @@ const CommentNotification: React.FC<CommentNotificationProps> = ({ comment }) =>
   </div>
 );
 
-export default CommentNotification;
+export default CommentItem;

@@ -365,21 +365,20 @@ export enum FeedPostType {
   QUESTION = 'Question',
   ANSWER = 'Answer',
   COMMENT = 'Comment',
-  BADGE = 'Badge',
   FOLLOW = 'Follow',
 }
 
 /**
- * Interface representing a Notification, which contains:
- * - _id: The unique identifier for the notification.
- * - postType: The type of notification, one of NotificationType.
- * - eventId: The unique identifier of the event that triggered the notification.
+ * Interface representing a Feed item, which contains:
+ * - _id: The unique identifier for the feed.
+ * - postType: The type of feed item, one of FeedPostType.
+ * - eventId: The unique identifier of the event that triggered the feed item.
  */
 
 export interface FeedPost {
   _id?: ObjectId;
   postType: FeedPostType;
-  event: ObjectId | Question | Answer | Comment | Badge | Follow;
+  event: ObjectId | Question | Answer | Comment | Follow;
   date: Date;
 }
 

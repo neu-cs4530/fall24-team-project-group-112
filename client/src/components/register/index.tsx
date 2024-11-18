@@ -26,7 +26,7 @@ const Register = () => {
 
   return (
     <div className='container'>
-      <h2>Welcome to Stack Overgram!</h2>
+      <h2 className='font-bold text-2xl'>Welcome to Stack Overgram!</h2>
       <h4>Register a new account</h4>
       {textErr !== '' && (
         <div className='account-creation-error'>

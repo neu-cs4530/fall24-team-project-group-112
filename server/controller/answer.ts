@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { Answer, AnswerRequest, AnswerResponse, FakeSOSocket, NotificationType } from '../types';
+import { Answer, AnswerRequest, AnswerResponse, FakeSOSocket } from '../types';
 import { addAnswerToQuestion, populateDocument, saveAnswer } from '../models/application';
 
 const answerController = (socket: FakeSOSocket) => {

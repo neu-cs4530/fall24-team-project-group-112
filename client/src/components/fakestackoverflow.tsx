@@ -6,7 +6,7 @@ import Layout from './layout';
 import Login from './login';
 import Register from './register';
 import Profile from './main/profile';
-import { FakeSOSocket, User } from '../types';
+import { FakeSOSocket, User, Notification } from '../types';
 import LoginContext from '../contexts/LoginContext';
 import UserContext from '../contexts/UserContext';
 import QuestionPage from './main/questionPage';
@@ -46,11 +46,12 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     const userItem = getItem('user');
     return userItem ? JSON.parse(userItem) : null;
   });
-  const [notification, setNotification] = useState<boolean>(false);
+  const [notificationAlert, setNotificationAlert] = useState<boolean>(false);
 
   useEffect(() => {
-    const handleNotificationUpdate = async () => {
-      setNotification(true);
+    const handleNotificationUpdate = async (notification: Notification) => {
+      if (notification.receiverUsername !== user?.username) return;
+      setNotificationAlert(true);
     };
 
     socket?.on('notificationUpdate', handleNotificationUpdate);
@@ -58,12 +59,12 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     return () => {
       socket?.off('notificationUpdate', handleNotificationUpdate);
     };
-  }, [socket]);
+  }, [socket, user?.username]);
 
   const snackbarAction = (
     <React.Fragment>
       <Link to='/notification'>
-        <Button color='primary' size='small' onClick={() => setNotification(false)}>
+        <Button color='primary' size='small' onClick={() => setNotificationAlert(false)}>
           View
         </Button>
       </Link>
@@ -71,7 +72,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
         size='small'
         aria-label='close'
         color='inherit'
-        onClick={() => setNotification(false)}>
+        onClick={() => setNotificationAlert(false)}>
         <CloseIcon fontSize='small' />
       </IconButton>
     </React.Fragment>
@@ -81,9 +82,9 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     <LoginContext.Provider value={{ setUser }}>
       <Snackbar
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={notification}
+        open={notificationAlert}
         autoHideDuration={5000}
-        onClose={() => setNotification(false)}
+        onClose={() => setNotificationAlert(false)}
         message='You have a new notification!'
         action={snackbarAction}
       />

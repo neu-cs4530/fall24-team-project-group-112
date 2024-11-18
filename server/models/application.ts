@@ -19,7 +19,6 @@ import {
   QuestionNotificationResponse,
   FeedPost,
   FeedPostType,
-  Badge,
   UserNotificationResponse,
 } from '../types';
 import AnswerModel from './answers';
@@ -229,7 +228,6 @@ export const addBadge = async (
       { $addToSet: { badges: badgeObjectId } },
       { new: true },
     );
-    const badge = await BadgeModel.findById(badgeObjectId);
     const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
     return { user: updatedUser as User, notification };
   } catch (error) {

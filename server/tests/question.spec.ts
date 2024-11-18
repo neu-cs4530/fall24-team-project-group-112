@@ -1,6 +1,5 @@
 import supertest from 'supertest';
 import mongoose from 'mongoose';
-import { ObjectId } from 'mongodb';
 import { app } from '../app';
 import * as util from '../models/application';
 import { Notification, Question } from '../types';

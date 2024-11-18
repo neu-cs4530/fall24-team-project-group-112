@@ -158,6 +158,36 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
 };
 
 /**
+ * Adds a notification to the database for the given event and user.
+ * @param {ObjectId} eventId id of event associated with this notification
+ * @param {string} receiverUsername username of user who will receive this notification
+ * @param {NotificationType} type type of event associated with this notification
+ * @returns {Promise<Notification>} - The added notification or an error message
+ */
+const addNotifications = async (
+  eventId: ObjectId,
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<Notification> => {
+  if (!eventId || !type || !receiverUsername) {
+    throw new Error('Invalid request');
+  }
+
+  /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
+    who performed the action and create a notification record for each of them. */
+
+  const notif: Notification = {
+    notificationType: type,
+    eventId,
+    receiverUsername,
+    notificationDate: new Date(),
+    seen: false,
+  };
+
+  return NotificationModel.create(notif);
+};
+
+/**
  * Adds the specified badge to the provided user.
  *
  * @param {string} username - The username of the user to add the badge to
@@ -373,36 +403,6 @@ export const addTag = async (tag: Tag): Promise<Tag | null> => {
   } catch (error) {
     return null;
   }
-};
-
-/**
- * Adds a notification to the database for the given event and user.
- * @param {ObjectId} eventId id of event associated with this notification
- * @param {string} receiverUsername username of user who will receive this notification
- * @param {NotificationType} type type of event associated with this notification
- * @returns {Promise<Notification>} - The added notification or an error message
- */
-const addNotifications = async (
-  eventId: ObjectId,
-  receiverUsername: string,
-  type: NotificationType,
-): Promise<Notification> => {
-  if (!eventId || !type || !receiverUsername) {
-    throw new Error('Invalid request');
-  }
-
-  /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-  const notif: Notification = {
-    notificationType: type,
-    eventId,
-    receiverUsername,
-    notificationDate: new Date(),
-    seen: false,
-  };
-
-  return await NotificationModel.create(notif);
 };
 
 /**
@@ -744,7 +744,7 @@ export const addVoteToQuestion = async (
     }
 
     const shouldReceiveVoterbadge = await checkVoterBadge(username);
-    var newBadges = [];
+    const newBadges = [];
     if (shouldReceiveVoterbadge) {
       const userBadgeResponse = await addBadge(username, 'VOTER');
       if ('error' in userBadgeResponse) {
@@ -765,8 +765,6 @@ export const addVoteToQuestion = async (
         newBadges.push(userBadgeResponse.badgeEarned);
       }
     }
-
-    console.log(newBadges);
 
     return {
       msg,
@@ -1179,7 +1177,6 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
     const followResponse = await FollowModel.create(follow);
 
     if (followResponse._id) {
-      console.log('Follow id: ', followResponse._id);
       await addNotifications(followResponse._id, follow.followeeUsername, NotificationType.FOLLOW);
     }
 

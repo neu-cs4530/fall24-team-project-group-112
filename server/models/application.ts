@@ -178,7 +178,7 @@ const addNotifications = async (
     const notif: Notification = {
       notificationType: type,
       eventId,
-      questionId,
+      question: questionId,
       receiverUsername,
       notificationDate: new Date(),
       seen: false,
@@ -1189,22 +1189,22 @@ export const getNotificationsForUser = async (
 
     // if type is provided, filter notifications by type
     if (type) {
-      const notifications = await NotificationModel.find({
+      return await NotificationModel.find({
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
-      }).populate([{ path: 'user' }, { path: 'eventId' }, { path: 'questionId' }]);
-
-      return notifications;
+      }).populate([
+        { path: 'user' },
+        { path: 'eventId', populate: 'user' },
+        { path: 'question', populate: 'user' },
+      ]);
     }
 
     // otherwise, find all notifications for the user
-    const notifications = await NotificationModel.find({ receiverUsername: username }).populate([
+    return await NotificationModel.find({ receiverUsername: username }).populate([
       { path: 'user' },
-      { path: 'eventId' },
-      { path: 'questionId', populate: 'user' },
+      { path: 'eventId', populate: 'user' },
+      { path: 'question', populate: 'user' },
     ]);
-
-    return notifications;
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
   }

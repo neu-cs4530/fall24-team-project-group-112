@@ -245,7 +245,6 @@ export interface Notification {
   _id?: string;
   notificationType: NotificationType;
   eventId: Answer | Comment | Badge | Follow;
-  questionId?: Question;
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;

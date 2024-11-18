@@ -36,7 +36,14 @@ const questionSchema: Schema = new Schema(
     downVotes: [{ type: String }],
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   },
-  { collection: 'Question' },
+  { collection: 'Question', toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+questionSchema.virtual('user', {
+  ref: 'User',
+  localField: 'askedBy',
+  foreignField: 'username',
+  justOne: true,
+});
 
 export default questionSchema;

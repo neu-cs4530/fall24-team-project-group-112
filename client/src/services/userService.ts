@@ -1,7 +1,8 @@
-import { Follows, User } from '../types';
+import { Follows, UpdateUserPayload, User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
+const LOGIN_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/login`;
 
 /**
  * Adds a new answer to a specific question.
@@ -10,7 +11,7 @@ const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
  * @param ans - The answer object containing the answer details.
  * @throws Error Throws an error if the request fails or the response status is not 200.
  */
-const addUser = async (
+export const addUser = async (
   user: User,
   password: string,
 ): Promise<User | { status: number; error: string }> => {
@@ -30,10 +31,53 @@ const addUser = async (
  * @throws Error Throws an error if the request fails or the response status is not 200.
  * @returns The user object.
  */
-const getUser = async (username: string): Promise<User> => {
+export const getUser = async (username: string): Promise<User> => {
   const res = await api.get(`${USER_API_URL}/${username}`);
   if (res.status !== 200) {
     throw new Error('Error while fetching user');
+  }
+  return res.data;
+};
+
+/**
+ * Logs in a user with the given email and password.
+ *
+ * @param email - The email of the user logging in.
+ * @param password - The password of the user logging in.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ */
+export const loginUser = async (
+  email: string,
+  password: string,
+): Promise<User | { status: number; error: string }> => {
+  const data = { email, password };
+
+  try {
+    const res = await api.post(`${LOGIN_API_URL}`, data);
+    return res.data;
+  } catch (error: unknown) {
+    return {
+      status: 500,
+      error: 'An unexpected error occurred',
+    };
+  }
+};
+
+/**
+ * Updates a user's information with the given information.
+ *
+ * @param username - The username of the user to be updated.
+ * @param userPayload - The user payload object containing the updated user details.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ * @returns The updated user object.
+ */
+export const updateProfile = async (
+  username: string,
+  userPayload: UpdateUserPayload,
+): Promise<User> => {
+  const res = await api.patch(`${USER_API_URL}/${username}`, userPayload);
+  if (res.status !== 200) {
+    throw new Error('Error while updating user');
   }
   return res.data;
 };
@@ -45,7 +89,7 @@ const getUser = async (username: string): Promise<User> => {
  * @throws Error Throws an error if the request fails or the response status is not 200.
  * @returns an object containing an array of follower usernames and following usernames.
  */
-const getFollowers = async (username: string): Promise<Follows> => {
+export const getFollowers = async (username: string): Promise<Follows> => {
   const res = await api.get(`${USER_API_URL}/follow/${username}`);
   if (res.status !== 200) {
     throw new Error('Error while fetching follows');
@@ -61,7 +105,7 @@ const getFollowers = async (username: string): Promise<Follows> => {
  * @throws Error Throws an error if the request fails or the response status is not 200.
  * @returns a success or error message depending on the succesful addition or deletion of the follow.
  */
-const addFollow = async (
+export const addFollow = async (
   followerUsername: string,
   followeeUsername: string,
 ): Promise<{ success: string } | { error: string }> => {
@@ -73,4 +117,3 @@ const addFollow = async (
   }
   return res.data;
 };
-export { addUser, getUser, getFollowers, addFollow };

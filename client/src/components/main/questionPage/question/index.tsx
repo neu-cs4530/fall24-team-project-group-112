@@ -46,7 +46,7 @@ const QuestionView = ({ q }: QuestionProps) => {
 
   return (
     <div
-      className='question right_padding'
+      className='flex flex-row border border-dashed border-t-black p-[2%]'
       onClick={() => {
         if (q._id) {
           handleAnswer(q._id);

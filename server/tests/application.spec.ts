@@ -252,7 +252,7 @@ const FOLLOWS: Follow[] = [
   },
 ];
 
-const notifications: Notification[] = [
+const NOTIFICATIONS: Notification[] = [
   {
     _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
     notificationType: NotificationType.ANSWER,
@@ -1777,9 +1777,9 @@ describe('application module', () => {
   describe('Notification model', () => {
     describe('markNotificationsAsSeen', () => {
       test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
-        const expectedResults = notifications
-          .filter(notif => notif.receiverUsername === 'receiver1')
-          .map(result => ({ ...result, seen: true }));
+        const expectedResults = NOTIFICATIONS.filter(
+          notif => notif.receiverUsername === 'receiver1',
+        ).map(result => ({ ...result, seen: true }));
 
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
@@ -1830,7 +1830,7 @@ describe('application module', () => {
     });
     describe('getNotificationsForUser', () => {
       test('getNotificationsForUser should get all notifications for the specified user when no filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3',
         );
 
@@ -1849,7 +1849,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Answer filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Answer',
         );
 
@@ -1870,7 +1870,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Comment filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Comment',
         );
 
@@ -1890,7 +1890,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Badge filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Badge',
         );
 
@@ -1910,7 +1910,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Follow filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Follow',
         );
 
@@ -2009,7 +2009,7 @@ describe('application module', () => {
 
       test('deleteNotifications should delete the specified notification of the specified user', async () => {
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-        mockingoose(NotificationModel).toReturn(notifications[1], 'deleteOne');
+        mockingoose(NotificationModel).toReturn(NOTIFICATIONS[1], 'deleteOne');
 
         const receiverUsername = 'receiver1';
         const notificationId = '65e9b58910afe6e94fc6e6de';

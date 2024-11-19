@@ -10,7 +10,7 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
   };
 
   return (
-    <div className='notification-filter'>
+    <div className='notification-filter flex flex-col mt-5 ml-1 border border-black rounded px-3 py-2'>
       <h3 className='font-bold mb-2'>Filter By:</h3>
 
       <label className='mr-3'>

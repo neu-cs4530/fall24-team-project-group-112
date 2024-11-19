@@ -36,6 +36,7 @@ import {
   checkLifesaverBadge,
   addBadge,
   getFeedForUser,
+  fetchQuestionById,
 } from '../models/application';
 import {
   Answer,
@@ -686,7 +687,45 @@ describe('application module', () => {
           error: string;
         };
 
-        expect(result.error).toEqual('Error when fetching and updating a question');
+        expect(result.error).toEqual('Error when fetching a question');
+      });
+    });
+
+    describe('fetchQuestionById', () => {
+      test('fetchQuestionById should return question', async () => {
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        mockingoose(QuestionModel).toReturn(question, 'findOne');
+        QuestionModel.schema.path('answers', Object);
+
+        const result = (await fetchQuestionById('65e9b5a995b6c7045a30d823')) as Question;
+
+        expect(result.views.length).toEqual(1);
+        expect(result.views).toEqual(['question2_user']);
+        expect(result._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+        expect(result.title).toEqual(question.title);
+        expect(result.text).toEqual(question.text);
+        expect(result.answers).toEqual(question.answers);
+        expect(result.askDateTime).toEqual(question.askDateTime);
+      });
+
+      test('fetchQuestionById should return null if id does not exist', async () => {
+        mockingoose(QuestionModel).toReturn(null, 'findOne');
+
+        const result = await fetchQuestionById('65e9b716ff0e892116b2de01');
+
+        expect(result).toBeNull();
+      });
+
+      test('fetchQuestionById should return an object with error if findOne throws an error', async () => {
+        mockingoose(QuestionModel).toReturn(new Error('error'), 'findOne');
+
+        const result = (await fetchQuestionById('65e9b716ff0e892116b2de01')) as {
+          error: string;
+        };
+
+        expect(result.error).toEqual('Error when fetching a question');
       });
     });
 

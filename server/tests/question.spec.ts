@@ -814,3 +814,129 @@ describe('GET /upvotedBy/:username', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('GET /getQuestion/:qid', () => {
+  afterEach(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should return a question object in the response when the question id is passed as request parameter without incrementing the view count', async () => {
+    // Mock request parameters
+    const mockReqParams = {
+      qid: '65e9b5a995b6c7045a30d823',
+    };
+    const mockReqQuery = {
+      username: 'question3_user',
+    };
+
+    const findq = MOCK_QUESTIONS.filter(q => q._id.toString() === mockReqParams.qid)[0];
+
+    const mockPopulatedQuestion = {
+      ...findq,
+      _id: new mongoose.Types.ObjectId(findq._id),
+      tags: [],
+      answers: [],
+      askDateTime: findq.askDateTime,
+    };
+
+    // Provide mock question data
+    jest.spyOn(util, 'fetchQuestionById').mockResolvedValueOnce(mockPopulatedQuestion as Question);
+
+    // Making the request
+    const response = await supertest(app).get(
+      `/question/getQuestion/${mockReqParams.qid}?username=${mockReqQuery.username}`,
+    );
+
+    const expectedResponse = {
+      ...mockPopulatedQuestion,
+      _id: mockPopulatedQuestion._id.toString(),
+      askDateTime: mockPopulatedQuestion.askDateTime.toISOString(),
+    };
+    // Asserting the response
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedResponse);
+  });
+
+  it('should return bad request error if the question id is not in the correct format', async () => {
+    // Mock request parameters
+    const mockReqParams = {
+      qid: 'invalid id',
+    };
+    const mockReqQuery = {
+      username: 'question2_user',
+    };
+
+    jest.spyOn(util, 'fetchQuestionById').mockResolvedValueOnce(null);
+
+    // Making the request
+    const response = await supertest(app).get(
+      `/question/getQuestion/${mockReqParams.qid}?username=${mockReqQuery.username}`,
+    );
+
+    // Asserting the response
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid ID format');
+  });
+
+  it('should return bad request error if the username is not provided', async () => {
+    // Mock request parameters
+    const mockReqParams = {
+      qid: '65e9b5a995b6c7045a30d823',
+    };
+
+    jest.spyOn(util, 'fetchQuestionById').mockResolvedValueOnce(null);
+
+    // Making the request
+    const response = await supertest(app).get(`/question/getQuestion/${mockReqParams.qid}`);
+
+    // Asserting the response
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid username requesting question.');
+  });
+
+  it('should return database error if the question id is not found in the database', async () => {
+    // Mock request parameters
+    const mockReqParams = {
+      qid: '65e9b5a995b6c7045a30d823',
+    };
+    const mockReqQuery = {
+      username: 'question2_user',
+    };
+
+    jest.spyOn(util, 'fetchQuestionById').mockResolvedValueOnce(null);
+
+    // Making the request
+    const response = await supertest(app).get(
+      `/question/getQuestion/${mockReqParams.qid}?username=${mockReqQuery.username}`,
+    );
+
+    // Asserting the response
+    expect(response.status).toBe(500);
+  });
+
+  it('should return bad request error if an error occurs when fetching and updating the question', async () => {
+    // Mock request parameters
+    const mockReqParams = {
+      qid: '65e9b5a995b6c7045a30d823',
+    };
+    const mockReqQuery = {
+      username: 'question2_user',
+    };
+
+    jest
+      .spyOn(util, 'fetchQuestionById')
+      .mockResolvedValueOnce({ error: 'Error when fetching and updating a question' });
+
+    // Making the request
+    const response = await supertest(app).get(
+      `/question/getQuestion/${mockReqParams.qid}?username=${mockReqQuery.username}`,
+    );
+
+    // Asserting the response
+    expect(response.status).toBe(500);
+  });
+});

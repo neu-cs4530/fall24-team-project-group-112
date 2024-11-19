@@ -181,11 +181,10 @@ const addNotification = async (
     notificationDate: new Date(),
     seen: false,
   };
-
-    return await NotificationModel.create(notif);
-  } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
-  }
+  const notification = await NotificationModel.create(notif);
+  return (await NotificationModel.findById(notification._id)
+    .populate('eventId')
+    .exec()) as Notification;
 };
 
 /**
@@ -565,6 +564,24 @@ export const fetchAndIncrementQuestionViewsById = async (
 };
 
 /**
+ * Fetches a question by its ID without incrementing its view count.
+ *
+ * @param {string} qid - The ID of the question to fetch.
+ *
+ * @returns {Promise<QuestionResponse | null>} - Promise that resolves to the fetched question
+ *          null if the question is not found, or an error message.
+ */
+export const fetchQuestionById = async (qid: string): Promise<QuestionResponse | null> => {
+  try {
+    const q = await QuestionModel.findOne({ _id: new ObjectId(qid) });
+    console.log(qid);
+    return q;
+  } catch (error) {
+    return { error: 'Error when fetching a question' };
+  }
+};
+
+/**
  * Saves a new question to the database.
  *
  * @param {Question} question - The question to save
@@ -815,7 +832,14 @@ export const addAnswerToQuestion = async (
       throw new Error('Error when adding answer to question');
     }
 
-    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER, new ObjectId(qid));
+    const notifications = [];
+    const answerNotification = await addNotification(
+      ans._id,
+      question.askedBy,
+      NotificationType.ANSWER,
+      new ObjectId(qid),
+    );
+    notifications.push(answerNotification);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {

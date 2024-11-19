@@ -186,6 +186,7 @@ export interface FindQuestionRequest extends Request {
 /**
  * Interface for the request parameters when finding a question by its ID.
  * - qid - The unique identifier of the question.
+ * - username - The username of the user viewing the question.
  */
 export interface FindQuestionByIdRequest extends Request {
   params: {
@@ -331,6 +332,7 @@ export enum NotificationType {
  * - _id: The unique identifier for the notification.
  * - notificationType: The type of notification, one of NotificationType.
  * - eventId: The unique identifier of the event that triggered the notification.
+ * - question: The unique identifier of the question associated with the notification. This field is optional.
  * - receiverUsername: The username of the user who will receive the notification.
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.

@@ -26,6 +26,7 @@ import {
   findQuestionAskedBy,
   findQuestionDownvotedBy,
   findQuestionUpvotedBy,
+  fetchQuestionById,
 } from '../models/application';
 
 const questionController = (socket: FakeSOSocket) => {
@@ -90,6 +91,46 @@ const questionController = (socket: FakeSOSocket) => {
 
       if (q && !('error' in q)) {
         socket.emit('viewsUpdate', q);
+        res.json(q);
+        return;
+      }
+
+      throw new Error('Error while fetching question by id');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        res.status(500).send(`Error when fetching question by id: ${err.message}`);
+      } else {
+        res.status(500).send(`Error when fetching question by id`);
+      }
+    }
+  };
+
+  /**
+   * Retrieves a question by its unique ID without incrementing its view count
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req The id of the question to find.
+   * @param res The HTTP response object used to send back the question details.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getQuestion = async (req: FindQuestionByIdRequest, res: Response): Promise<void> => {
+    const { qid } = req.params;
+    const { username } = req.query;
+
+    if (!ObjectId.isValid(qid)) {
+      res.status(400).send('Invalid ID format');
+      return;
+    }
+    if (username === undefined) {
+      res.status(400).send('Invalid username requesting question.');
+      return;
+    }
+
+    try {
+      const q = await fetchQuestionById(qid);
+
+      if (q && !('error' in q)) {
         res.json(q);
         return;
       }
@@ -400,6 +441,7 @@ const questionController = (socket: FakeSOSocket) => {
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
+  router.get('/getQuestion/:qid', getQuestion);
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);

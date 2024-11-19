@@ -1,10 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Follow } from '../../../../../types';
-import useUserAvatar from '../../../../../hooks/useUserAvatar';
 import './index.css';
-import Avatar from '../../../baseComponents/avatar';
 import ItemHeader from '../itemHeader';
 
 interface FollowItemProps {

@@ -11,19 +11,25 @@ import { User } from '../../types';
  * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
 const Layout = ({ user }: { user: User | null }) => {
-  const location = useLocation(); // Get current route location
+  const location = useLocation();
 
   // Check if the current path is '/notifications'
   const isNotificationsPage = location.pathname === '/notification';
 
   // Check if the current path is '/feed'
   const isFeedPage = location.pathname === '/feed';
+
+  // Check if the current path is '/profile'
+  const isProfilePage = location.pathname.startsWith('/profile');
+
   return (
     <>
       <Header user={user} />
       <div id='main' className='main'>
-        {!isNotificationsPage && !isFeedPage && <SideBarNav />}
-        <div id='right_main' className={!isNotificationsPage ? 'right_main' : ''}>
+        {!isNotificationsPage && !isFeedPage && !isProfilePage && <SideBarNav />}
+        <div
+          id='right_main'
+          className={!isNotificationsPage || !isFeedPage || !isProfilePage ? 'right_main' : ''}>
           <Outlet />
         </div>
       </div>

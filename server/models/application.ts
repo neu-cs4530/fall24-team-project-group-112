@@ -564,24 +564,6 @@ export const fetchAndIncrementQuestionViewsById = async (
 };
 
 /**
- * Fetches a question by its ID without incrementing its view count.
- *
- * @param {string} qid - The ID of the question to fetch.
- *
- * @returns {Promise<QuestionResponse | null>} - Promise that resolves to the fetched question
- *          null if the question is not found, or an error message.
- */
-export const fetchQuestionById = async (qid: string): Promise<QuestionResponse | null> => {
-  try {
-    const q = await QuestionModel.findOne({ _id: new ObjectId(qid) });
-    console.log(qid);
-    return q;
-  } catch (error) {
-    return { error: 'Error when fetching a question' };
-  }
-};
-
-/**
  * Saves a new question to the database.
  *
  * @param {Question} question - The question to save

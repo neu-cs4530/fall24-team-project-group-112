@@ -59,9 +59,9 @@ const useProfile = (loggedInUser: User | null) => {
             Object.entries(formData).filter(([_, value]) => value !== undefined),
           ),
         });
-        setIsEditing(false);
-        setUser(updatedUser);
+        setUser(updatedUser.user);
         setError('');
+        setIsEditing(false);
       } catch (err) {
         setError('An error occurred while saving the profile data.');
 

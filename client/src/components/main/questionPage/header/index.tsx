@@ -28,11 +28,11 @@ interface QuestionHeaderProps {
  */
 const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => (
   <div>
-    <div className='space_between right_padding w-100'>
+    <div className='space_between right_padding'>
       <div className='bold_title'>{titleText}</div>
       <AskQuestionButton />
     </div>
-    <div className='space_between right_padding w-100'>
+    <div className='space_between right_padding'>
       <div id='question_count'>{qcnt} questions</div>
       <div className='btns'>
         {Object.keys(orderTypeDisplayName).map((order, idx) => (

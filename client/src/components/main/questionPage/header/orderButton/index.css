@@ -1,11 +1,6 @@
 .btn {
   background: #ffffff;
   border: #000000 1px solid;
-  padding: 5px;
-  padding-left: 8px;
-  padding-right: 8px;
-  margin-left: 10px;
-  border-radius: 8px;
 }
 
 .btn:hover {

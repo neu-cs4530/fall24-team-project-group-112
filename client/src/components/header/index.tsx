@@ -21,11 +21,7 @@ const Header = ({ user }: { user: User | null }) => {
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
     { name: 'Notifications', route: 'notification', image: <FaBell /> },
-    {
-      name: 'Me',
-      route: user ? `profile/${user.username}` : 'register',
-      image: <IoMdPerson></IoMdPerson>,
-    },
+    { name: 'Me', route: user ? `profile/${user.username}` : 'register', image: <IoMdPerson /> },
   ];
 
   const { pathname } = useLocation();
@@ -33,10 +29,9 @@ const Header = ({ user }: { user: User | null }) => {
   return (
     <div id='header' className='header'>
       <div className='left-side-header'>
-        <div className='text-[24px] font-bold pr-8'>Stack Overgram</div>
+        <div className='text-[24px] font-bold pr-8'>Fake Stack Overflow</div>
         <input
           id='searchBar'
-          className='px-4 py-2 rounded-lg search-bar border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
           placeholder='Search ...'
           type='text'
           value={val}

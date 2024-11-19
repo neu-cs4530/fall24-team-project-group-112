@@ -1,16 +1,16 @@
 import React from 'react';
 
-interface NotificationFilterProps {
+interface FeedFilterProps {
   onFilterChange: (type: string) => void;
 }
 
-const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange }) => {
+const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange(e.target.value); // Pass only the selected value (string)
   };
 
   return (
-    <div className='notification-filter flex flex-col mt-5 ml-1 border border-black rounded px-3 py-2'>
+    <div className='notification-filter'>
       <h3 className='font-bold mb-2'>Filter By:</h3>
 
       <label className='mr-3'>
@@ -52,10 +52,10 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
           className='mr-1'
           type='radio'
           name='filter'
-          value='Badge'
+          value='Question'
           onChange={handleRadioChange}
         />
-        Badges
+        Questions
       </label>
 
       <label>
@@ -72,4 +72,4 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
   );
 };
 
-export default NotificationFilter;
+export default FeedFilter;

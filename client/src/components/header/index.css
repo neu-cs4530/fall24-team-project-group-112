@@ -1,10 +1,14 @@
+/* src/styles.css
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities'; */
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 10%;
-  padding-left: 25px;
-  padding-right: 10px;
+  padding-left: 30px;
   background: #dddddd;
 }
 
@@ -20,17 +24,17 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  width: 20%;
 }
 
 .text {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 12px;
+  font-weight: 200;
   text-decoration: none;
-  margin-top: 7px;
 }
 
 .icon {
-  font-size: 1.5rem !important;
+  font-size: 30px;
 }
 
 .right-side-header {
@@ -41,30 +45,14 @@
 
 .left-side-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .link {
   color: black;
+  width: 75px;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-left: 25px;
-  padding-right: 25px;
 }
 
 .link:hover {
   color: grey;
-}
-
-.search-bar {
-  width: 300px;
-}
-
-.avatar-in-header {
-  display: flex;
-  width: 35px !important;
-  height: 35px !important;
 }

@@ -34,8 +34,8 @@ const ProfileHeader = ({
   handleChange,
 }: ProfileHeaderProps) => {
   const styles = {
-    name: 'text-4xl font-bold text-gray-800 p-1',
-    username: 'text-2xl text-gray-600 ml-12 p-1',
+    name: 'text-4xl font-bold text-gray-800',
+    username: 'text-2xl text-gray-600 ml-12',
   };
 
   return isEditing ? (

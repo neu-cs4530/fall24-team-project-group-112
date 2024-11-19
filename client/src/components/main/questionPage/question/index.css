@@ -16,8 +16,6 @@
 
 .postTitle {
   color: cornflowerblue;
-  font-weight: 500;
-  font-size: 1.1rem;
 }
 
 .question_tags {
@@ -45,7 +43,6 @@
 
 .question_author {
   color: red;
-  font-weight: 500;
 }
 
 .question_meta {

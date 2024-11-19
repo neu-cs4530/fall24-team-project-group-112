@@ -1,5 +1,5 @@
 import React from 'react';
-import useNotifications from '../../../hooks/useNotifications';
+import useNotifications from '../../../../hooks/useNotifications';
 import NotificationList from './notificationList';
 import NotificationFilter from './filterComponent';
 import ConfirmationDisplay from './confirmation';
@@ -30,18 +30,16 @@ const NotificationCenter: React.FC = () => {
   return (
     <div className='notification-div relative'>
       <h2 className='notification-title font-bold text-4xl'>Notifications Center</h2>
-      <div className='absolute top-0 right-0'>
-        <button
-          className=' mt-5 mr-5 border border-black rounded px-3 py-2'
-          onClick={() => setShowConfirmationModal(true)}>
-          Clear all notifications
-        </button>
-        <div className='mb-5 absolute'>
-          <NotificationFilter onFilterChange={handleFilterChange} />
-        </div>
-      </div>
+      <button
+        className='absolute top-0 right-0 mt-5 mr-5 border border-black rounded px-3 py-2'
+        onClick={() => setShowConfirmationModal(true)}>
+        Clear all notifications
+      </button>
       <div className='flex justify-between items-center'>
         <div className='flex flex-col items-center'>
+          <div className='mb-5'>
+            <NotificationFilter onFilterChange={handleFilterChange} />
+          </div>
           {!notifications.length && (
             <div className='no-notifications'>No notifications here yet</div>
           )}

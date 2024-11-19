@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CircularProgress } from '@mui/material';
 import useProfile from '../../../hooks/useProfile';
 import ProfileText from './profileText';
 import {
@@ -23,6 +24,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
   const [questionsDownvoted, setQuestionsDownvoted] = useState<Question[]>([]);
   const [questionsUpvoted, setQuestionsUpvoted] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async (username: string) => {
@@ -41,6 +43,8 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -59,7 +63,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
 
   return (
     <>
-      {user ? (
+      {user && !isLoading ? (
         <>
           <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
           <div>
@@ -79,7 +83,17 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
             title={`Questions downvoted by @${user.username}`}
           />
         </>
-      ) : null}
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+          }}>
+          <CircularProgress />
+        </div>
+      )}
     </>
   );
 };

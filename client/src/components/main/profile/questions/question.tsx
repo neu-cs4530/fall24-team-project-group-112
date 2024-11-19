@@ -32,7 +32,6 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
               {question.askedBy}
             </Link>
             <p>{getMetaData(new Date(question.askDateTime))}</p>
-            {/* <p>{new Date(question.askDateTime).toLocaleDateString()}</p> */}
           </div>
         </div>
         <p className={styles.questionText}>{question.text}</p>

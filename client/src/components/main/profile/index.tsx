@@ -4,6 +4,7 @@ import ProfileText from './profileText';
 import {
   getQuestionsAnsweredBy,
   getQuestionsAskedBy,
+  getQuestionsDownvotedBy,
   getQuestionsUpvotedBy,
 } from '../../../services/questionService';
 import { User, Question } from '../../../types';
@@ -20,6 +21,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const { user, error } = useProfile(loggedInUser.loggedInUser);
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
+  const [questionsDownvoted, setQuestionsDownvoted] = useState<Question[]>([]);
   const [questionsUpvoted, setQuestionsUpvoted] = useState<Question[]>([]);
 
   useEffect(() => {
@@ -30,6 +32,9 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
 
         const answeredByRes = await getQuestionsAnsweredBy(username);
         setQuestionsAnswered(answeredByRes || []);
+
+        const downvotedByRes = await getQuestionsDownvotedBy(username);
+        setQuestionsDownvoted(downvotedByRes || []);
 
         const upvotedByRes = await getQuestionsUpvotedBy(username);
         setQuestionsUpvoted(upvotedByRes || []);
@@ -68,6 +73,10 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
           <QuestionList
             questions={questionsUpvoted}
             title={`Questions upvoted by @${user.username}`}
+          />
+          <QuestionList
+            questions={questionsDownvoted}
+            title={`Questions downvoted by @${user.username}`}
           />
         </>
       ) : null}

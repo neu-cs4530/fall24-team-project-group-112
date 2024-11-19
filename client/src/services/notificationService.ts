@@ -43,4 +43,23 @@ const clearAllNotifications = async (username: string): Promise<void> => {
   return res.data;
 };
 
-export { getNotifications, clearAllNotifications };
+/**
+ * Function to clear a single notification for a user.
+ *
+ * @param username - The username of the user whose notification is being deleted.
+ * @param notificationId - The ID of the notification to delete.
+ * @throws Error if there is an issue deleting the notifications.
+ */
+const clearSingleNotification = async (username: string, notificationId: string): Promise<void> => {
+  const url = `${NOTIFICATION_API_URL}/${username}/${notificationId}`;
+
+  const res = await api.delete(url);
+
+  if (res.status !== 200) {
+    throw new Error('Error when deleting notification');
+  }
+
+  return res.data;
+};
+
+export { getNotifications, clearAllNotifications, clearSingleNotification };

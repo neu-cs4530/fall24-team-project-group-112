@@ -1,5 +1,7 @@
 .user-in-notification {
   font-weight: bold;
+  margin-left: 6px;
+  margin-right: 6px;
 }
 
 .notification {

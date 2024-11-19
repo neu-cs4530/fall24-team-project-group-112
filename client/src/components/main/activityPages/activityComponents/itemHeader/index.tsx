@@ -35,8 +35,8 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ username, headerText }) => {
           alignItems: 'center',
           marginBottom: headerText ? '1px' : '8px',
         }}>
-        <Avatar avatarName={userAvatar} width={30} height={30} circular={true} />
-        <span className='user-in-notification'>&nbsp;{username}&nbsp;</span>
+        <Avatar avatarName={userAvatar} width={20} height={20} circular={true} />
+        <span className='user-in-notification'>{username}</span>
       </Link>
       {headerText && <span>{headerText}</span>}
     </div>

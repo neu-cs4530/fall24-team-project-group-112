@@ -1,8 +1,7 @@
-import React from 'react';
 import './index.css';
 import QuestionHeader from './header';
-import QuestionView from './question';
 import useQuestionPage from '../../../hooks/useQuestionPage';
+import QuestionDisplay from '../profile/questions/question';
 
 /**
  * QuestionPage component renders a page displaying a list of questions
@@ -21,7 +20,7 @@ const QuestionPage = () => {
       />
       <div id='question_list' className='question_list'>
         {qlist.map((q, idx) => (
-          <QuestionView q={q} key={idx} />
+          <QuestionDisplay question={q} key={idx} />
         ))}
       </div>
       {titleText === 'Search Results' && !qlist.length && (

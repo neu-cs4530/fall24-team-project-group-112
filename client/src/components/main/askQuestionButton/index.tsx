@@ -18,7 +18,7 @@ const AskQuestionButton = () => {
 
   return (
     <button
-      className='bluebtn'
+      className='bluebtn my-4'
       onClick={() => {
         handleNewQuestion();
       }}>

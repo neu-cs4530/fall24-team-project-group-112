@@ -14,6 +14,7 @@ interface QuestionBodyProps {
   views: number;
   text: string;
   askby: string;
+  ansCount: number;
   meta: string;
 }
 
@@ -25,17 +26,23 @@ interface QuestionBodyProps {
  * @param views The number of views the question has received.
  * @param text The content of the question.
  * @param askby The username of the question's author.
+ * @param ansCount The number of answers to the question.
  * @param meta Additional metadata related to the question.
  */
-const QuestionBody = ({ views, text, askby, meta }: QuestionBodyProps) => (
-  <div id='questionBody' className='questionBody right_padding'>
-    <div className='bold_title answer_question_view'>{views} views</div>
-    <div className='answer_question_text'>{handleHyperlink(text)}</div>
-    <div className='answer_question_right'>
-      <Link to={`/profile/${askby}`}>
-        <div className='question_author'>{askby}</div>
-      </Link>
-      <div className='answer_question_meta'>asked {meta}</div>
+const QuestionBody = ({ views, text, askby, ansCount, meta }: QuestionBodyProps) => (
+  <div className='border-b-[1px] border-dashed border-b-black p-[2%]'>
+    <div className='text-xl'>{handleHyperlink(text)}</div>
+    <div className='flex mt-4 items-center justify-between'>
+      <div className='flex'>
+        <div className='font-bold text-lg mr-6'>{views} views</div>
+        <div className='font-bold text-lg'>{ansCount} answers</div>
+      </div>
+      <div className='flex ml-8 gap-2 justify-end'>
+        <Link to={`/profile/${askby}`}>
+          <div className='font-bold text-blue-800'>{askby}</div>
+        </Link>
+        <div className='text-[#7f7f7f]'>asked {meta}</div>
+      </div>
     </div>
   </div>
 );

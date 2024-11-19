@@ -1,10 +1,10 @@
 import React from 'react';
-import { Notification, Answer, Follow, Comment, Badge } from '../../../../types';
+import { Notification, Answer, Follow, Comment, Badge, Question } from '../../../../../types';
 import './index.css';
-import AnswerNotification from '../answer';
-import CommentNotification from '../comment';
-import BadgeNotification from '../badge';
-import FollowNotification from '../follow';
+import AnswerItem from '../../activityComponents/answer';
+import CommentItem from '../../activityComponents/comment';
+import BadgeNotification from '../../activityComponents/badge';
+import FollowItem from '../../activityComponents/follow';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -16,12 +16,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   switch (notification.notificationType) {
     case 'Answer': {
       const answer = notification.eventId as Answer;
-      content = <AnswerNotification answer={answer} />;
+      const question = notification.question as Question;
+      content = <AnswerItem answer={answer} question={question} itemType='notification' />;
       break;
     }
     case 'Comment': {
       const comment = notification.eventId as Comment;
-      content = <CommentNotification comment={comment} />;
+      const question = notification.question as Question;
+      content = <CommentItem comment={comment} question={question} itemType='notification' />;
       break;
     }
     case 'Badge': {
@@ -31,7 +33,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     }
     case 'Follow': {
       const follow = notification.eventId as Follow;
-      content = <FollowNotification follow={follow} />;
+      content = <FollowItem follow={follow} itemType='notification' />;
       break;
     }
     default: {

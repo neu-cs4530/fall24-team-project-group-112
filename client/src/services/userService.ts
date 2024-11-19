@@ -1,8 +1,9 @@
-import { Follows, UpdateUserPayload, User } from '../types';
+import { FeedPost, Follows, UpdateUserPayload, User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
 const LOGIN_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/login`;
+const FEED_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/feed`;
 
 /**
  * Adds a new answer to a specific question.
@@ -115,5 +116,27 @@ export const addFollow = async (
   if (res.status !== 200) {
     throw new Error('Error while adding or deleting follows');
   }
+  return res.data;
+};
+
+/**
+ * Function to get all feed items for a user.
+ *
+ * @param username - The username of the user whose feed items are being retrieved.
+ * @param type - (Optional) The type of feed item to filter by.
+ * @throws Error if there is an issue fetching the feed items.
+ */
+export const getFeed = async (username: string, type?: string): Promise<FeedPost[]> => {
+  let url = `${FEED_API_URL}/${username}`;
+  if (type) {
+    url += `?postType=${type}`;
+  }
+
+  const res = await api.get(url);
+
+  if (res.status !== 200) {
+    throw new Error('Error when fetching or filtering feed items');
+  }
+
   return res.data;
 };

@@ -26,7 +26,7 @@ const getNotifications = async (username: string, type?: string): Promise<Notifi
 };
 
 /**
- * Function to get all notifications for a user.
+ * Function to clear all notifications for a user.
  *
  * @param username - The username of the user whose notifications are being deleted.
  * @throws Error if there is an issue deleting the notifications.

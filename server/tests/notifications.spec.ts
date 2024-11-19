@@ -133,6 +133,18 @@ describe('DELETE /:username', () => {
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ success: 'Notifications deleted' });
   });
+  test('deleteNotificationsForUser should delete the specified notification for the specified user', async () => {
+    jest
+      .spyOn(util, 'deleteNotificationsForUser')
+      .mockResolvedValueOnce({ success: 'Notifications deleted' });
+
+    const result = await supertest(app).delete(
+      `/notification/${USERNAME}/91e9c58910afe6e94fc6e6de`,
+    );
+
+    expect(result.status).toBe(200);
+    expect(result.body).toEqual({ success: 'Notifications deleted' });
+  });
   test('deleteNotificationsForUser should return an error if there is an error updating the notifications', async () => {
     jest
       .spyOn(util, 'deleteNotificationsForUser')
@@ -161,6 +173,30 @@ describe('DELETE /:username', () => {
     const result = await supertest(app).delete(`/notification/invalidUsername`);
     expect(result.status).toBe(500);
     expect(result.text).toContain('Invalid username');
+  });
+
+  test('deleteNotificationsForUser should return an error if an invalid notificationId is provided', async () => {
+    jest
+      .spyOn(util, 'deleteNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
+
+    const result = await supertest(app).delete(
+      `/notification/${USERNAME}/91f9c58910afe6e94fc6e6de`,
+    );
+    expect(result.status).toBe(500);
+    expect(result.text).toContain('Error when deleting notifications');
+  });
+
+  test('deleteNotificationsForUser should return an error if the notificationId does not belong to the specified user', async () => {
+    jest
+      .spyOn(util, 'deleteNotificationsForUser')
+      .mockResolvedValueOnce({ error: 'Error when deleting notifications' });
+
+    const result = await supertest(app).delete(
+      `/notification/${USERNAME}/65e9b58910afe6e94fc6e6de`,
+    );
+    expect(result.status).toBe(500);
+    expect(result.text).toContain('Error when deleting notifications');
   });
 });
 

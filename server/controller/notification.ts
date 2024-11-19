@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { FakeSOSocket, GetNotificationRequest } from '../types';
+import { DeleteNotificationRequest, FakeSOSocket, GetNotificationRequest } from '../types';
 import {
   markNotificationsAsSeen,
   deleteNotificationsForUser,
@@ -32,16 +32,21 @@ const notificationController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Deletes all notifications for the given user
-   * If the provided user is invalid, an error will be returned and no notifications are deleted.
+   * Deletes all notifications for the given user if no notification id is provided, otherwise deletes a singular notification.
+   * If the provided user is invalid, or the notification id is invalid, an error will be returned and no notifications are deleted.
    *
-   * @param req The request object containing the username as a parameter.
+   * @param req The request object containing the username as a parameter, and an optional notification id to delete a singular notification.
    * @param res The HTTP response object used to send back an empty result or an error
    */
-  const deleteNotifications = async (req: Request, res: Response): Promise<void> => {
-    const { username } = req.params;
+  const deleteNotifications = async (
+    req: DeleteNotificationRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { username, notificationId } = req.params;
     try {
-      const result = await deleteNotificationsForUser(username);
+      const result = notificationId
+        ? await deleteNotificationsForUser(username, notificationId) // Pass notificationId if provided
+        : await deleteNotificationsForUser(username);
 
       if (result && 'error' in result) {
         throw new Error(result.error);
@@ -78,7 +83,7 @@ const notificationController = (socket: FakeSOSocket) => {
 
   router.patch('/seen/:username', markNotificationsAsSeenRoute);
   router.get('/:username', getNotifications);
-  router.delete('/:username', deleteNotifications);
+  router.delete('/:username/:notificationId?', deleteNotifications);
   return router;
 };
 

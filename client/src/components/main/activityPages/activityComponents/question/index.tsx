@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Question } from '../../../../../types';
 import './index.css';
 import ItemHeader from '../itemHeader';

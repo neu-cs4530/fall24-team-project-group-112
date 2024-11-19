@@ -27,7 +27,7 @@ const FollowItem: React.FC<FollowItemProps> = ({ follow, itemType }) => (
           </div>
         )}
       </div>
-      <RiDeleteBin5Line className='trash-icon' />
+      {itemType === 'notification' && <RiDeleteBin5Line className='trash-icon' />}
     </div>
   </div>
 );

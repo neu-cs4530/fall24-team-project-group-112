@@ -13,7 +13,6 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => (
   <div className='notification'>
     <div className='notification-header'>
       <ItemHeader username={question.askedBy} headerText={`asked a question.`} />
-      <RiDeleteBin5Line className='trash-icon' />
     </div>
     <hr />
     <div className='answer'>

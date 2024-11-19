@@ -32,7 +32,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, question, itemType }
         username={comment.commentBy}
         headerText={` commented on ${itemType === 'notification' ? 'your' : 'a'} post.`}
       />
-      <RiDeleteBin5Line className='trash-icon' />
+      {itemType === 'notification' && <RiDeleteBin5Line className='trash-icon' />}
     </div>
     <hr />
     <div className='answer'>

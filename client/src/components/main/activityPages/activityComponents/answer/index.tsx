@@ -33,7 +33,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, question, itemType }) =
           username={answer.ansBy}
           headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
         />
-        <RiDeleteBin5Line className='trash-icon' />
+        {itemType === 'notification' && <RiDeleteBin5Line className='trash-icon' />}
       </div>
       <hr />
       <div className='answer'>

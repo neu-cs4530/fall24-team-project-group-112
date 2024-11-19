@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../app';
 import * as util from '../models/application';
-import { Question } from '../types';
+import { Notification, Question } from '../types';
 
 const addVoteToQuestionSpy = jest.spyOn(util, 'addVoteToQuestion');
 
@@ -10,6 +10,7 @@ interface MockResponse {
   msg: string;
   upVotes: string[];
   downVotes: string[];
+  notifications: Notification[];
 }
 
 const tag1 = {
@@ -124,6 +125,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       upVotes: ['new-user'],
       downVotes: [],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -144,6 +146,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Upvote cancelled successfully',
       upVotes: [],
       downVotes: [],
+      notifications: [],
     };
 
     await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
@@ -167,6 +170,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       upVotes: ['new-user'],
       downVotes: [],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponseWithBothVotes);
@@ -181,6 +185,7 @@ describe('POST /upvoteQuestion', () => {
       msg: 'Question downvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponseWithBothVotes);
@@ -231,6 +236,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -251,6 +257,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Downvote cancelled successfully',
       downVotes: [],
       upVotes: [],
+      notifications: [],
     };
 
     await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
@@ -274,6 +281,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question downvoted successfully',
       downVotes: ['new-user'],
       upVotes: [],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);
@@ -288,6 +296,7 @@ describe('POST /downvoteQuestion', () => {
       msg: 'Question upvoted successfully',
       downVotes: [],
       upVotes: ['new-user'],
+      notifications: [],
     };
 
     addVoteToQuestionSpy.mockResolvedValueOnce(mockResponse);

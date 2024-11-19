@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Button, IconButton, Snackbar } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
 import Profile from './main/profile';
-import { FakeSOSocket, User } from '../types';
+import { FakeSOSocket, User, Notification } from '../types';
 import LoginContext from '../contexts/LoginContext';
 import UserContext from '../contexts/UserContext';
 import QuestionPage from './main/questionPage';
@@ -43,12 +45,50 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
     const userItem = getItem('user');
     return userItem ? JSON.parse(userItem) : null;
   });
+  const [notificationAlert, setNotificationAlert] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleNotificationUpdate = async (notification: Notification) => {
+      if (notification.receiverUsername !== user?.username) return;
+      setNotificationAlert(true);
+    };
+
+    socket?.on('notificationUpdate', handleNotificationUpdate);
+
+    return () => {
+      socket?.off('notificationUpdate', handleNotificationUpdate);
+    };
+  }, [socket, user?.username]);
+
+  const snackbarAction = (
+    <React.Fragment>
+      <Link to='/notification'>
+        <Button color='primary' size='small' onClick={() => setNotificationAlert(false)}>
+          View
+        </Button>
+      </Link>
+      <IconButton
+        size='small'
+        aria-label='close'
+        color='inherit'
+        onClick={() => setNotificationAlert(false)}>
+        <CloseIcon fontSize='small' />
+      </IconButton>
+    </React.Fragment>
+  );
 
   return (
     <LoginContext.Provider value={{ setUser }}>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={notificationAlert}
+        autoHideDuration={5000}
+        onClose={() => setNotificationAlert(false)}
+        message='You have a new notification!'
+        action={snackbarAction}
+      />
       <Routes>
         {/* Public Routes */}
-        {/* <Route path='/login' element={user ? <Navigate to='/home' /> : <Login />} /> */}
         <Route path='/' element={user ? <Navigate to='/home' /> : <Login />} />
         <Route path='/register' element={user ? <Navigate to='/home' /> : <Register />} />
 

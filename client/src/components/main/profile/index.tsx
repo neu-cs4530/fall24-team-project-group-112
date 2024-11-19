@@ -5,6 +5,7 @@ import {
   getQuestionsAnsweredBy,
   getQuestionsAskedBy,
   getQuestionsDownvotedBy,
+  getQuestionsUpvotedBy,
 } from '../../../services/questionService';
 import { User, Question } from '../../../types';
 import QuestionList from './questions/questionList';
@@ -21,6 +22,7 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
   const [questionsDownvoted, setQuestionsDownvoted] = useState<Question[]>([]);
+  const [questionsUpvoted, setQuestionsUpvoted] = useState<Question[]>([]);
 
   useEffect(() => {
     const fetchData = async (username: string) => {
@@ -33,6 +35,9 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
 
         const downvotedByRes = await getQuestionsDownvotedBy(username);
         setQuestionsDownvoted(downvotedByRes || []);
+
+        const upvotedByRes = await getQuestionsUpvotedBy(username);
+        setQuestionsUpvoted(upvotedByRes || []);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
@@ -64,6 +69,10 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
           <QuestionList
             questions={questionsAnswered}
             title={`Questions answered by @${user.username}`}
+          />
+          <QuestionList
+            questions={questionsUpvoted}
+            title={`Questions upvoted by @${user.username}`}
           />
           <QuestionList
             questions={questionsDownvoted}

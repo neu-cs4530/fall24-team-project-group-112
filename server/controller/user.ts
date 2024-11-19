@@ -11,6 +11,7 @@ import {
   FindFollowersAndFollowingRequest,
   FindUserRequest,
   GetFeedRequest,
+  NotificationType,
 } from '../types';
 import {
   addUser,
@@ -196,7 +197,10 @@ const userController = (socket: FakeSOSocket) => {
       if (updatedUser && 'error' in updatedUser) {
         throw new Error(updatedUser.error);
       }
-      socket.emit('profileUpdate', updatedUser);
+      socket.emit('profileUpdate', updatedUser.user);
+      if (updatedUser.notification) {
+        socket.emit('notificationUpdate', updatedUser.notification);
+      }
       res.json(updatedUser);
     } catch (err) {
       res.status(500).send(`Error when updating user profile: ${(err as Error).message}`);
@@ -232,6 +236,18 @@ const userController = (socket: FakeSOSocket) => {
         throw new Error(response.error);
       }
       socket.emit('followUpdate', response.success);
+
+      // only send socket update if a follow was created (not if one was deleted)
+      if (response.success.includes('created')) {
+        socket.emit('notificationUpdate', {
+          notificationType: NotificationType.FOLLOW,
+          eventId: follow,
+          receiverUsername: followeeUsername,
+          notificationDate: new Date(),
+          seen: false,
+        });
+      }
+
       res.json(response);
     } catch (err) {
       res

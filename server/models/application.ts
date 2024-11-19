@@ -16,8 +16,10 @@ import {
   UpdateUserPayload,
   User,
   UserResponse,
+  QuestionNotificationResponse,
   FeedPost,
   FeedPostType,
+  UserNotificationResponse,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -159,33 +161,31 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
  * @param {ObjectId} eventId id of event associated with this notification
  * @param {string} receiverUsername username of user who will receive this notification
  * @param {NotificationType} type type of event associated with this notification
- * @returns {Promise<Notification | { error: string }>} - The added notification or an error message
+ * @returns {Notification} - The added notification or an error message
  */
-const addNotifications = async (
+const addNotification = async (
   eventId: ObjectId,
   receiverUsername: string,
   type: NotificationType,
-): Promise<Notification | { error: string }> => {
-  try {
-    if (!eventId || !type || !receiverUsername) {
-      throw new Error('Invalid request');
-    }
-
-    /* TODO: Once getFollowers endpoint is implemented, retrieve the followers of the user 
-    who performed the action and create a notification record for each of them. */
-
-    const notif: Notification = {
-      notificationType: type,
-      eventId,
-      receiverUsername,
-      notificationDate: new Date(),
-      seen: false,
-    };
-
-    return await NotificationModel.create(notif);
-  } catch (error) {
-    return { error: `Error when adding notification: ${(error as Error).message}` };
+  questionId?: ObjectId,
+): Promise<Notification> => {
+  if (!eventId || !type || !receiverUsername) {
+    throw new Error('Invalid request');
   }
+
+  const notif: Notification = {
+    notificationType: type,
+    eventId,
+    question: questionId,
+    receiverUsername,
+    notificationDate: new Date(),
+    seen: false,
+  };
+
+  const notification = await NotificationModel.create(notif);
+  return (await NotificationModel.findById(notification._id)
+    .populate('eventId')
+    .exec()) as Notification;
 };
 
 /**
@@ -194,9 +194,12 @@ const addNotifications = async (
  * @param {string} username - The username of the user to add the badge to
  * @param {string} badgeId - The identifier of the badge to add
  *
- * @returns {Promise<UserResponse>} - The user with the added badge, or an error message if the addition failed.
+ * @returns {Promise<UserNotificationResponse>} - The user with an optional badge notification, or an error message if the addition failed.
  */
-export const addBadge = async (username: string, badgeName: string): Promise<UserResponse> => {
+export const addBadge = async (
+  username: string,
+  badgeName: string,
+): Promise<UserNotificationResponse> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
@@ -214,15 +217,15 @@ export const addBadge = async (username: string, badgeName: string): Promise<Use
     });
 
     if (userWithBadge) {
-      return user as UserResponse;
+      return { user, notification: undefined };
     }
     const updatedUser = await UserModel.findOneAndUpdate(
       { username },
       { $addToSet: { badges: badgeObjectId } },
       { new: true },
     );
-    await addNotifications(badgeObjectId, username, NotificationType.BADGE);
-    return updatedUser as UserResponse;
+    const notification = await addNotification(badgeObjectId, username, NotificationType.BADGE);
+    return { user: updatedUser as User, notification };
   } catch (error) {
     return { error: `Error when adding badge to user: ${(error as Error).message}` };
   }
@@ -672,7 +675,15 @@ export const addVoteToQuestion = async (
   qid: string,
   username: string,
   type: 'upvote' | 'downvote',
-): Promise<{ msg: string; upVotes: string[]; downVotes: string[] } | { error: string }> => {
+): Promise<
+  | {
+      msg: string;
+      upVotes: string[];
+      downVotes: string[];
+      notifications: Notification[];
+    }
+  | { error: string }
+> => {
   let updateOperation: QueryOptions;
 
   if (type === 'upvote') {
@@ -741,19 +752,33 @@ export const addVoteToQuestion = async (
     }
 
     const shouldReceiveVoterbadge = await checkVoterBadge(username);
+    const newBadgeNotifications = [];
     if (shouldReceiveVoterbadge) {
-      await addBadge(username, 'VOTER');
+      const userBadgeResponse = await addBadge(username, 'VOTER');
+      if ('error' in userBadgeResponse) {
+        return { error: 'error adding badge to user' };
+      }
+      if (userBadgeResponse.notification) {
+        newBadgeNotifications.push(userBadgeResponse.notification);
+      }
     }
 
     const shouldReceiveLifesaverBadge = await checkLifesaverBadge(qid);
     if (shouldReceiveLifesaverBadge) {
-      await addBadge(result.askedBy, 'LIFESAVER');
+      const userBadgeResponse = await addBadge(result.askedBy, 'LIFESAVER');
+      if ('error' in userBadgeResponse) {
+        return { error: 'error adding badge to user' };
+      }
+      if (userBadgeResponse.notification) {
+        newBadgeNotifications.push(userBadgeResponse.notification);
+      }
     }
 
     return {
       msg,
       upVotes: result.upVotes || [],
       downVotes: result.downVotes || [],
+      notifications: newBadgeNotifications,
     };
   } catch (err) {
     return {
@@ -773,38 +798,66 @@ export const addVoteToQuestion = async (
  *
  * @returns Promise<QuestionResponse> - The updated question or an error message
  */
-export const addAnswerToQuestion = async (qid: string, ans: Answer): Promise<QuestionResponse> => {
+export const addAnswerToQuestion = async (
+  qid: string,
+  ans: Answer,
+): Promise<QuestionNotificationResponse> => {
   try {
     if (!ans || !ans.text || !ans.ansBy || !ans.ansDateTime || !ans._id) {
       throw new Error('Invalid answer');
     }
-    const result = await QuestionModel.findOneAndUpdate(
+    const question = await QuestionModel.findOneAndUpdate(
       { _id: qid },
       { $push: { answers: { $each: [ans._id], $position: 0 } } },
       { new: true },
     );
-    if (result === null) {
+    if (question === null) {
       throw new Error('Error when adding answer to question');
     }
 
-    await addNotifications(ans._id, result.askedBy, NotificationType.ANSWER);
+    const notifications = [];
+    const answerNotification = await addNotification(
+      ans._id,
+      question.askedBy,
+      NotificationType.ANSWER,
+      new ObjectId(qid),
+    );
+    notifications.push(answerNotification);
 
     const shouldReceiveSpeedyAnswererBadge = await checkSpeedyAnswererBadge(qid);
     if (shouldReceiveSpeedyAnswererBadge) {
-      await addBadge(ans.ansBy, 'SPEEDY_ANSWERER');
+      const badge = await addBadge(ans.ansBy, 'SPEEDY_ANSWERER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
     const shouldReceiveCommunityHelperBadge = await checkCommunityHelperBadge(ans.ansBy);
     if (shouldReceiveCommunityHelperBadge) {
-      await addBadge(ans.ansBy, 'COMMUNITY_HELPER');
+      const badge = await addBadge(ans.ansBy, 'COMMUNITY_HELPER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
     const shouldReceiveTopAnswererBadge = await checkTopAnswererBadge(ans.ansBy);
     if (shouldReceiveTopAnswererBadge) {
-      await addBadge(ans.ansBy, 'TOP_ANSWERER');
+      const badge = await addBadge(ans.ansBy, 'TOP_ANSWERER');
+      if ('error' in badge) {
+        return { error: 'error adding badge to user' };
+      }
+      if (badge.notification) {
+        notifications.push(badge.notification);
+      }
     }
 
-    return result;
+    return { question, notifications };
   } catch (error) {
     return { error: 'Error when adding answer to question' };
   }
@@ -854,10 +907,15 @@ export const addComment = async (
 
     if (type === 'question') {
       result = result as Question;
-      await addNotifications(comment._id, result.askedBy, NotificationType.COMMENT);
+      await addNotification(
+        comment._id,
+        result.askedBy,
+        NotificationType.COMMENT,
+        new ObjectId(id),
+      );
     } else {
       result = result as Answer;
-      await addNotifications(comment._id, result.ansBy, NotificationType.COMMENT);
+      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
     }
 
     return result;
@@ -1062,7 +1120,7 @@ export const findQuestionUpvotedBy = async (
 export const updateUser = async (
   username: string,
   userUpdate: UpdateUserPayload,
-): Promise<UserResponse> => {
+): Promise<UserNotificationResponse> => {
   const existingUser = await UserModel.findOne({ username });
   if (!existingUser) {
     return { error: 'User does not exist' };
@@ -1072,11 +1130,15 @@ export const updateUser = async (
   await existingUser.save();
 
   const shouldReceiveAutobiographerBadge = await checkAutobiographerBadge(existingUser);
+  let user;
   if (shouldReceiveAutobiographerBadge) {
-    await addBadge(existingUser.username, 'AUTOBIOGRAPHER');
+    user = await addBadge(existingUser.username, 'AUTOBIOGRAPHER');
+    if ('error' in user) {
+      return { error: 'error adding badge to user' };
+    }
   }
 
-  return existingUser as User;
+  return { user: existingUser as User, notification: user?.notification };
 };
 
 /**
@@ -1149,12 +1211,15 @@ export const addFollow = async (follow: Follow): Promise<FollowResponse> => {
         followerUsername: follow.followerUsername,
         followeeUsername: follow.followeeUsername,
       });
+      await NotificationModel.deleteOne({
+        eventId: existingFollow._id,
+      });
       return { success: 'Follow request deleted' };
     }
-    await FollowModel.create(follow);
+    const followResponse = await FollowModel.create(follow);
 
-    if (follow._id) {
-      await addNotifications(follow._id, follow.followeeUsername, NotificationType.FOLLOW);
+    if (followResponse._id) {
+      await addNotification(followResponse._id, follow.followeeUsername, NotificationType.FOLLOW);
     }
 
     return { success: 'Follow request created' };
@@ -1182,18 +1247,18 @@ export const getNotificationsForUser = async (
 
     // if type is provided, filter notifications by type
     if (type) {
-      const notifications = await NotificationModel.find({
+      return await NotificationModel.find({
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
-      }).populate('eventId');
-      return notifications;
+      })
+        .populate([{ path: 'eventId' }, { path: 'question' }])
+        .sort({ notificationDate: -1 });
     }
 
     // otherwise, find all notifications for the user
-    const notifications = await NotificationModel.find({ receiverUsername: username }).populate(
-      'eventId',
-    );
-    return notifications;
+    return await NotificationModel.find({ receiverUsername: username })
+      .populate([{ path: 'eventId' }, { path: 'question' }])
+      .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import './index.css';
 import { handleHyperlink } from '../../../../tool';
 
@@ -32,7 +32,9 @@ const QuestionBody = ({ views, text, askby, meta }: QuestionBodyProps) => (
     <div className='bold_title answer_question_view'>{views} views</div>
     <div className='answer_question_text'>{handleHyperlink(text)}</div>
     <div className='answer_question_right'>
-      <div className='question_author'>{askby}</div>
+      <Link to={`/profile/${askby}`}>
+        <div className='question_author'>{askby}</div>
+      </Link>
       <div className='answer_question_meta'>asked {meta}</div>
     </div>
   </div>

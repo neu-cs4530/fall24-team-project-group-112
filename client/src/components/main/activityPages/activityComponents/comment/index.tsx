@@ -1,36 +1,52 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { RiDeleteBin5Line } from 'react-icons/ri';
-import { Comment } from '../../../../../types';
+import { Comment, Question } from '../../../../../types';
 import './index.css';
-import Avatar from '../../../baseComponents/avatar';
-import useUserAvatar from '../../../../../hooks/useUserAvatar';
+import ItemHeader from '../itemHeader';
 
+/**
+ * CommentItem component displays a comment on a post.
+ *
+ * @param {Comment} comment - The comment object.
+ * @param {Question} question - The question object associated with the answer.
+ * @param {'notification' | 'feed'} itemType - The type of the item.
+ */
 interface CommentItemProps {
   comment: Comment;
+  question: Question;
   itemType: 'notification' | 'feed';
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, itemType }) => {
-  const userAvatar = useUserAvatar(comment.commentBy);
-  return (
-    <div className='notification'>
-      <div>
-        <div className='notification-header'>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar avatarName={userAvatar} width={30} height={30} circular={true} />
-            <span className='user-in-notification'>&nbsp;{comment.commentBy}&nbsp;</span>
-            {` commented on ${itemType === 'notification' ? 'your' : 'a'} post.`}
-          </div>
-          <RiDeleteBin5Line className='trash-icon' />
-        </div>
-        <hr />
-        <div className='answer'>
-          <div className='user-in-answer'>{comment.commentBy}</div>
-          <div>{comment.text}</div>
-        </div>
-      </div>
+/**
+ * CommentItem component displays a comment on a post.
+ *
+ * @param {Comment} comment - The comment object.
+ * @param {Question} question - The question object associated with the answer.
+ * @param {'notification' | 'feed'} itemType - The type of the item.
+ */
+const CommentItem: React.FC<CommentItemProps> = ({ comment, question, itemType }) => (
+  <div className='notification'>
+    <div className='notification-header'>
+      <ItemHeader
+        username={comment.commentBy}
+        headerText={` commented on ${itemType === 'notification' ? 'your' : 'a'} post.`}
+      />
+      <RiDeleteBin5Line className='trash-icon' />
     </div>
-  );
-};
-
+    <hr />
+    <div className='answer'>
+      {question && <ItemHeader username={question?.askedBy} />}
+      <div className='clamp-text'>{question?.text}</div>
+    </div>
+    <hr />
+    <div className='answer'>
+      <ItemHeader username={comment.commentBy} />
+      <div className='clamp-text'>{comment.text}</div>
+    </div>
+    <Link key={question?._id} to={`/question/${question?._id}`}>
+      <button className='see-full-text'>See full text</button>
+    </Link>
+  </div>
+);
 export default CommentItem;

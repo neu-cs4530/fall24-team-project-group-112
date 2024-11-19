@@ -22,7 +22,7 @@ const getQuestionsByFilter = async (
 };
 
 /**
- * Function to get a question by its ID.
+ * Function to get a question by its ID and increment its view count.
  *
  * @param qid - The ID of the question to retrieve.
  * @param username - The username of the user requesting the question.

@@ -227,6 +227,7 @@ export enum NotificationType {
  * - _id: The unique identifier for the notification.
  * - notificationType: The type of notification, one of NotificationType.
  * - eventId: The unique identifier of the event that triggered the notification.
+ * - question: The question associated with the notification. This field is optional.
  * - receiverUsername: The username of the user who will receive the notification.
  * - notificationDate: The date and time when the notification was created.
  * - seen: A boolean value indicating whether the notification has been seen by the user.
@@ -235,7 +236,8 @@ export enum NotificationType {
 export interface Notification {
   _id?: string;
   notificationType: NotificationType;
-  eventId: Answer | Comment | Badge | Follow;
+  eventId: string | Answer | Comment | Badge | Follow;
+  question?: Question; // Optional field, provided for Answer and Comment events
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;

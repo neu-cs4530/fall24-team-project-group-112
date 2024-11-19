@@ -1,5 +1,5 @@
 import React from 'react';
-import { Notification, Answer, Follow, Comment, Badge } from '../../../../types';
+import { Notification, Answer, Follow, Comment, Badge, Question } from '../../../../../types';
 import './index.css';
 import AnswerItem from '../../activityComponents/answer';
 import CommentItem from '../../activityComponents/comment';
@@ -16,12 +16,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   switch (notification.notificationType) {
     case 'Answer': {
       const answer = notification.eventId as Answer;
-      content = <AnswerNotification answer={answer} />;
+      const question = notification.question as Question;
+      content = <AnswerItem answer={answer} question={question} itemType='notification' />;
       break;
     }
     case 'Comment': {
       const comment = notification.eventId as Comment;
-      content = <CommentItem comment={comment} itemType='notification' />;
+      const question = notification.question as Question;
+      content = <CommentItem comment={comment} question={question} itemType='notification' />;
       break;
     }
     case 'Badge': {

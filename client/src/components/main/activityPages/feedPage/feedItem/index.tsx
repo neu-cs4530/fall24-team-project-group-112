@@ -15,13 +15,15 @@ const FeedItem: React.FC<FeedItemProps> = ({ feedItem }) => {
 
   switch (feedItem.postType) {
     case 'Answer': {
+      const question = feedItem.event as Question;
       const answer = (feedItem.event as Question).answers[0];
-      content = <AnswerItem answer={answer} itemType='feed' />;
+      content = <AnswerItem answer={answer} question={question} itemType='feed' />;
       break;
     }
     case 'Comment': {
+      const question = feedItem.event as Question;
       const comment = (feedItem.event as Question).comments[0];
-      content = <CommentItem comment={comment} itemType='feed' />;
+      content = <CommentItem comment={comment} question={question} itemType='feed' />;
       break;
     }
     case 'Follow': {

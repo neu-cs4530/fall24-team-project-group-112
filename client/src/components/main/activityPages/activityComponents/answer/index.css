@@ -1,8 +1,18 @@
 .answer {
-  display: flex;
+  display: block;
   flex-direction: column;
   border: 0px;
   margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.clamp-text {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-in-answer {
@@ -20,4 +30,11 @@
 .trash-icon {
   cursor: pointer;
   font-size: 1.1em;
+}
+
+.see-full-text {
+  cursor: pointer;
+  color: #007bff;
+  font-size: 0.9em;
+  text-decoration: underline;
 }

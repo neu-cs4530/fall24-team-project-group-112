@@ -3,36 +3,27 @@ import { Link } from 'react-router-dom';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Question } from '../../../../../types';
 import './index.css';
-import useUserAvatar from '../../../../../hooks/useUserAvatar';
-import Avatar from '../../../baseComponents/avatar';
+import ItemHeader from '../itemHeader';
 
 interface QuestionItemProps {
   question: Question;
 }
 
-const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
-  const userAvatar = useUserAvatar(question.askedBy);
-  return (
-    <div className='notification'>
-      <div>
-        <div className='notification-header'>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar avatarName={userAvatar} width={30} height={30} circular={true} />
-            <span className='user-in-notification'>&nbsp;{question.askedBy}&nbsp;</span> asked a
-            question.
-          </div>
-          <RiDeleteBin5Line className='trash-icon' />
-        </div>
-        <hr />
-        <Link to={`/question/${question._id}`}>
-          <div className='answer'>
-            <div className='user-in-answer'>{question.askedBy}</div>
-            {question.text}
-          </div>
-        </Link>
-      </div>
+const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => (
+  <div className='notification'>
+    <div className='notification-header'>
+      <ItemHeader username={question.askedBy} headerText={`asked a question.`} />
+      <RiDeleteBin5Line className='trash-icon' />
     </div>
-  );
-};
+    <hr />
+    <div className='answer'>
+      <ItemHeader username={question.askedBy} />
+      <div className='clamp-text'>{question.text}</div>
+    </div>
+    <Link key={question?._id} to={`/question/${question?._id}`}>
+      <button className='see-full-text'>See full question</button>
+    </Link>
+  </div>
+);
 
 export default QuestionItem;

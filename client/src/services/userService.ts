@@ -75,7 +75,7 @@ export const loginUser = async (
 export const updateProfile = async (
   username: string,
   userPayload: UpdateUserPayload,
-): Promise<User> => {
+): Promise<{ user: User; notification: Notification | undefined }> => {
   const res = await api.patch(`${USER_API_URL}/${username}`, userPayload);
   if (res.status !== 200) {
     throw new Error('Error while updating user');

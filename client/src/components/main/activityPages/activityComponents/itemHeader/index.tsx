@@ -23,8 +23,13 @@ interface ItemHeaderProps {
 const ItemHeader: React.FC<ItemHeaderProps> = ({ username, headerText }) => {
   const userAvatar = useUserAvatar(username);
   return (
-    <Link to={`/profile/${username}`}>
-      <div
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+      }}>
+      <Link
+        to={`/profile/${username}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -32,9 +37,9 @@ const ItemHeader: React.FC<ItemHeaderProps> = ({ username, headerText }) => {
         }}>
         <Avatar avatarName={userAvatar} width={30} height={30} circular={true} />
         <span className='user-in-notification'>&nbsp;{username}&nbsp;</span>
-        {headerText && <span>{headerText}</span>}
-      </div>
-    </Link>
+      </Link>
+      {headerText && <span>{headerText}</span>}
+    </div>
   );
 };
 

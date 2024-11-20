@@ -3,10 +3,8 @@ import './index.css';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
-import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
-import Avatar from '../main/baseComponents/avatar';
 import HeaderMenu from './menu';
 /**
  * Header component that renders the main title and a search bar.
@@ -55,8 +53,7 @@ const Header = ({ user }: { user: User | null }) => {
             </Link>
           ) : (
             <div key={index} className='header-element'>
-              <HeaderMenu key={index} user={user} />
-              <span className='text'>{link.name}</span>
+              <HeaderMenu key={index} user={user} text={link.name} />
             </div>
           ),
         )}

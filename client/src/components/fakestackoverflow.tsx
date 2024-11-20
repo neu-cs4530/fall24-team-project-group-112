@@ -14,7 +14,6 @@ import TagPage from './main/tagPage';
 import NewQuestionPage from './main/newQuestion';
 import NewAnswerPage from './main/newAnswer';
 import AnswerPage from './main/answerPage';
-import useLocalStorage from '../hooks/useLocalStorage';
 import NotificationCenter from './main/activityPages/notificationPage';
 import Feed from './main/activityPages/feedPage';
 import useUser from '../hooks/useUser';
@@ -40,13 +39,6 @@ const ProtectedRoute = ({
  * It manages the state for search terms and the main title.
  */
 const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
-  // const { getItem } = useLocalStorage();
-
-  // Initialize `user` directly from localStorage once during component mount
-  // const [user, setUser] = useState<User | null>(() => {
-  //   const userItem = getItem('user');
-  //   return userItem ? JSON.parse(userItem) : null;
-  // });
   const [notificationAlert, setNotificationAlert] = useState<boolean>(false);
   const { user, setUser } = useUser();
 

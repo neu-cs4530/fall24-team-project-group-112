@@ -14,8 +14,9 @@ import useUser from '../../../hooks/useUser';
  * HeaderMenu component displays the menu options for the user to navigate to different pages.
  *
  * @param user The user object containing the logged in user's information.
+ * @param text The text to display for the menu.
  */
-export default function HeaderMenu({ user }: { user: User | null }) {
+export default function HeaderMenu({ user, text }: { user: User | null; text: string }) {
   const [anchor, setAnchor] = React.useState<null | HTMLElement>(null);
   const [error, setError] = React.useState<string | null>(null);
   const open = Boolean(anchor);
@@ -48,27 +49,38 @@ export default function HeaderMenu({ user }: { user: User | null }) {
 
   return (
     <div>
-      <Button
-        // id='basic-button'
-        // aria-controls={open ? 'basic-menu' : undefined}
-        // aria-haspopup='true'
-        // aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}>
-        {user !== null ? (
-          <Avatar avatarName={user.avatarName} width={30} height={30} circular={true} />
-        ) : (
-          <IoMdPerson />
-        )}
+      <Button onClick={handleClick}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {user !== null ? (
+            <Avatar avatarName={user.avatarName} width={30} height={30} circular={true} />
+          ) : (
+            <IoMdPerson />
+          )}
+
+          <span
+            style={{
+              fontSize: '14px',
+              fontWeight: 400,
+              textDecoration: 'none',
+              color: 'black',
+              textTransform: 'none',
+            }}>
+            {text}
+          </span>
+        </div>
       </Button>
       <Menu anchorEl={anchor} open={open} onClose={handleClose}>
         <MenuItem
           component={Link}
           to={user ? `profile/${user.username}` : 'register'}
-          onClick={handleClose}>
+          onClick={handleClose}
+          style={{ fontFamily: 'Newsreader, serif' }}>
           Profile
         </MenuItem>
 
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        <MenuItem onClick={handleLogout} style={{ fontFamily: 'Newsreader, serif' }}>
+          Logout
+        </MenuItem>
       </Menu>
     </div>
   );

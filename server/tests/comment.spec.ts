@@ -7,6 +7,7 @@ import { Question } from '../types';
 const saveCommentSpy = jest.spyOn(util, 'saveComment');
 const addCommentSpy = jest.spyOn(util, 'addComment');
 const popDocSpy = jest.spyOn(util, 'populateDocument');
+const getQuestionByAnswerIdSpy = jest.spyOn(util, 'getQuestionByAnswerId');
 
 describe('POST /addComment', () => {
   afterEach(async () => {
@@ -99,6 +100,19 @@ describe('POST /addComment', () => {
     };
 
     saveCommentSpy.mockResolvedValueOnce(mockComment);
+    getQuestionByAnswerIdSpy.mockResolvedValueOnce({
+      _id: validCid,
+      title: 'This is a test question',
+      text: 'This is a test question',
+      tags: [],
+      askedBy: 'dummyUserId',
+      askDateTime: new Date('2024-06-03'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      answers: [],
+      comments: [mockComment._id],
+    });
 
     addCommentSpy.mockResolvedValueOnce({
       _id: validAid,

@@ -119,7 +119,7 @@ const commentController = (socket: FakeSOSocket) => {
         socket.emit('notificationUpdate', {
           notificationType: NotificationType.COMMENT,
           eventId: comFromDb as Comment,
-          question: question,
+          question,
           answer: populatedDoc as Answer,
           receiverUsername: (populatedDoc as Answer).ansBy,
           notificationDate: new Date(),

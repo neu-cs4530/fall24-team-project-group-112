@@ -1419,12 +1419,13 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
   );
 
   // find answers with comments made by people the user is following
-  const answers = await AnswerModel.find({
+  const answersWithCommentsByFollowing = await AnswerModel.find({
     comments: { $in: commentsByFollowing.map(a => a._id) },
   });
+
   // find questions with answers that have comments made by people the user is following
   const questionsWithAnswers = await QuestionModel.find({
-    answers: { $in: answers.map(a => a._id) },
+    answers: { $in: answersWithCommentsByFollowing.map(a => a._id) },
   }).populate([
     {
       path: 'answers',
@@ -1436,11 +1437,11 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
   const allAnswerCommentsAsFeedPosts = questionsWithAnswers.flatMap(question => {
     const answers = question.answers as Answer[];
     return answers.flatMap(answer => {
-      const answerComments = answer.comments as Comment[];
+      const answerComments = (answer?.comments as Comment[]) || [];
       return answerComments.map(comment => {
         const com = comment as Comment;
-        const { _id, ansBy, ansDateTime, text } = answer;
-        const answerCopy = { _id, ansBy, ansDateTime, text, comments: [comment] };
+        const { ansBy, ansDateTime, text } = answer;
+        const answerCopy = { id: answer._id, ansBy, ansDateTime, text, comments: [comment] };
         const answerWithSingleComment = { ...question.toObject(), answers: [answerCopy] };
 
         return {
@@ -1454,6 +1455,10 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
 
   // combine both types of posts and then sort by date
   const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
+
+  if (posts.length === 0) {
+    return [];
+  }
   return posts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 

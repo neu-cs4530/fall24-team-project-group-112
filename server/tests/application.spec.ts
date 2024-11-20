@@ -1381,7 +1381,10 @@ describe('application module', () => {
 
       test('addComment should return the updated answer when given `answer`', async () => {
         // copy the answer to avoid modifying the original
+
         const answer: Answer = { ...ans1 };
+        mockingoose(QuestionModel).toReturn(QUESTIONS[1], 'findOne');
+        mockingoose(AnswerModel).toReturn(answer, 'find');
         (answer.comments as Comment[]).push(com1);
         mockingoose(AnswerModel).toReturn(answer, 'findOneAndUpdate');
 
@@ -2233,15 +2236,17 @@ describe('application module', () => {
     test('should return a feed with only comments posted when the comment filter is applied', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS.slice(0, 3), 'find');
+      mockingoose(AnswerModel).toReturn([], 'find');
       mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
       const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
 
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
-      expect(posts.length).toBe(1);
+      expect(posts.length).toBe(2);
       expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
+      expect(posts[1].postType).toEqual(FeedPostType.COMMENT);
     });
 
     test('should return an error if there is an error fetching comments posted', async () => {

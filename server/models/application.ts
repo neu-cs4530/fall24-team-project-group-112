@@ -868,7 +868,7 @@ export const addAnswerToQuestion = async (
 export const getQuestionByAnswerId = async (answerId: string): Promise<Question> => {
   const question = await QuestionModel.findOne({ answers: { $in: [answerId] } });
   if (!question) {
-    throw new Error('Question not found');
+    throw new Error('Question with answer not found');
   }
   return question;
 };

@@ -9,6 +9,7 @@ const useFeed = (initialType?: string) => {
   const [feedItems, setFeedItems] = useState<FeedPost[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [feedItemType, setFeedItemType] = useState<string | undefined>(initialType);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     /**
@@ -27,6 +28,8 @@ const useFeed = (initialType?: string) => {
         setFeedItems(res || []);
       } catch (err) {
         setError('Failed to fetch feed');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -37,6 +40,7 @@ const useFeed = (initialType?: string) => {
     feedItems,
     error,
     setFeedItemType,
+    isLoading,
   };
 };
 

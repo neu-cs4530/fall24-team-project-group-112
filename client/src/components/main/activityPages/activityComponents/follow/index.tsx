@@ -18,6 +18,7 @@ interface FollowItemProps {
   itemType: 'notification' | 'feed';
 }
 
+
 /**
  * FollowItem component displays a follow notification.
  *

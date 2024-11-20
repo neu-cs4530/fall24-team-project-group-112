@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CircularProgress } from '@mui/material';
 import useProfile from '../../../hooks/useProfile';
 import ProfileText from './profileText';
 import {
@@ -15,14 +16,15 @@ import BadgeDisplay from './badgeDisplay';
 /**
  * Profile Component displays the full content on a user's profile page. It also includes functionality for a user to edit the information on their own profile page.
  *
- * @param user The user object containing the logged in user's information, or null if a user is not logged in.
+ * @param loggedInUser The user object containing the logged-in user's information, or null if a user is not logged in.
  */
-const Profile = (loggedInUser: { loggedInUser: User | null }) => {
-  const { user, error } = useProfile(loggedInUser.loggedInUser);
+const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
+  const { user, error, badgeOpen, setBadgeOpen } = useProfile(loggedInUser);
   const [questionsAsked, setQuestionsAsked] = useState<Question[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState<Question[]>([]);
   const [questionsDownvoted, setQuestionsDownvoted] = useState<Question[]>([]);
   const [questionsUpvoted, setQuestionsUpvoted] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async (username: string) => {
@@ -41,6 +43,8 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -59,11 +63,19 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
 
   return (
     <>
-      {user ? (
+      {user && !isLoading ? (
         <>
-          <ProfileText user={user} loggedInUser={loggedInUser.loggedInUser} />
+          <ProfileText user={user} loggedInUser={loggedInUser} />
           <div>
-            <BadgeDisplay user={user} />
+            {user.badges.length > 0 && (
+              <div className='mt-6'>
+                <h2 className='font-bold text-xl ml-5'>Badges</h2>
+                <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
+                  View all badges
+                </p>
+                <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+              </div>
+            )}
           </div>
           <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
           <QuestionList
@@ -79,7 +91,17 @@ const Profile = (loggedInUser: { loggedInUser: User | null }) => {
             title={`Questions downvoted by @${user.username}`}
           />
         </>
-      ) : null}
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+          }}>
+          <CircularProgress />
+        </div>
+      )}
     </>
   );
 };

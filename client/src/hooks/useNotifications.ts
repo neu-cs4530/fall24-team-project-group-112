@@ -14,6 +14,7 @@ const useNotifications = (initialType?: string) => {
   const [error, setError] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<string | undefined>(initialType);
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     /**
@@ -32,6 +33,8 @@ const useNotifications = (initialType?: string) => {
         setNotifications(res || []);
       } catch (err) {
         setError('Failed to fetch notifications');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -88,6 +91,7 @@ const useNotifications = (initialType?: string) => {
     deleteNotification,
     showConfirmationModal,
     setShowConfirmationModal,
+    isLoading,
   };
 };
 

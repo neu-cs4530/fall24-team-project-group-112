@@ -113,13 +113,17 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                 isEditing={isEditing}
                 firstName={formData.firstName}
                 lastName={formData.lastName}
-                username={user.username}
+                user={user}
                 handleChange={handleChange}
               />
 
               {!isEditing && loggedInUser && loggedInUser.username === user.username && (
                 <div>
-                  <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => {
+                      setIsEditing(true);
+                    }}>
                     <FaEdit className={styles.editIcon} />
                   </button>
                 </div>
@@ -133,7 +137,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                     className={styles.editButton}
                     onClick={() => {
                       setError('');
-                      setIsEditing(!isEditing);
+                      setIsEditing(false);
                     }}>
                     <MdCancel className={styles.editIcon} />
                   </button>

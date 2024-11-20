@@ -53,9 +53,7 @@ const getMetaData = (date: Date): string => {
     return `${h} hours ago`;
   }
   if (diffs < 60 * 60 * 24 * 365) {
-    return `${MONTHS[date.getMonth()]} ${getDateHelper(date)} at ${date
-      .toTimeString()
-      .slice(0, 8)}`;
+    return `${MONTHS[date.getMonth()]} ${getDateHelper(date)} at ${date.toLocaleTimeString()}`;
   }
   return `${MONTHS[date.getMonth()]} ${getDateHelper(
     date,

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './index.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { User } from '../../../types';
 import Avatar from '../../main/baseComponents/avatar';
 import { logoutUser } from '../../../services/userService';
+import useUser from '../../../hooks/useUser';
 
 /**
  * HeaderMenu component displays the menu options for the user to navigate to different pages.
@@ -16,7 +17,9 @@ import { logoutUser } from '../../../services/userService';
  */
 export default function HeaderMenu({ user }: { user: User | null }) {
   const [anchor, setAnchor] = React.useState<null | HTMLElement>(null);
+  const [error, setError] = React.useState<string | null>(null);
   const open = Boolean(anchor);
+  const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchor(event.currentTarget);
   };
@@ -24,30 +27,32 @@ export default function HeaderMenu({ user }: { user: User | null }) {
     setAnchor(null);
   };
 
-  const handleLogout = async (user: User) => {
+  const { setUser } = useUser();
+
+  const handleLogout = async () => {
     try {
-      const res = await logoutUser(user.email);
-      localStorage.removeItem('user');
+      const res = await logoutUser();
+      await localStorage.removeItem('user');
+      setUser(null);
       setAnchor(null);
 
       if ('status' in res) {
         setError(res.error);
+      } else {
+        navigate('/');
       }
-    } catch (error: unknown) {
-      return {
-        status: 500,
-        error: 'An unexpected error occurred',
-      };
+    } catch (err: unknown) {
+      setError(err as string);
     }
   };
 
   return (
     <div>
       <Button
-        id='basic-button'
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup='true'
-        aria-expanded={open ? 'true' : undefined}
+        // id='basic-button'
+        // aria-controls={open ? 'basic-menu' : undefined}
+        // aria-haspopup='true'
+        // aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}>
         {user !== null ? (
           <Avatar avatarName={user.avatarName} width={30} height={30} circular={true} />
@@ -55,17 +60,15 @@ export default function HeaderMenu({ user }: { user: User | null }) {
           <IoMdPerson />
         )}
       </Button>
-      <Menu id='basic-menu' anchorEl={anchor} open={open} onClose={handleClose} className='*'>
+      <Menu anchorEl={anchor} open={open} onClose={handleClose}>
         <MenuItem
           component={Link}
-          className='*'
-          to={user ? `profile/${user.username}` : 'login'}
+          to={user ? `profile/${user.username}` : 'register'}
           onClick={handleClose}>
           Profile
         </MenuItem>
-        <MenuItem component={Link} to={'login'} onClick={handleLogout} className='*'>
-          Logout
-        </MenuItem>
+
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
   );

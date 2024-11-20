@@ -71,11 +71,9 @@ export const loginUser = async (
  * @param email - The email of the user logging out.
  * @throws Error Throws an error if the request fails or the response status is not 200.
  */
-export const logoutUser = async (email: string): Promise<{ status: number; error: string }> => {
-  const data = { email };
-
+export const logoutUser = async (): Promise<{ status: number; error: string }> => {
   try {
-    const res = await api.post(`${LOGOUT_API_URL}`, data);
+    const res = await api.post(`${LOGOUT_API_URL}`);
     return res.data;
   } catch (error: unknown) {
     return {

@@ -22,15 +22,7 @@ const Header = ({ user }: { user: User | null }) => {
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
     { name: 'Notifications', route: 'notification', image: <FaBell /> },
-    {
-      name: 'Me',
-      route: user ? `profile/${user.username}` : 'register',
-      image: user ? (
-        <Avatar avatarName={user.avatarName} width={30} height={30} circular={true} />
-      ) : (
-        <IoMdPerson></IoMdPerson>
-      ),
-    },
+    { name: 'Me' },
   ];
 
   const { pathname } = useLocation();

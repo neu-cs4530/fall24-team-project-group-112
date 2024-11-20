@@ -30,11 +30,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     case 'Comment': {
       const comment = notification.eventId as Comment;
       const question = notification.question as Question;
+      const answer = notification.answer as Answer;
       content = (
         <CommentItem
           notificationId={notification._id}
           comment={comment}
           question={question}
+          answer={answer}
           itemType='notification'
         />
       );

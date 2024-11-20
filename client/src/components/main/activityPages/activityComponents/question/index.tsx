@@ -16,7 +16,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => (
     <hr />
     <div className='answer'>
       <ItemHeader username={question.askedBy} />
-      <div className='clamp-text'>{question.text}</div>
+      <div className='clamp-text'>{question.title}</div>
     </div>
     <Link key={question?._id} to={`/question/${question?._id}`}>
       <button className='see-full-text'>See full question</button>

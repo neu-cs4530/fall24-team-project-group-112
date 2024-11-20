@@ -168,6 +168,7 @@ const addNotification = async (
   receiverUsername: string,
   type: NotificationType,
   questionId?: ObjectId,
+  answerId?: ObjectId,
 ): Promise<Notification> => {
   if (!eventId || !type || !receiverUsername) {
     throw new Error('Invalid request');
@@ -177,6 +178,7 @@ const addNotification = async (
     notificationType: type,
     eventId,
     question: questionId,
+    answer: answerId,
     receiverUsername,
     notificationDate: new Date(),
     seen: false,
@@ -185,6 +187,8 @@ const addNotification = async (
   const notification = await NotificationModel.create(notif);
   return (await NotificationModel.findById(notification._id)
     .populate('eventId')
+    .populate('question')
+    .populate('answer')
     .exec()) as Notification;
 };
 
@@ -864,6 +868,21 @@ export const addAnswerToQuestion = async (
 };
 
 /**
+ * Retrieves a question that contains the specified answer ID.
+ *
+ * @param {string} answerId - The ID of the answer to search for within questions.
+ * @returns {Promise<Question>} A promise that resolves to the question containing the specified answer ID.
+ * @throws {Error} If no question containing the specified answer ID is found.
+ */
+export const getQuestionByAnswerId = async (answerId: string): Promise<Question> => {
+  const question = await QuestionModel.findOne({ answers: { $in: [answerId] } });
+  if (!question) {
+    throw new Error('Question with answer not found');
+  }
+  return question;
+};
+
+/**
  * Adds a comment to a question or answer.
  *
  * @param id The ID of the question or answer to add a comment to
@@ -915,7 +934,14 @@ export const addComment = async (
       );
     } else {
       result = result as Answer;
-      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
+      const question = await getQuestionByAnswerId(id);
+      await addNotification(
+        comment._id,
+        result.ansBy,
+        NotificationType.COMMENT,
+        new ObjectId(question._id),
+        new ObjectId(id),
+      );
     }
 
     return result;
@@ -1260,13 +1286,13 @@ export const getNotificationsForUser = async (
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
       })
-        .populate([{ path: 'eventId' }, { path: 'question' }])
+        .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
         .sort({ notificationDate: -1 });
     }
 
     // otherwise, find all notifications for the user
     return await NotificationModel.find({ receiverUsername: username })
-      .populate([{ path: 'eventId' }, { path: 'question' }])
+      .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
       .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
@@ -1379,26 +1405,24 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
 
 /**
  * Retrieves the 10 most recent comments made by the given users.
+ * Note that comments can be made on both questions and answers.
+ * This method finds comments on both types of posts.
  *
  * @param {string[]} followingUsernames - The usernames of the users whose comments should be retrieved
  * @returns {Promise<FeedPost[]>} - The list of feed posts representing comments made by these users
  */
 const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  // find comments made by people the user is following
   const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
+
+  // find questions with comments made by people the user is following
   const questions = await QuestionModel.find({
     comments: { $in: commentsByFollowing.map(a => a._id) },
   })
-    .select('title text askDateTime askedBy comments user')
-    .populate([
-      {
-        path: 'comments',
-        match: { commentBy: { $in: followingUsernames } },
-        populate: { path: 'user', select: 'username firstName lastName avatarName' },
-      },
-      { path: 'user', select: 'username firstName lastName avatarName' },
-    ]);
+    .select('title text askDateTime askedBy comments user') // intentially don't select answers here
+    .populate([{ path: 'comments', match: { commentBy: { $in: followingUsernames } } }]);
 
-  // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
+  // Find 10 most recent comments. Each comment gets its own feed post, even if part of the same question.
   const allCommentsAsFeedPosts = questions.flatMap(question =>
     question.comments.map(comment => {
       const com = comment as Comment;
@@ -1412,7 +1436,48 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     }),
   );
 
-  return allCommentsAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+  // find answers with comments made by people the user is following
+  const answersWithCommentsByFollowing = await AnswerModel.find({
+    comments: { $in: commentsByFollowing.map(a => a._id) },
+  });
+
+  // find questions with answers that have comments made by people the user is following
+  const questionsWithAnswers = await QuestionModel.find({
+    answers: { $in: answersWithCommentsByFollowing.map(a => a._id) },
+  }).populate([
+    {
+      path: 'answers',
+      populate: { path: 'comments', match: { commentBy: { $in: followingUsernames } } },
+    },
+  ]);
+
+  // Find 10 most recent comments on answers. Each comment gets its own feed post, even if part of the same answer.
+  const allAnswerCommentsAsFeedPosts = questionsWithAnswers.flatMap(question => {
+    const answers = question.answers as Answer[];
+    return answers.flatMap(answer => {
+      const answerComments = (answer?.comments as Comment[]) || [];
+      return answerComments.map(comment => {
+        const com = comment as Comment;
+        const { ansBy, ansDateTime, text } = answer;
+        const answerCopy = { id: answer._id, ansBy, ansDateTime, text, comments: [comment] };
+        const answerWithSingleComment = { ...question.toObject(), answers: [answerCopy] };
+
+        return {
+          postType: FeedPostType.COMMENT,
+          event: answerWithSingleComment,
+          date: com.commentDateTime,
+        };
+      });
+    });
+  });
+
+  // combine both types of posts and then sort by date
+  const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
+
+  if (posts.length === 0) {
+    return [];
+  }
+  return posts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 
 /**

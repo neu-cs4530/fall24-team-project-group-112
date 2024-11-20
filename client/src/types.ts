@@ -238,6 +238,7 @@ export interface Notification {
   notificationType: NotificationType;
   eventId: string | Answer | Comment | Badge | Follow;
   question?: Question; // Optional field, provided for Answer and Comment events
+  answer?: Answer; // Optional field, provided for certain Answer events
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;

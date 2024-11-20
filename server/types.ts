@@ -340,8 +340,8 @@ export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
   eventId: ObjectId | Answer | Comment | Badge | Follow;
-  question?: ObjectId | Question; // Optional field, provided for Answer and certain Comment events
-  answer?: ObjectId | Answer; // Optional field, provided certain Comment events
+  question?: ObjectId | Question; // Optional field, provided for Answer and Comment events
+  answer?: ObjectId | Answer; // Optional field, provided for certain Comment events
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;

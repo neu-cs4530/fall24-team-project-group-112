@@ -867,6 +867,13 @@ export const addAnswerToQuestion = async (
   }
 };
 
+/**
+ * Retrieves a question that contains the specified answer ID.
+ *
+ * @param {string} answerId - The ID of the answer to search for within questions.
+ * @returns {Promise<Question>} A promise that resolves to the question containing the specified answer ID.
+ * @throws {Error} If no question containing the specified answer ID is found.
+ */
 export const getQuestionByAnswerId = async (answerId: string): Promise<Question> => {
   const question = await QuestionModel.findOne({ answers: { $in: [answerId] } });
   if (!question) {

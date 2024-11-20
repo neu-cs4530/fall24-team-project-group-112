@@ -4,15 +4,18 @@ import { Link } from 'react-router-dom';
 import { Answer, Question } from '../../../../../types';
 import './index.css';
 import ItemHeader from '../itemHeader';
+import useNotifications from '../../../../../hooks/useNotifications';
 
 /**
  * AnswerItem component displays an answer to a question.
  *
+ * @param {string} notificationId - The id of the notification. If present, the delete button will be displayed.
  * @param {Answer} answer - The answer object.
  * @param {Question} question - The question object associated with the answer.
  * @param {'notification' | 'feed'} itemType - The type of the item.
  */
 interface AnswerItemProps {
+  notificationId?: string;
   answer: Answer;
   question: Question;
   itemType: 'notification' | 'feed';
@@ -25,32 +28,40 @@ interface AnswerItemProps {
  * @param {Question} question - The question object associated with the answer.
  * @param {'notification' | 'feed'} itemType - The type of the item.
  */
-const AnswerItem: React.FC<AnswerItemProps> = ({ answer, question, itemType }) => (
-  <div className='notification'>
-    <div>
-      <div className='notification-header'>
-        <ItemHeader
-          username={answer.ansBy}
-          headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
-        />
-        <RiDeleteBin5Line className='trash-icon' />
-      </div>
-      <hr />
-      <div className='answer'>
-        {question && <ItemHeader username={question?.askedBy} />}
-        <div className='clamp-text'>{question?.text}</div>
-      </div>
-      <hr />
-      <div className='answer'>
-        <ItemHeader username={answer.ansBy} />
-        <div className='clamp-text'>{answer.text}</div>
-      </div>
+const AnswerItem: React.FC<AnswerItemProps> = ({ notificationId, answer, question, itemType }) => {
+  const { deleteNotification } = useNotifications();
 
-      <Link key={question?._id} to={`/question/${question?._id}`}>
-        <button className='see-full-text'>See full question</button>
-      </Link>
+  return (
+    <div className='notification'>
+      <div>
+        <div className='notification-header'>
+          <ItemHeader
+            username={answer.ansBy}
+            headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
+          />
+          {notificationId && (
+            <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+              <RiDeleteBin5Line />
+            </button>
+          )}
+        </div>
+        <hr />
+        <div className='answer'>
+          {question && <ItemHeader username={question?.askedBy} />}
+          <div className='clamp-text'>{question?.text}</div>
+        </div>
+        <hr />
+        <div className='answer'>
+          <ItemHeader username={answer.ansBy} />
+          <div className='clamp-text'>{answer.text}</div>
+        </div>
+
+        <Link key={question?._id} to={`/question/${question?._id}`}>
+          <button className='see-full-text'>See full question</button>
+        </Link>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default AnswerItem;

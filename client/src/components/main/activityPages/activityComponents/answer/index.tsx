@@ -37,12 +37,12 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, question, itemType }) =
       </div>
       <hr />
       <div className='answer'>
-        {question && <ItemHeader username={question?.askedBy} />}
-        <div className='clamp-text'>{question?.text}</div>
+        {question && <ItemHeader username={question?.askedBy} headerText='asked:' />}
+        <div className='clamp-text'>{question?.title}</div>
       </div>
       <hr />
       <div className='answer'>
-        <ItemHeader username={answer.ansBy} />
+        <ItemHeader username={answer.ansBy} headerText='answered:' />
         <div className='clamp-text'>{answer.text}</div>
       </div>
 

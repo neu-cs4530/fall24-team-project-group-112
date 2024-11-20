@@ -1,5 +1,5 @@
 import React from 'react';
-import { Follow, FeedPost, Question } from '../../../../../types';
+import { Follow, FeedPost, Question, Answer } from '../../../../../types';
 import './index.css';
 import CommentItem from '../../activityComponents/comment';
 import FollowItem from '../../activityComponents/follow';
@@ -22,9 +22,18 @@ const FeedItem: React.FC<FeedItemProps> = ({ feedItem }) => {
     }
     case 'Comment': {
       const question = feedItem.event as Question;
-      const comment = (feedItem.event as Question).comments[0];
-      content = <CommentItem comment={comment} question={question} itemType='feed' />;
-      break;
+      if (question.answers) {
+        const answer = question.answers[0];
+        const comment = (answer as Answer).comments[0];
+        content = (
+          <CommentItem comment={comment} question={question} answer={answer} itemType='feed' />
+        );
+        break;
+      } else {
+        const comment = question.comments[0];
+        content = <CommentItem comment={comment} question={question} itemType='feed' />;
+        break;
+      }
     }
     case 'Follow': {
       const follow = feedItem.event as Follow;

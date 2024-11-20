@@ -23,7 +23,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     case 'Comment': {
       const comment = notification.eventId as Comment;
       const question = notification.question as Question;
-      content = <CommentItem comment={comment} question={question} itemType='notification' />;
+      const answer = notification.answer as Answer;
+      content = (
+        <CommentItem
+          comment={comment}
+          question={question}
+          answer={answer}
+          itemType='notification'
+        />
+      );
       break;
     }
     case 'Badge': {

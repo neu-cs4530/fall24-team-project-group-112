@@ -8,7 +8,12 @@ import {
   Question,
   Answer,
 } from '../types';
-import { addComment, populateDocument, saveComment } from '../models/application';
+import {
+  addComment,
+  getQuestionByAnswerId,
+  populateDocument,
+  saveComment,
+} from '../models/application';
 
 const commentController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -99,15 +104,29 @@ const commentController = (socket: FakeSOSocket) => {
         result: populatedDoc,
         type,
       });
-      const receiver =
-        type === 'question' ? (populatedDoc as Question).askedBy : (populatedDoc as Answer).ansBy;
-      socket.emit('notificationUpdate', {
-        notificationType: NotificationType.COMMENT,
-        eventId: comFromDb as Comment,
-        receiverUsername: receiver,
-        notificationDate: new Date(),
-        seen: false,
-      });
+
+      if (type === 'question') {
+        socket.emit('notificationUpdate', {
+          notificationType: NotificationType.COMMENT,
+          eventId: comFromDb as Comment,
+          question: populatedDoc as Question,
+          receiverUsername: (populatedDoc as Question).askedBy,
+          notificationDate: new Date(),
+          seen: false,
+        });
+      } else {
+        const question = await getQuestionByAnswerId(id);
+        socket.emit('notificationUpdate', {
+          notificationType: NotificationType.COMMENT,
+          eventId: comFromDb as Comment,
+          question: question,
+          answer: populatedDoc as Answer,
+          receiverUsername: (populatedDoc as Answer).ansBy,
+          notificationDate: new Date(),
+          seen: false,
+        });
+      }
+
       res.json(comFromDb);
     } catch (err: unknown) {
       res.status(500).send(`Error when adding comment: ${(err as Error).message}`);

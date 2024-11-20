@@ -168,6 +168,7 @@ const addNotification = async (
   receiverUsername: string,
   type: NotificationType,
   questionId?: ObjectId,
+  answerId?: ObjectId,
 ): Promise<Notification> => {
   if (!eventId || !type || !receiverUsername) {
     throw new Error('Invalid request');
@@ -177,6 +178,7 @@ const addNotification = async (
     notificationType: type,
     eventId,
     question: questionId,
+    answer: answerId,
     receiverUsername,
     notificationDate: new Date(),
     seen: false,
@@ -863,6 +865,14 @@ export const addAnswerToQuestion = async (
   }
 };
 
+export const getQuestionByAnswerId = async (answerId: string): Promise<Question> => {
+  const question = await QuestionModel.findOne({ answers: { $in: [answerId] } });
+  if (!question) {
+    throw new Error('Question not found');
+  }
+  return question;
+};
+
 /**
  * Adds a comment to a question or answer.
  *
@@ -915,7 +925,14 @@ export const addComment = async (
       );
     } else {
       result = result as Answer;
-      await addNotification(comment._id, result.ansBy, NotificationType.COMMENT, new ObjectId(id));
+      const question = await getQuestionByAnswerId(id);
+      await addNotification(
+        comment._id,
+        result.ansBy,
+        NotificationType.COMMENT,
+        new ObjectId(question._id),
+        new ObjectId(id),
+      );
     }
 
     return result;
@@ -1251,13 +1268,13 @@ export const getNotificationsForUser = async (
         receiverUsername: username,
         notificationType: new RegExp(type, 'i'),
       })
-        .populate([{ path: 'eventId' }, { path: 'question' }])
+        .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
         .sort({ notificationDate: -1 });
     }
 
     // otherwise, find all notifications for the user
     return await NotificationModel.find({ receiverUsername: username })
-      .populate([{ path: 'eventId' }, { path: 'question' }])
+      .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
       .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when getting notifications: ${(error as Error).message}` };
@@ -1389,6 +1406,47 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
       { path: 'user', select: 'username firstName lastName avatarName' },
     ]);
 
+  const answers = await AnswerModel.find({
+    comments: { $in: commentsByFollowing.map(a => a._id) },
+  });
+
+  const questionsFromDB = await QuestionModel.find({
+    answers: { $in: answers.map(a => a._id) },
+  });
+  console.log(questionsFromDB);
+
+  const questionsWithAnswers = await QuestionModel.find({
+    answers: { $in: answers.map(a => a._id) },
+  })
+    // .select('title text askDateTime askedBy comments answers user')
+    .populate([
+      {
+        path: 'answers',
+        model: AnswerModel,
+        populate: { path: 'comments', model: CommentModel },
+      },
+      // {
+      //   path: 'answers',
+      //   populate: [
+      //     //  { path: 'user'},
+      //     {
+      //       path: 'comments',
+      //       match: { commentBy: { $in: followingUsernames } },
+      //       // populate: { path: 'user', select: 'username firstName lastName avatarName' },
+      //     },
+      //   ],
+      // },
+      { path: 'user', select: 'username firstName lastName avatarName' },
+    ]);
+  // .populate([
+  //   {
+  //     path: 'comments',
+  //     match: { commentBy: { $in: followingUsernames } },
+  //     populate: { path: 'user', select: 'username firstName lastName avatarName' },
+  //   },
+  //   { path: 'user', select: 'username firstName lastName avatarName' },
+  // ]);
+
   // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
   const allCommentsAsFeedPosts = questions.flatMap(question =>
     question.comments.map(comment => {
@@ -1403,7 +1461,31 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     }),
   );
 
-  return allCommentsAsFeedPosts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
+  const allAnswerCommentsAsFeedPosts = questionsWithAnswers.flatMap(question => {
+    //  const answers = question.answers as Answer[];
+
+    return answers.flatMap(answer => {
+      return answer.comments.map(comment => {
+        const com = comment as Comment;
+        const answerCopy = { ...answer.toObject(), comments: [com] };
+        const answerWithSingleComment = { ...question.toObject(), answers: [answerCopy] };
+        console.log('LALALLALAl');
+        console.log(answerWithSingleComment.answers[0].comments);
+        return {
+          postType: FeedPostType.COMMENT,
+          event: answerWithSingleComment,
+          date: com.commentDateTime,
+        };
+      });
+    });
+  });
+
+  // const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
+  const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
+
+  return allAnswerCommentsAsFeedPosts
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 10);
 };
 
 /**

@@ -1401,51 +1401,21 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
       {
         path: 'comments',
         match: { commentBy: { $in: followingUsernames } },
-        populate: { path: 'user', select: 'username firstName lastName avatarName' },
       },
-      { path: 'user', select: 'username firstName lastName avatarName' },
     ]);
 
   const answers = await AnswerModel.find({
     comments: { $in: commentsByFollowing.map(a => a._id) },
   });
 
-  const questionsFromDB = await QuestionModel.find({
-    answers: { $in: answers.map(a => a._id) },
-  });
-  console.log(questionsFromDB);
-
   const questionsWithAnswers = await QuestionModel.find({
     answers: { $in: answers.map(a => a._id) },
-  })
-    // .select('title text askDateTime askedBy comments answers user')
-    .populate([
-      {
-        path: 'answers',
-        model: AnswerModel,
-        populate: { path: 'comments', model: CommentModel },
-      },
-      // {
-      //   path: 'answers',
-      //   populate: [
-      //     //  { path: 'user'},
-      //     {
-      //       path: 'comments',
-      //       match: { commentBy: { $in: followingUsernames } },
-      //       // populate: { path: 'user', select: 'username firstName lastName avatarName' },
-      //     },
-      //   ],
-      // },
-      { path: 'user', select: 'username firstName lastName avatarName' },
-    ]);
-  // .populate([
-  //   {
-  //     path: 'comments',
-  //     match: { commentBy: { $in: followingUsernames } },
-  //     populate: { path: 'user', select: 'username firstName lastName avatarName' },
-  //   },
-  //   { path: 'user', select: 'username firstName lastName avatarName' },
-  // ]);
+  }).populate([
+    {
+      path: 'answers',
+      populate: { path: 'comments', match: { commentBy: { $in: followingUsernames } } },
+    },
+  ]);
 
   // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
   const allCommentsAsFeedPosts = questions.flatMap(question =>
@@ -1462,15 +1432,19 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
   );
 
   const allAnswerCommentsAsFeedPosts = questionsWithAnswers.flatMap(question => {
-    //  const answers = question.answers as Answer[];
-
+    const answers = question.answers as Answer[];
     return answers.flatMap(answer => {
-      return answer.comments.map(comment => {
+      const answerComments = answer.comments as Comment[];
+      return answerComments.map(comment => {
         const com = comment as Comment;
-        const answerCopy = { ...answer.toObject(), comments: [com] };
+        const answerCopy = {
+          _id: answer._id,
+          ansBy: answer.ansBy,
+          ansDateTime: answer.ansDateTime,
+          text: answer.text,
+          comments: [com],
+        };
         const answerWithSingleComment = { ...question.toObject(), answers: [answerCopy] };
-        console.log('LALALLALAl');
-        console.log(answerWithSingleComment.answers[0].comments);
         return {
           postType: FeedPostType.COMMENT,
           event: answerWithSingleComment,
@@ -1480,12 +1454,8 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     });
   });
 
-  // const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
   const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
-
-  return allAnswerCommentsAsFeedPosts
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 10);
+  return posts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };
 
 /**

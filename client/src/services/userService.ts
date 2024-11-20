@@ -78,7 +78,7 @@ export const logoutUser = async (): Promise<{ status: number; error: string }> =
   } catch (error: unknown) {
     return {
       status: 500,
-      error: 'An unexpected error occurred',
+      error: 'There was an error logging out. Please try again.',
     };
   }
 };

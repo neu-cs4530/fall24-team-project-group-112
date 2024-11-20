@@ -46,6 +46,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     isEditing,
     setIsEditing,
     formData,
+    setFormData,
     handleSave,
     handleChange,
     handleSelectAvatar,
@@ -138,6 +139,19 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                     onClick={() => {
                       setError('');
                       setIsEditing(false);
+                      setFormData({
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        username: user.username,
+                        headline: user.headline || '',
+                        bio: user.bio || '',
+                        githubUrl: user.githubUrl || '',
+                        school: user.school || '',
+                        city: user.city || '',
+                        state: user.state || '',
+                        company: user.company || '',
+                        avatarName: user.avatarName || 'avatar1',
+                      });
                     }}>
                     <MdCancel className={styles.editIcon} />
                   </button>

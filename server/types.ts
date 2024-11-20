@@ -546,3 +546,10 @@ export interface FindUserRequest extends Request {
     username: string;
   };
 }
+
+/**
+ * Type representing the data to be used in an email template.
+ */
+export type EmailTemplateData = {
+  [key: string]: string | undefined;
+};

@@ -44,8 +44,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
           headerText={` commented on ${itemType === 'notification' ? 'your' : 'a'} post.`}
         />
         {notificationId && (
-          <button onClick={() => deleteNotification(notificationId)}>
-            <RiDeleteBin5Line className='trash-icon' />
+          <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+            <RiDeleteBin5Line />
           </button>
         )}
       </div>

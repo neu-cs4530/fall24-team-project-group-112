@@ -44,8 +44,8 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, b
           <div>You earned the {badge.name} badge</div>
         </div>
         {notificationId && (
-          <button onClick={() => deleteNotification(notificationId)}>
-            <RiDeleteBin5Line className='trash-icon' />
+          <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+            <RiDeleteBin5Line />
           </button>
         )}
       </div>

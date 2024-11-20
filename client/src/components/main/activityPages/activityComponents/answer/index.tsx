@@ -40,8 +40,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ notificationId, answer, questio
             headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
           />
           {notificationId && (
-            <button onClick={() => deleteNotification(notificationId)}>
-              <RiDeleteBin5Line className='trash-icon' />
+            <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+              <RiDeleteBin5Line />
             </button>
           )}
         </div>

@@ -46,8 +46,8 @@ const FollowItem: React.FC<FollowItemProps> = ({ notificationId, follow, itemTyp
           )}
         </div>
         {notificationId && (
-          <button onClick={() => deleteNotification(notificationId)}>
-            <RiDeleteBin5Line className='trash-icon' />
+          <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+            <RiDeleteBin5Line />
           </button>
         )}
       </div>

@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
-import { Alert } from '@mui/material';
+import { Alert, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
 import { User } from '../../../types';
 import Avatar from '../../main/baseComponents/avatar';
@@ -34,13 +35,13 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
   const handleLogout = async () => {
     try {
       const res = await logoutUser();
-      await localStorage.removeItem('user');
-      setUser(null);
-      setAnchor(null);
-
       if ('status' in res) {
         setError(res.error);
       } else {
+        // if logout successful remove user from local storage and set user to null
+        await localStorage.removeItem('user');
+        setUser(null);
+        setAnchor(null);
         navigate('/');
       }
     } catch (err: unknown) {
@@ -51,13 +52,15 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
   return (
     <div>
       {error && (
-        <Alert
-          severity='error'
-          onClose={() => {
-            setError('');
-          }}>
-          {error}
-        </Alert>
+        <Dialog open={Boolean(error)} onClose={() => setError(null)}>
+          <IconButton
+            onClick={() => setError(null)}
+            style={{ position: 'absolute', top: '8px', right: '8px' }}>
+            <CloseIcon />
+          </IconButton>
+          <DialogTitle style={{ fontFamily: 'Newsreader, serif' }}>Error</DialogTitle>
+          <DialogContent>{error}</DialogContent>
+        </Dialog>
       )}
       <Button onClick={handleClick}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

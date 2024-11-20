@@ -187,6 +187,8 @@ const addNotification = async (
   const notification = await NotificationModel.create(notif);
   return (await NotificationModel.findById(notification._id)
     .populate('eventId')
+    .populate('question')
+    .populate('answer')
     .exec()) as Notification;
 };
 

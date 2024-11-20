@@ -1387,37 +1387,22 @@ const getQuestionsAnsweredByUsers = async (followingUsernames: string[]): Promis
 
 /**
  * Retrieves the 10 most recent comments made by the given users.
+ * Note that comments can be made on both questions and answers.
+ * This method finds comments on both types of posts.
  *
  * @param {string[]} followingUsernames - The usernames of the users whose comments should be retrieved
  * @returns {Promise<FeedPost[]>} - The list of feed posts representing comments made by these users
  */
 const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<FeedPost[]> => {
+  // find comments made by people the user is following
   const commentsByFollowing = await CommentModel.find({ commentBy: { $in: followingUsernames } });
+
+  // find questions with comments made by people the user is following
   const questions = await QuestionModel.find({
     comments: { $in: commentsByFollowing.map(a => a._id) },
-  })
-    .select('title text askDateTime askedBy comments user')
-    .populate([
-      {
-        path: 'comments',
-        match: { commentBy: { $in: followingUsernames } },
-      },
-    ]);
+  }).populate([{ path: 'comments', match: { commentBy: { $in: followingUsernames } } }]);
 
-  const answers = await AnswerModel.find({
-    comments: { $in: commentsByFollowing.map(a => a._id) },
-  });
-
-  const questionsWithAnswers = await QuestionModel.find({
-    answers: { $in: answers.map(a => a._id) },
-  }).populate([
-    {
-      path: 'answers',
-      populate: { path: 'comments', match: { commentBy: { $in: followingUsernames } } },
-    },
-  ]);
-
-  // Find 10 most recent comment. Each comment gets its own feed post, even if part of the same question.
+  // Find 10 most recent comments. Each comment gets its own feed post, even if part of the same question.
   const allCommentsAsFeedPosts = questions.flatMap(question =>
     question.comments.map(comment => {
       const com = comment as Comment;
@@ -1431,6 +1416,21 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     }),
   );
 
+  // find answers with comments made by people the user is following
+  const answers = await AnswerModel.find({
+    comments: { $in: commentsByFollowing.map(a => a._id) },
+  });
+  // find questions with answers that have comments made by people the user is following
+  const questionsWithAnswers = await QuestionModel.find({
+    answers: { $in: answers.map(a => a._id) },
+  }).populate([
+    {
+      path: 'answers',
+      populate: { path: 'comments', match: { commentBy: { $in: followingUsernames } } },
+    },
+  ]);
+
+  // Find 10 most recent comments on answers. Each comment gets its own feed post, even if part of the same answer.
   const allAnswerCommentsAsFeedPosts = questionsWithAnswers.flatMap(question => {
     const answers = question.answers as Answer[];
     return answers.flatMap(answer => {
@@ -1454,6 +1454,7 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     });
   });
 
+  // combine both types of posts and then sort by date
   const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
   return posts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
 };

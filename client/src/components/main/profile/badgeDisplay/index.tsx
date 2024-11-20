@@ -66,8 +66,6 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
     badgeId => BADGES.find(badge => badge._id?.toString() === badgeId.toString())?.name,
   );
 
-  const navigate = useNavigate();
-
   const styles = {
     dialogContainer: 'w-[500px]',
     title: 'pl-5 pt-5 text-xl font-bold',

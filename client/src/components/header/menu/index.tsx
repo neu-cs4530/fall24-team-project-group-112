@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
-import { Alert, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuItem from '@mui/material/MenuItem';
 import { User } from '../../../types';

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dialog, List, ListItem, ListItemText } from '@mui/material';
 import { FaCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 import { User } from '../../../../types';
 import './index.css';
 

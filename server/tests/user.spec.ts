@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { app } from '../app';
 import UserModel from '../models/users';
 import FollowModel from '../models/follows';
@@ -26,8 +26,10 @@ const findOneSpy = jest.spyOn(UserModel, 'findOne');
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
 }));
 const mockSignInWithEmailAndPassword = signInWithEmailAndPassword as jest.Mock;
+const mockSignOut = signOut as jest.Mock;
 
 describe('POST /login', () => {
   afterEach(async () => {
@@ -109,6 +111,35 @@ describe('POST /login', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toBe('Login error: Invalid email or password');
+  });
+});
+
+describe('POST /logout', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should log out a user via firebase and return a success message', async () => {
+    mockSignOut.mockResolvedValueOnce({ success: 'User logged out' });
+
+    const response = await supertest(app).post('/user/logout').send();
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ success: 'User logged out' });
+  });
+
+  it('should raise an error if there is a problem logging out', async () => {
+    mockSignOut.mockRejectedValueOnce(new Error('Error logging out'));
+
+    const response = await supertest(app).post('/user/logout').send();
+
+    expect(response.status).toBe(500);
+    expect(response.text).toEqual('Logout error: Error logging out');
   });
 });
 

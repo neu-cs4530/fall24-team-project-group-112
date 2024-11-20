@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
+import { Alert } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import { User } from '../../../types';
 import Avatar from '../../main/baseComponents/avatar';
@@ -49,6 +50,15 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
 
   return (
     <div>
+      {error && (
+        <Alert
+          severity='error'
+          onClose={() => {
+            setError('');
+          }}>
+          {error}
+        </Alert>
+      )}
       <Button onClick={handleClick}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {user !== null ? (

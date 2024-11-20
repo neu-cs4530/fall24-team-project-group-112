@@ -194,7 +194,7 @@ const userController = (socket: FakeSOSocket) => {
       await signOut(auth);
       res.json({ success: 'User logged out' });
     } catch (err) {
-      res.status(500).send(`Login error: ${(err as Error).message}`);
+      res.status(500).send(`Logout error: ${(err as Error).message}`);
     }
   };
 

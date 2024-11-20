@@ -1191,20 +1191,29 @@ export const markNotificationsAsSeen = async (
 
 /**
  * Deletes notifications for a given user.
- * If the provided user is invalid, an error will be returned and no notifications are deleted.
+ * If a notificationId is given, deletes the single notification with that ID.
+ * If the provided user is invalid or the notificationId is invalid, an error will be returned and no notifications are deleted.
  *
  * @param username the username of the user whose notifications should be deleted
+ * @param notificationId the ID of the notification to delete. This is optional.
  * @returns a Promise resolving to void, or an error message if the operation fails
  */
 export const deleteNotificationsForUser = async (
   username: string,
+  notificationId?: string,
 ): Promise<{ success: string } | { error: string }> => {
   try {
     const user = await UserModel.findOne({ username });
     if (!user) {
       throw new Error('Invalid username');
     }
-    await NotificationModel.deleteMany({ receiverUsername: username }, { seen: true });
+
+    if (notificationId) {
+      await NotificationModel.deleteOne({ receiverUsername: username, _id: notificationId });
+    } else {
+      await NotificationModel.deleteMany({ receiverUsername: username });
+    }
+
     return { success: 'Notifications deleted successfully' };
   } catch (error) {
     return { error: `Error when deleting notifications: ${(error as Error).message}` };

@@ -230,7 +230,18 @@ export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
-  // user?: User;
+}
+
+/**
+ * Interface for the request parameters when finding a question by its ID.
+ * - username - The unique identifier of the user.
+ * - notificationId - The unique identifier of the notification. This is an optional field.
+ */
+export interface DeleteNotificationRequest extends Request {
+  params: {
+    username: string;
+    notificationId?: string;
+  };
 }
 
 /**

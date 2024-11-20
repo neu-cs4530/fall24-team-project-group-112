@@ -17,7 +17,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     case 'Answer': {
       const answer = notification.eventId as Answer;
       const question = notification.question as Question;
-      content = <AnswerItem answer={answer} question={question} itemType='notification' />;
+      content = (
+        <AnswerItem
+          notificationId={notification._id}
+          answer={answer}
+          question={question}
+          itemType='notification'
+        />
+      );
       break;
     }
     case 'Comment': {
@@ -26,6 +33,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
       const answer = notification.answer as Answer;
       content = (
         <CommentItem
+          notificationId={notification._id}
           comment={comment}
           question={question}
           answer={answer}
@@ -36,12 +44,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     }
     case 'Badge': {
       const badge = notification.eventId as Badge;
-      content = <BadgeNotification badge={badge} />;
+      content = <BadgeNotification notificationId={notification._id} badge={badge} />;
       break;
     }
     case 'Follow': {
       const follow = notification.eventId as Follow;
-      content = <FollowItem follow={follow} itemType='notification' />;
+      content = (
+        <FollowItem notificationId={notification._id} follow={follow} itemType='notification' />
+      );
       break;
     }
     default: {

@@ -18,6 +18,7 @@ const useProfile = (loggedInUser: User | null) => {
   const [following, setFollowing] = useState<Follow[]>([]);
   const [followersOpen, setFollowersOpen] = useState(false);
   const [followingOpen, setFollowingOpen] = useState(false);
+  const [badgeOpen, setBadgeOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [error, setError] = useState<string>('');
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -170,6 +171,8 @@ const useProfile = (loggedInUser: User | null) => {
     setFollowersOpen,
     followingOpen,
     setFollowingOpen,
+    badgeOpen,
+    setBadgeOpen,
     avatarOpen,
     setAvatarOpen,
     error,

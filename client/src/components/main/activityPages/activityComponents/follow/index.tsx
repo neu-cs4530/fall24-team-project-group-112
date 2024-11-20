@@ -23,7 +23,9 @@ const FollowItem: React.FC<FollowItemProps> = ({ follow, itemType }) => (
             }}>
             <ItemHeader username={follow.followerUsername} headerText={`followed`} />
             &nbsp; &nbsp;
-            <ItemHeader username={follow.followeeUsername} />
+            <span className='mt-1'>
+              <ItemHeader username={follow.followeeUsername} />
+            </span>
           </div>
         )}
       </div>

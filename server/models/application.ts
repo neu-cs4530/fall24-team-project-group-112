@@ -1584,6 +1584,7 @@ export const getFollowRecommendationsForUser = async (
       },
       { $addFields: { followerCount: { $size: '$followers' } } },
       { $sort: { followerCount: -1 } },
+      { $limit: 10 },
     ]);
   } catch (e) {
     return { error: `Error when getting follow recommendations: ${(e as Error).message}` };

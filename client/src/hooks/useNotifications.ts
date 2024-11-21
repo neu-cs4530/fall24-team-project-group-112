@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import useUserContext from './useUserContext';
 import { Notification } from '../types';
 import {
   getNotifications,
   clearAllNotifications,
   clearSingleNotification,
+  markNotificationsAsSeen,
 } from '../services/notificationService';
 
 const useNotifications = (initialType?: string) => {
   const { user, socket } = useUserContext();
-
+  const location = useLocation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<string | undefined>(initialType);
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [unseenNotificationCount, setUnseenNotificationCount] = useState<number>(0);
 
   useEffect(() => {
     /**
@@ -29,8 +32,16 @@ const useNotifications = (initialType?: string) => {
       setError(null);
 
       try {
-        const res = await getNotifications(user.username, notificationType);
-        setNotifications(res || []);
+        if (location.pathname !== '/notification') {
+          const res = await getNotifications(user.username, notificationType);
+          setNotifications(res || []);
+          setUnseenNotificationCount(res.filter(notification => !notification.seen).length);
+        } else {
+          setUnseenNotificationCount(0);
+          await markNotificationsAsSeen(user.username);
+          const updatedNotifications = await getNotifications(user.username, notificationType);
+          setNotifications(updatedNotifications || []);
+        }
       } catch (err) {
         setError('Failed to fetch notifications');
       } finally {
@@ -43,14 +54,20 @@ const useNotifications = (initialType?: string) => {
      *
      * @param notification - The new or updated notification object.
      */
-    const handleNotificationUpdate = (notification: Notification) => {
+    const handleNotificationUpdate = async (notification: Notification) => {
       // only update notification list if the notification is for the specified user and
       // the type matches the current filter
       if (
         notification.receiverUsername === user.username &&
         (!notificationType || notificationType === notification.notificationType)
       ) {
-        setNotifications(prevNotifications => [notification, ...prevNotifications]);
+        if (location.pathname !== '/notification') {
+          setUnseenNotificationCount(prevCount => prevCount + 1);
+        } else {
+          setUnseenNotificationCount(0);
+          await markNotificationsAsSeen(user.username);
+          setNotifications(prevNotifications => [notification, ...prevNotifications]);
+        }
       }
     };
 
@@ -61,7 +78,7 @@ const useNotifications = (initialType?: string) => {
     return () => {
       socket.off('notificationUpdate', handleNotificationUpdate);
     };
-  }, [user.username, notificationType, notifications, socket]);
+  }, [user.username, notificationType, location.pathname, unseenNotificationCount, socket]);
 
   const deleteNotifications = async () => {
     try {
@@ -92,6 +109,8 @@ const useNotifications = (initialType?: string) => {
     showConfirmationModal,
     setShowConfirmationModal,
     isLoading,
+    unseenNotificationCount,
+    setUnseenNotificationCount,
   };
 };
 

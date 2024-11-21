@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './index.css';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import useNotifications from '../../../../hooks/useNotifications';
 import NotificationList from './notificationList';
@@ -15,6 +15,7 @@ const NotificationCenter: React.FC = () => {
     showConfirmationModal,
     setShowConfirmationModal,
     isLoading,
+    setUnseenNotificationCount,
   } = useNotifications();
 
   const handleFilterChange = (type: string) => {
@@ -24,6 +25,10 @@ const NotificationCenter: React.FC = () => {
   const handleClearNotifications = () => {
     deleteNotifications();
   };
+
+  useEffect(() => {
+    setUnseenNotificationCount(0);
+  }, []);
 
   if (error) {
     return <div>Error: {error}</div>;

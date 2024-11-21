@@ -37,6 +37,7 @@ import {
   addBadge,
   getFeedForUser,
   getQuestionByAnswerId,
+  getFollowRecommendationsForUser,
 } from '../models/application';
 import {
   Answer,
@@ -2356,6 +2357,37 @@ describe('application module', () => {
       await expect(getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc')).rejects.toThrow(
         'Question with answer not found',
       );
+    });
+  });
+
+  describe('getFollowRecommendationsForUser', () => {
+    beforeAll(() => {
+      mockingoose.resetAll();
+    });
+
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.clearAllMocks();
+    });
+
+    test('should return recommendations for a valid user', async () => {
+      mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'aggregate');
+
+      const result = await getFollowRecommendationsForUser('user1');
+
+      expect(result).toEqual([USERS[1], USERS[2]]);
+    });
+
+    test('should return an error if the user does not exist', async () => {
+      mockingoose(UserModel).toReturn(null, 'findOne');
+
+      const result = await getFollowRecommendationsForUser('nonExistentUser');
+
+      expect(result).toEqual({
+        error: 'Error when getting follow recommendations: Invalid username',
+      });
     });
   });
 });

@@ -21,7 +21,7 @@ import BadgeModel from '../models/badges';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
 
-const USER = {
+const user = {
   _id: '67325222c2afe26a6ab97909',
   badges: [],
   username: 'dummyUser',
@@ -31,18 +31,6 @@ const USER = {
   createdAt: new Date('2024-06-03'),
   headline: 'Software engineer',
   bio: 'Software engineer in Boston',
-};
-
-const USER2 = {
-  _id: '51325222c2afe26a6ab97910',
-  badges: [],
-  username: 'otherUser',
-  firstName: 'Other',
-  lastName: 'User',
-  email: 'other@gmail.com',
-  createdAt: new Date('2024-06-03'),
-  headline: 'Software engineer',
-  bio: 'Software engineer in Cambridge',
 };
 
 const findOneSpy = jest.spyOn(UserModel, 'findOne');
@@ -626,8 +614,8 @@ describe('GET /follow/recommendations/:username', () => {
   });
 
   it('should return the recommendations for a user', async () => {
-    jest.spyOn(util, 'getFollowRecommendationsForUser').mockResolvedValueOnce([USER2]);
-    const expectedResult = { ...USER2, createdAt: USER2.createdAt.toISOString() };
+    jest.spyOn(util, 'getFollowRecommendationsForUser').mockResolvedValueOnce([user]);
+    const expectedResult = { ...user, createdAt: user.createdAt.toISOString() };
 
     const response = await supertest(app).get('/user/follow/recommendations/user1');
 

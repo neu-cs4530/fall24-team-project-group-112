@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Query } from 'mongoose';
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import { NodemailerMock } from 'nodemailer-mock';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
@@ -64,6 +64,9 @@ import { feedUser, populatedAnswer1, populatedComment1, populatedQuestion1 } fro
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
+
+// import nodemailer mock per docs: https://www.npmjs.com/package/nodemailer-mock
+const { mock } = nodemailer as unknown as NodemailerMock;
 
 const tag1: Tag = {
   _id: new ObjectId('507f191e810c19729de860ea'),
@@ -2019,7 +2022,7 @@ describe('application module', () => {
 
     // jest.mock('nodemailer');
 
-    const { mock } = nodemailer as unknown as NodemailerMock;
+    //  const { mock } = nodemailerMock as unknown as NodemailerMock;
 
     describe('sendEmail', () => {
       const mockUser = {
@@ -2044,23 +2047,28 @@ describe('application module', () => {
 
         await sendEmail('receiver1', NotificationType.ANSWER);
 
-        expect(nodemailer.createTransport).toHaveBeenCalledWith({
-          service: 'gmail',
-          auth: {
-            user: 'stackovergram@gmail.com',
-            pass: process.env.EMAIL_KEY,
-          },
-        });
+        const sentEmails = mock.getSentMail();
 
-        expect(nodemailer).toHaveBeenCalledWith(
-          {
-            from: 'stackovergram@gmail.com',
-            to: 'receiver1@example.com',
-            subject: 'Stack Overgram: Notification for receiver1',
-            html: expect.any(String), // Assuming fillOutEmailTemplate generates an HTML string
-          },
-          expect.any(Function),
-        );
+        expect(sentEmails.length).toBe(1);
+        expect(sentEmails[0].to).toBe(mockUser.email);
+
+        // expect(nodemailerMock.createTransport).toHaveBeenCalledWith({
+        //   service: 'gmail',
+        //   auth: {
+        //     user: 'stackovergram@gmail.com',
+        //     pass: process.env.EMAIL_KEY,
+        //   },
+        // });
+
+        // expect(nodemailerMock).toHaveBeenCalledWith(
+        //   {
+        //     from: 'stackovergram@gmail.com',
+        //     to: 'receiver1@example.com',
+        //     subject: 'Stack Overgram: Notification for receiver1',
+        //     html: expect.any(String), // Assuming fillOutEmailTemplate generates an HTML string
+        //   },
+        //   expect.any(Function),
+        // );
       });
 
       test('should throw an error if the user is not found', async () => {

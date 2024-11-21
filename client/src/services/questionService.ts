@@ -22,7 +22,7 @@ const getQuestionsByFilter = async (
 };
 
 /**
- * Function to get a question by its ID.
+ * Function to get a question by its ID and increment its view count.
  *
  * @param qid - The ID of the question to retrieve.
  * @param username - The username of the user requesting the question.
@@ -113,6 +113,20 @@ const getQuestionsAnsweredBy = async (username: string): Promise<Question[]> => 
 };
 
 /**
+ * Function to get questions downvoted by a user.
+ *
+ * @param username - The username of the user who's information we need.
+ * @throws Error if there is an issue fetching questions downvoted by the user.
+ */
+const getQuestionsDownvotedBy = async (username: string): Promise<Question[]> => {
+  const res = await api.get(`${QUESTION_API_URL}/downvotedBy/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching questions downvoted by user');
+  }
+  return res.data;
+};
+
+/**
  * Function to get questions upvoted by a user.
  *
  * @param username - The username of the user who's information we need.
@@ -134,5 +148,6 @@ export {
   downvoteQuestion,
   getQuestionsAskedBy,
   getQuestionsAnsweredBy,
+  getQuestionsDownvotedBy,
   getQuestionsUpvotedBy,
 };

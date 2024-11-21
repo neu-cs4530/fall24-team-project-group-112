@@ -1,5 +1,5 @@
-import express, { Response, Router } from 'express';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import express, { Request, Response, Router } from 'express';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import {
   FakeSOSocket,
   UpdateUserRequest,
@@ -20,6 +20,7 @@ import {
   addFollow,
   getFollowersAndFollowingForUser,
   getFeedForUser,
+  getFollowRecommendationsForUser,
 } from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/users';
@@ -156,7 +157,7 @@ const userController = (socket: FakeSOSocket) => {
    *
    * If the user does not exist or login fails, the HTTP response's status is updated.
    *
-   * @param req The HTTP request object (not used in this function).
+   * @param req The HTTP request object.
    * @param res The HTTP response object used to send back the tag count mapping.
    *
    * @returns A Promise that resolves to void.
@@ -176,6 +177,25 @@ const userController = (socket: FakeSOSocket) => {
       res.json(user);
     } catch (err) {
       res.status(500).send(`Login error: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Logs out a user.
+   *
+   * If the user does not exist or logout fails, the HTTP response's status is updated.
+   *
+   * @param _ The HTTP request object. (not used in this function)
+   * @param res The HTTP response object used to send back the tag count mapping.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const logoutUser = async (_: Request, res: Response): Promise<void> => {
+    try {
+      await signOut(auth);
+      res.json({ success: 'User logged out' });
+    } catch (err) {
+      res.status(500).send(`Logout error: ${(err as Error).message}`);
     }
   };
 
@@ -308,12 +328,38 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves follow recommendations for a given user.
+   *
+   * @param req - The request object containing the username parameter.
+   * @param res - The response object used to send the follow recommendations or an error message.
+   * @returns A promise that resolves to void.
+   *
+   * @throws Will throw an error if there is an issue retrieving follow recommendations.
+   */
+  const getFollowRecommendations = async (req: FindUserRequest, res: Response): Promise<void> => {
+    const { username } = req.params;
+    try {
+      const result = await getFollowRecommendationsForUser(username);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when getting follow recommendations: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
   router.post('/login', loginUser);
+  router.post('/logout', logoutUser);
   router.get('/:username', getUserByUsername);
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
   router.get('/follow/:username', getFollowersAndFollowing);
+  router.get('/follow/recommendations/:username', getFollowRecommendations);
   router.get('/feed/:username', getFeed);
 
   return router;

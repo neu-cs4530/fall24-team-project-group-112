@@ -230,7 +230,18 @@ export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
-  // user?: User;
+}
+
+/**
+ * Interface for the request parameters when finding a question by its ID.
+ * - username - The unique identifier of the user.
+ * - notificationId - The unique identifier of the notification. This is an optional field.
+ */
+export interface DeleteNotificationRequest extends Request {
+  params: {
+    username: string;
+    notificationId?: string;
+  };
 }
 
 /**
@@ -340,7 +351,8 @@ export interface Notification {
   _id?: ObjectId;
   notificationType: NotificationType;
   eventId: ObjectId | Answer | Comment | Badge | Follow;
-  question?: ObjectId; // Optional field, provided for Answer and Comment events
+  question?: ObjectId | Question; // Optional field, provided for Answer and Comment events
+  answer?: ObjectId | Answer; // Optional field, provided for certain Comment events
   receiverUsername: string;
   notificationDate: Date;
   seen: boolean;
@@ -452,6 +464,16 @@ export interface LoginUserRequest extends Request {
   body: {
     email: string;
     password: string;
+  };
+}
+
+/**
+ * Interface extending the request body when logging out an existing user, which contains:
+ * - email - The email of the user.
+ */
+export interface LogoutUserRequest extends Request {
+  body: {
+    email: string;
   };
 }
 

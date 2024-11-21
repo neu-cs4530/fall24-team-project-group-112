@@ -41,6 +41,8 @@ import {
   getFeedForUser,
   sendEmail,
   fillOutEmailTemplate,
+  getQuestionByAnswerId,
+  getFollowRecommendationsForUser,
 } from '../models/application';
 import {
   Answer,
@@ -261,6 +263,75 @@ const FOLLOWS: Follow[] = [
   },
 ];
 
+const NOTIFICATIONS: Notification[] = [
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.ANSWER,
+    eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver1',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.ANSWER,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver1',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.ANSWER,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver2',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.ANSWER,
+    eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+
+  {
+    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.BADGE,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+
+  {
+    _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
+    notificationType: NotificationType.FOLLOW,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+    notificationType: NotificationType.COMMENT,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver3',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+  {
+    _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
+    notificationType: NotificationType.COMMENT,
+    eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
+    receiverUsername: 'receiver4',
+    notificationDate: new Date('2023-11-19T09:24:00'),
+    seen: false,
+  },
+];
 describe('application module', () => {
   beforeEach(() => {
     mockingoose.resetAll();
@@ -1404,7 +1475,10 @@ describe('application module', () => {
 
       test('addComment should return the updated answer when given `answer`', async () => {
         // copy the answer to avoid modifying the original
+
         const answer: Answer = { ...ans1 };
+        mockingoose(QuestionModel).toReturn(QUESTIONS[1], 'findOne');
+        mockingoose(AnswerModel).toReturn(answer, 'find');
         (answer.comments as Comment[]).push(com1);
         mockingoose(AnswerModel).toReturn(answer, 'findOneAndUpdate');
         mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
@@ -1735,80 +1809,11 @@ describe('application module', () => {
   });
 
   describe('Notification model', () => {
-    const notifications: Notification[] = [
-      {
-        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.ANSWER,
-        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver1',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-      {
-        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.ANSWER,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver1',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-      {
-        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.ANSWER,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver2',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-
-      {
-        _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.ANSWER,
-        eventId: new ObjectId('73e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver3',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-
-      {
-        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.BADGE,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver3',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-
-      {
-        _id: new ObjectId('91e9b58910afe6e94fc6e6de'),
-        notificationType: NotificationType.FOLLOW,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver3',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-      {
-        _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
-        notificationType: NotificationType.COMMENT,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver3',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-      {
-        _id: new ObjectId('91e9c58910afe6e94fc6e6de'),
-        notificationType: NotificationType.COMMENT,
-        eventId: new ObjectId('75e9b58910afe6e94fc6e6de'),
-        receiverUsername: 'receiver4',
-        notificationDate: new Date('2023-11-19T09:24:00'),
-        seen: false,
-      },
-    ];
     describe('markNotificationsAsSeen', () => {
       test('markNotificationsAsSeen should update the notifications of the specified user', async () => {
-        const expectedResults = notifications
-          .filter(notif => notif.receiverUsername === 'receiver1')
-          .map(result => ({ ...result, seen: true }));
+        const expectedResults = NOTIFICATIONS.filter(
+          notif => notif.receiverUsername === 'receiver1',
+        ).map(result => ({ ...result, seen: true }));
 
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(NotificationModel).toReturn(expectedResults, 'updateMany');
@@ -1859,7 +1864,7 @@ describe('application module', () => {
     });
     describe('getNotificationsForUser', () => {
       test('getNotificationsForUser should get all notifications for the specified user when no filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3',
         );
 
@@ -1878,7 +1883,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Answer filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Answer',
         );
 
@@ -1899,7 +1904,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Comment filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Comment',
         );
 
@@ -1919,7 +1924,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Badge filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Badge',
         );
 
@@ -1939,7 +1944,7 @@ describe('application module', () => {
       });
 
       test('getNotificationsForUser should get filtered notifications for the specified user when the Follow filter is provided', async () => {
-        const expectedResults = notifications.filter(
+        const expectedResults = NOTIFICATIONS.filter(
           notif => notif.receiverUsername === 'receiver3' && notif.notificationType === 'Follow',
         );
 
@@ -2031,6 +2036,46 @@ describe('application module', () => {
         mockingoose(NotificationModel).toReturn(new Error('Error performing delete'), 'deleteMany');
 
         const result = await deleteNotificationsForUser('invalidUser');
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Error performing delete',
+        });
+      });
+
+      test('deleteNotifications should delete the specified notification of the specified user', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(NOTIFICATIONS[1], 'deleteOne');
+
+        const receiverUsername = 'receiver1';
+        const notificationId = '65e9b58910afe6e94fc6e6de';
+
+        const result = await deleteNotificationsForUser(receiverUsername, notificationId);
+
+        expect(result).toEqual({ success: 'Notifications deleted successfully' });
+      });
+
+      test('deleteNotifications should return an error if the given notificationId does not point to a valid notification', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error performing delete'), 'deleteOne');
+
+        const receiverUsername = 'receiver1';
+        const notificationId = '75e9b58910afe6e94fc6e6df';
+
+        const result = await deleteNotificationsForUser(receiverUsername, notificationId);
+
+        expect(result).toEqual({
+          error: 'Error when deleting notifications: Error performing delete',
+        });
+      });
+
+      test('deleteNotifications should return an error if the given notificationId does not point to a notification for the given user', async () => {
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(NotificationModel).toReturn(new Error('Error performing delete'), 'deleteOne');
+
+        const receiverUsername = 'receiver4';
+        const notificationId = '65e9b58910afe6e94fc6e6de';
+
+        const result = await deleteNotificationsForUser(receiverUsername, notificationId);
+
         expect(result).toEqual({
           error: 'Error when deleting notifications: Error performing delete',
         });
@@ -2399,15 +2444,17 @@ describe('application module', () => {
     test('should return a feed with only comments posted when the comment filter is applied', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-      mockingoose(QuestionModel).toReturn(QUESTIONS, 'find');
+      mockingoose(QuestionModel).toReturn(QUESTIONS.slice(0, 3), 'find');
+      mockingoose(AnswerModel).toReturn([], 'find');
       mockingoose(CommentModel).toReturn([populatedComment1], 'find');
 
       const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
 
       expect(Array.isArray(feedPosts)).toBe(true);
       const posts = feedPosts as FeedPost[];
-      expect(posts.length).toBe(1);
+      expect(posts.length).toBe(2);
       expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
+      expect(posts[1].postType).toEqual(FeedPostType.COMMENT);
     });
 
     test('should return an error if there is an error fetching comments posted', async () => {
@@ -2442,22 +2489,71 @@ describe('application module', () => {
 
       expect(result).toEqual({ error: 'Error when getting feed: Error fetching follows' });
     });
+
+    test('should return a feed sorted from most to least recent', async () => {
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
+      mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
+      mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+      const feedPosts = await getFeedForUser('user1');
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(5);
+      for (let i = 0; i < posts.length - 1; i++) {
+        expect(posts[i].date.getSeconds()).toBeGreaterThanOrEqual(posts[i + 1].date.getSeconds());
+      }
+    });
   });
 
-  test('should return a feed sorted from most to least recent', async () => {
-    mockingoose(UserModel).toReturn(feedUser, 'findOne');
-    mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-    mockingoose(QuestionModel).toReturn([populatedQuestion1], 'find');
-    mockingoose(AnswerModel).toReturn([populatedAnswer1], 'find');
-    mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+  describe('getQuestionByAnswerId', () => {
+    test('should return a question if it contains the provided answerId', async () => {
+      mockingoose(QuestionModel).toReturn(QUESTIONS[0], 'findOne');
 
-    const feedPosts = await getFeedForUser('user1');
+      const result = await getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc');
 
-    expect(Array.isArray(feedPosts)).toBe(true);
-    const posts = feedPosts as FeedPost[];
-    expect(posts.length).toBe(5);
-    for (let i = 0; i < posts.length - 1; i++) {
-      expect(posts[i].date.getSeconds()).toBeGreaterThanOrEqual(posts[i + 1].date.getSeconds());
-    }
+      expect(result).toMatchObject(QUESTIONS[0]);
+    });
+
+    test('should return an error if the provided answer is not found', async () => {
+      mockingoose(QuestionModel).toReturn(null, 'findOne');
+
+      await expect(getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc')).rejects.toThrow(
+        'Question with answer not found',
+      );
+    });
+  });
+
+  describe('getFollowRecommendationsForUser', () => {
+    beforeAll(() => {
+      mockingoose.resetAll();
+    });
+
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.clearAllMocks();
+    });
+
+    test('should return recommendations for a valid user', async () => {
+      mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'aggregate');
+
+      const result = await getFollowRecommendationsForUser('user1');
+
+      expect(result).toEqual([USERS[1], USERS[2]]);
+    });
+
+    test('should return an error if the user does not exist', async () => {
+      mockingoose(UserModel).toReturn(null, 'findOne');
+
+      const result = await getFollowRecommendationsForUser('nonExistentUser');
+
+      expect(result).toEqual({
+        error: 'Error when getting follow recommendations: Invalid username',
+      });
+    });
   });
 });

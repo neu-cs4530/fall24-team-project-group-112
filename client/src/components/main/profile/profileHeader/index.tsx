@@ -1,17 +1,18 @@
 import React from 'react';
+import { User } from '../../../../types';
 /**
  * Interface representing the props for the ProfileHeaderProps component.
  *
  * isEditing - A boolean representing whether the user is currently editing their profile.
  * firstName - A string representing the user's first name.
  * lastName - A string representing the user's last name.
- * username - A string representing the user's username.
+ * user - A User object that contains the user's information.
  */
 interface ProfileHeaderProps {
   isEditing: boolean;
   firstName: string;
   lastName: string;
-  username: string;
+  user: User;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -21,7 +22,7 @@ interface ProfileHeaderProps {
  * @param isEditing - A boolean representing whether the user is currently editing their profile.
  * @param firstName - A string representing the user's first name.
  * @param lastName - A string representing the user's last name.
- * @param username - A string representing the user's username
+ * @param user - A User object that contains the user's information.
  * @param handleChange - A function that handles changes to the user's profile information.
  *
  * @returns A React component that displays the user's header information.
@@ -30,7 +31,7 @@ const ProfileHeader = ({
   isEditing,
   firstName,
   lastName,
-  username,
+  user,
   handleChange,
 }: ProfileHeaderProps) => {
   const styles = {
@@ -56,12 +57,12 @@ const ProfileHeader = ({
         className={`${styles.name} border w-1/4 ml-4`}
         placeholder='Last Name'
       />
-      <div className={styles.username}>{`@${username}`}</div>
+      <div className={styles.username}>{`@${user.username}`}</div>
     </>
   ) : (
     <>
-      <div className={styles.name}>{`${firstName} ${lastName}`}</div>
-      <div className={styles.username}>{`@${username}`}</div>
+      <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>
+      <div className={styles.username}>{`@${user.username}`}</div>
     </>
   );
 };

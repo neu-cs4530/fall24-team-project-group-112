@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { app } from '../app';
 import UserModel from '../models/users';
 import FollowModel from '../models/follows';
@@ -21,13 +21,27 @@ import BadgeModel from '../models/badges';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
 
+const user = {
+  _id: '67325222c2afe26a6ab97909',
+  badges: [],
+  username: 'dummyUser',
+  firstName: 'Dummy',
+  lastName: 'User',
+  email: 'dummy@gmail.com',
+  createdAt: new Date('2024-06-03'),
+  headline: 'Software engineer',
+  bio: 'Software engineer in Boston',
+};
+
 const findOneSpy = jest.spyOn(UserModel, 'findOne');
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
 }));
 const mockSignInWithEmailAndPassword = signInWithEmailAndPassword as jest.Mock;
+const mockSignOut = signOut as jest.Mock;
 
 describe('POST /login', () => {
   afterEach(async () => {
@@ -109,6 +123,35 @@ describe('POST /login', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toBe('Login error: Invalid email or password');
+  });
+});
+
+describe('POST /logout', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure the connection is properly closed
+    await mongoose.disconnect(); // Ensure mongoose is disconnected after all tests
+  });
+
+  it('should log out a user via firebase and return a success message', async () => {
+    mockSignOut.mockResolvedValueOnce({ success: 'User logged out' });
+
+    const response = await supertest(app).post('/user/logout').send();
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ success: 'User logged out' });
+  });
+
+  it('should raise an error if there is a problem logging out', async () => {
+    mockSignOut.mockRejectedValueOnce(new Error('Error logging out'));
+
+    const response = await supertest(app).post('/user/logout').send();
+
+    expect(response.status).toBe(500);
+    expect(response.text).toEqual('Logout error: Error logging out');
   });
 });
 
@@ -589,5 +632,33 @@ describe('GET /getFeed/:username', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toContain('Error when fetching user feed');
+  });
+});
+
+describe('GET /follow/recommendations/:username', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure connection is properly closed
+  });
+
+  it('should return the recommendations for a user', async () => {
+    jest.spyOn(util, 'getFollowRecommendationsForUser').mockResolvedValueOnce([user]);
+    const expectedResult = { ...user, createdAt: user.createdAt.toISOString() };
+
+    const response = await supertest(app).get('/user/follow/recommendations/user1');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([expectedResult]);
+  });
+
+  it('should return an error when the user is invalid', async () => {
+    mockingoose(UserModel).toReturn(null, 'findOne');
+
+    const response = await supertest(app).get('/user/follow/recommendations/invalidUser');
+
+    expect(response.status).toBe(500);
   });
 });

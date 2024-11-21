@@ -3,10 +3,9 @@ import './index.css';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
-import { IoMdPerson } from 'react-icons/io';
 import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
-
+import HeaderMenu from './menu';
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
@@ -21,11 +20,7 @@ const Header = ({ user }: { user: User | null }) => {
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
     { name: 'Feed', route: 'feed', image: <MdFeed /> },
     { name: 'Notifications', route: 'notification', image: <FaBell /> },
-    {
-      name: 'Me',
-      route: user ? `profile/${user.username}` : 'register',
-      image: <IoMdPerson></IoMdPerson>,
-    },
+    { name: 'Me' },
   ];
 
   const { pathname } = useLocation();
@@ -45,17 +40,23 @@ const Header = ({ user }: { user: User | null }) => {
         />
       </div>
       <div className='right-side-header'>
-        {links.map((link, index) => (
-          <Link
-            key={index}
-            to={`/${link.route}`}
-            className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}>
-            <div className='header-element'>
-              <span className='icon'>{link.image}</span>
-              <span className='text'>{link.name}</span>
+        {links.map((link, index) =>
+          link.name !== 'Me' ? (
+            <Link
+              key={index}
+              to={`/${link.route}`}
+              className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}>
+              <div className='header-element'>
+                <span className='icon'>{link.image}</span>
+                <span className='text'>{link.name}</span>
+              </div>
+            </Link>
+          ) : (
+            <div key={index} className='header-element'>
+              <HeaderMenu key={index} user={user} text={link.name} />
             </div>
-          </Link>
-        ))}
+          ),
+        )}
       </div>
     </div>
   );

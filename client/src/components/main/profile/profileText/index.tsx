@@ -46,6 +46,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     isEditing,
     setIsEditing,
     formData,
+    setFormData,
     handleSave,
     handleChange,
     handleSelectAvatar,
@@ -113,13 +114,17 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                 isEditing={isEditing}
                 firstName={formData.firstName}
                 lastName={formData.lastName}
-                username={user.username}
+                user={user}
                 handleChange={handleChange}
               />
 
               {!isEditing && loggedInUser && loggedInUser.username === user.username && (
                 <div>
-                  <button className={styles.editButton} onClick={() => setIsEditing(!isEditing)}>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => {
+                      setIsEditing(true);
+                    }}>
                     <FaEdit className={styles.editIcon} />
                   </button>
                 </div>
@@ -133,7 +138,20 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                     className={styles.editButton}
                     onClick={() => {
                       setError('');
-                      setIsEditing(!isEditing);
+                      setIsEditing(false);
+                      setFormData({
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        username: user.username,
+                        headline: user.headline || '',
+                        bio: user.bio || '',
+                        githubUrl: user.githubUrl || '',
+                        school: user.school || '',
+                        city: user.city || '',
+                        state: user.state || '',
+                        company: user.company || '',
+                        avatarName: user.avatarName || 'avatar1',
+                      });
                     }}>
                     <MdCancel className={styles.editIcon} />
                   </button>

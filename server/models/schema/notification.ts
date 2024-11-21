@@ -28,6 +28,10 @@ const notificationSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Question',
     },
+    answer: {
+      type: Schema.Types.ObjectId,
+      ref: 'Answer',
+    },
     receiverUsername: {
       type: String,
       required: true,

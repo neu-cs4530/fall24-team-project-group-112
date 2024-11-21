@@ -1,8 +1,10 @@
-import { Follows, UpdateUserPayload, User } from '../types';
+import { FeedPost, Follows, UpdateUserPayload, User } from '../types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
 const LOGIN_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/login`;
+const LOGOUT_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/logout`;
+const FEED_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/feed`;
 
 /**
  * Adds a new answer to a specific question.
@@ -64,6 +66,24 @@ export const loginUser = async (
 };
 
 /**
+ * Logs out a user with the given email.
+ *
+ * @param email - The email of the user logging out.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ */
+export const logoutUser = async (): Promise<{ status: number; error: string }> => {
+  try {
+    const res = await api.post(`${LOGOUT_API_URL}`);
+    return res.data;
+  } catch (error: unknown) {
+    return {
+      status: 500,
+      error: 'There was an error logging out. Please try again.',
+    };
+  }
+};
+
+/**
  * Updates a user's information with the given information.
  *
  * @param username - The username of the user to be updated.
@@ -74,7 +94,7 @@ export const loginUser = async (
 export const updateProfile = async (
   username: string,
   userPayload: UpdateUserPayload,
-): Promise<User> => {
+): Promise<{ user: User; notification: Notification | undefined }> => {
   const res = await api.patch(`${USER_API_URL}/${username}`, userPayload);
   if (res.status !== 200) {
     throw new Error('Error while updating user');
@@ -115,5 +135,44 @@ export const addFollow = async (
   if (res.status !== 200) {
     throw new Error('Error while adding or deleting follows');
   }
+  return res.data;
+};
+
+/**
+ * Function to get all feed items for a user.
+ *
+ * @param username - The username of the user whose feed items are being retrieved.
+ * @param type - (Optional) The type of feed item to filter by.
+ * @throws Error if there is an issue fetching the feed items.
+ */
+export const getFeed = async (username: string, type?: string): Promise<FeedPost[]> => {
+  let url = `${FEED_API_URL}/${username}`;
+  if (type) {
+    url += `?postType=${type}`;
+  }
+
+  const res = await api.get(url);
+
+  if (res.status !== 200) {
+    throw new Error('Error when fetching or filtering feed items');
+  }
+
+  return res.data;
+};
+
+/**
+ * Function to get follow recommendations for a user.
+ *
+ * @param username - The username of the user whose follow recommendations are being retrieved.
+ * @throws Error if there is an issue fetching recommendations.
+ */
+export const getFollowRecommendations = async (username: string): Promise<User[]> => {
+  const url = `${USER_API_URL}/follow/recommendations/${username}`;
+
+  const res = await api.get(url);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching or filtering feed items');
+  }
+
   return res.data;
 };

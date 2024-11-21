@@ -1,8 +1,8 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { handleHyperlink } from '../../../../tool';
 import CommentSection from '../../commentSection';
-import './index.css';
 import { Comment } from '../../../../types';
+import './index.css';
 
 /**
  * Interface representing the props for the AnswerView component.
@@ -33,12 +33,16 @@ interface AnswerProps {
  */
 const AnswerView = ({ text, ansBy, meta, comments, handleAddComment }: AnswerProps) => (
   <div className='answer right_padding'>
-    <div id='answerText' className='answerText'>
-      {handleHyperlink(text)}
-    </div>
-    <div className='answerAuthor'>
-      <div className='answer_author'>{ansBy}</div>
-      <div className='answer_question_meta'>{meta}</div>
+    <div className='flex gap-6 justify-between'>
+      <div id='answerText' className='answerText'>
+        {handleHyperlink(text)}
+      </div>
+      <div className='flex gap-2'>
+        <Link to={`/profile/${ansBy}`}>
+          <div className='answer_author'>{ansBy}</div>
+        </Link>
+        <div className='answer_question_meta'>{meta}</div>
+      </div>
     </div>
     <CommentSection comments={comments} handleAddComment={handleAddComment} />
   </div>

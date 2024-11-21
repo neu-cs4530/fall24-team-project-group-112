@@ -2291,6 +2291,35 @@ describe('application module', () => {
       expect(posts[1].postType).toEqual(FeedPostType.COMMENT);
     });
 
+    test('should return a feed with comments posted when the comment filter is applied', async () => {
+      const mockQuestion = {
+        _id: new ObjectId('65e9b716ff0e892116b2de08'),
+        title: 'Unanswered Question #3',
+        text: 'Does something like that even exist?',
+        tags: [],
+        answers: [],
+        askedBy: 'q_by4',
+        askDateTime: new Date('2023-11-21T09:24:00'),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [com1],
+      };
+
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn([mockQuestion], 'find');
+      mockingoose(AnswerModel).toReturn([], 'find');
+      mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(1);
+      expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
+    });
+
     test('should return an error if there is an error fetching comments posted', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');

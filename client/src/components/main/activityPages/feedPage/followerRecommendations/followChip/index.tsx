@@ -47,7 +47,7 @@ const FollowChip: React.FC<FollowChipProps> = ({ followeeUsername, followeeName 
         </div>
       </Link>
       <button
-        className={`${followed ? 'bg-blue-400 hover:bg-white' : 'border border-blue-300 hover:bg-white '}  rounded-md px-2`}
+        className={`${followed ? 'bg-gray-200 hover:bg-white' : 'text-white bg-blue-800 border border-blue-300'}  rounded-md px-2 py-1`}
         onClick={() => handleFollowClick()}>
         {followed ? 'Following' : 'Follow'}
       </button>

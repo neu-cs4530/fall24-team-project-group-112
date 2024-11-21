@@ -10,9 +10,11 @@ const FollowerRecommendations: React.FC<FollowerRecommendationsProps> = () => {
   return (
     recommendations &&
     recommendations.length > 0 && (
-      <div className='w-[300px] border border-black rounded-lg p-4'>
-        <h2 className='font-bold text-lg mb-2'>Follow Recommendations</h2>
-        <div className='flex flex-col gap-2'>
+      <div className='w-[300px] border border-black rounded-lg'>
+        <h2 className='font-bold text-lg bg-gray-200 px-4 py-2 rounded-lg'>
+          Follow Recommendations
+        </h2>
+        <div className='flex flex-col gap-2  p-4'>
           {recommendations.map((recommendation, index) => (
             <FollowChip
               key={index}

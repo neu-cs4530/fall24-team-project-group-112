@@ -1161,12 +1161,6 @@ describe('application module', () => {
       });
     });
 
-    // jest.mock('nodemailer', () => ({
-    //   createTransport: jest.fn(() => ({
-    //     sendMail: jest.fn().mockResolvedValue('Email sent successfully'),
-    //   })),
-    // }));
-
     describe('addAnswerToQuestion', () => {
       test('addAnswerToQuestion should return the updated question', async () => {
         const question = QUESTIONS.filter(

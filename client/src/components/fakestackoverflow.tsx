@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { Button, IconButton, Snackbar } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { io } from 'socket.io-client';
 import Layout from './layout';
 import Login from './login';
 import Register from './register';
@@ -27,8 +28,19 @@ const ProtectedRoute = ({
   socket: FakeSOSocket | null;
   children: JSX.Element;
 }) => {
-  if (!user || !socket) {
+  if (!user) {
     return <Navigate to='/' />;
+  }
+
+  if (!socket) {
+    const serverURL = process.env.REACT_APP_SERVER_URL;
+    if (serverURL === undefined) {
+      return <Navigate to='/' />;
+    }
+    const newSocket = io(serverURL);
+    return (
+      <UserContext.Provider value={{ user, socket: newSocket }}>{children}</UserContext.Provider>
+    );
   }
 
   return <UserContext.Provider value={{ user, socket }}>{children}</UserContext.Provider>;

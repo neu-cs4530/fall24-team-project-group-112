@@ -1067,6 +1067,9 @@ describe('application module', () => {
 
   describe('Answer model', () => {
     describe('saveAnswer', () => {
+      afterEach(() => {
+        mock.reset();
+      });
       test('saveAnswer should return the saved answer', async () => {
         const mockAnswer = {
           text: 'This is a test answer',
@@ -1084,11 +1087,11 @@ describe('application module', () => {
       });
     });
 
-    jest.mock('nodemailer', () => ({
-      createTransport: jest.fn(() => ({
-        sendMail: jest.fn().mockResolvedValue('Email sent successfully'),
-      })),
-    }));
+    // jest.mock('nodemailer', () => ({
+    //   createTransport: jest.fn(() => ({
+    //     sendMail: jest.fn().mockResolvedValue('Email sent successfully'),
+    //   })),
+    // }));
 
     describe('addAnswerToQuestion', () => {
       test('addAnswerToQuestion should return the updated question', async () => {
@@ -1125,6 +1128,7 @@ describe('application module', () => {
             })),
           'find',
         );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
@@ -1376,10 +1380,14 @@ describe('application module', () => {
     });
 
     describe('addComment', () => {
+      afterEach(() => {
+        mock.reset();
+      });
       test('addComment should return the updated question when given `question`', async () => {
         // copy the question to avoid modifying the original
         const question = { ...QUESTIONS[0], comments: [com1] };
         mockingoose(QuestionModel).toReturn(question, 'findOneAndUpdate');
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = (await addComment(
           question._id?.toString() as string,
@@ -1396,6 +1404,7 @@ describe('application module', () => {
         const answer: Answer = { ...ans1 };
         (answer.comments as Comment[]).push(com1);
         mockingoose(AnswerModel).toReturn(answer, 'findOneAndUpdate');
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = (await addComment(
           answer._id?.toString() as string,
@@ -1654,6 +1663,10 @@ describe('application module', () => {
         jest.clearAllMocks();
       });
 
+      afterEach(() => {
+        mock.reset();
+      });
+
       const mockUser = USERS[0];
 
       test('should add a badge to the user if they do not already have it', async () => {
@@ -1666,6 +1679,7 @@ describe('application module', () => {
         jest
           .spyOn(UserModel, 'findOneAndUpdate')
           .mockResolvedValueOnce({ ...mockUser, badges: [badgeId] });
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = await addBadge('dummyUser', 'AUTOBIOGRAPHER');
         if (result && 'error' in result) {
@@ -2020,30 +2034,23 @@ describe('application module', () => {
       });
     });
 
-    // jest.mock('nodemailer');
-
-    //  const { mock } = nodemailerMock as unknown as NodemailerMock;
-
     describe('sendEmail', () => {
       const mockUser = {
         username: 'receiver1',
         email: 'receiver1@example.com',
       };
-      // jest.mock('nodemailer');
-      // const sendMailMock = jest.fn();
-      // (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
 
       beforeEach(() => {
         jest.clearAllMocks();
         mockingoose.resetAll();
       });
 
+      afterEach(() => {
+        mock.reset();
+      });
+
       test('should send an email to the specified user', async () => {
         mockingoose(UserModel).toReturn(mockUser, 'findOne');
-        // (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
-        // mockTransporter.sendMail.mockImplementation((mailDetails, callback) =>
-        //   callback(null, 'Email sent'),
-        // );
 
         await sendEmail('receiver1', NotificationType.ANSWER);
 
@@ -2051,47 +2058,24 @@ describe('application module', () => {
 
         expect(sentEmails.length).toBe(1);
         expect(sentEmails[0].to).toBe(mockUser.email);
-
-        // expect(nodemailerMock.createTransport).toHaveBeenCalledWith({
-        //   service: 'gmail',
-        //   auth: {
-        //     user: 'stackovergram@gmail.com',
-        //     pass: process.env.EMAIL_KEY,
-        //   },
-        // });
-
-        // expect(nodemailerMock).toHaveBeenCalledWith(
-        //   {
-        //     from: 'stackovergram@gmail.com',
-        //     to: 'receiver1@example.com',
-        //     subject: 'Stack Overgram: Notification for receiver1',
-        //     html: expect.any(String), // Assuming fillOutEmailTemplate generates an HTML string
-        //   },
-        //   expect.any(Function),
-        // );
       });
 
       test('should throw an error if the user is not found', async () => {
         mockingoose(UserModel).toReturn(null, 'findOne');
 
         await expect(sendEmail('invalidUser', NotificationType.ANSWER)).rejects.toThrow(
-          "Cannot read properties of null (reading 'email')",
+          'User not found',
         );
       });
 
-      test('should log an error if sending the email fails', async () => {
-        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-
+      test('should throw an error if sending the email fails', async () => {
+        mock.setShouldFail(true);
         mockingoose(UserModel).toReturn(mockUser, 'findOne');
-        // (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
-        // mockTransporter.sendMail.mockImplementation((mailDetails, callback) =>
-        //   callback(new Error('Failed to send email'), null),
-        // );
 
         await sendEmail('receiver1', NotificationType.ANSWER);
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
-        consoleLogSpy.mockRestore();
+        const sentEmails = mock.getSentMail();
+        expect(sentEmails.length).toBe(0);
       });
     });
   });

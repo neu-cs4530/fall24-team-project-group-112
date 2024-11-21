@@ -183,6 +183,9 @@ export const sendEmail = async (
   type: NotificationType,
 ): Promise<void> => {
   const user = await UserModel.findOne({ username: receiverUsername });
+  if (!user) {
+    throw new Error('User not found');
+  }
 
   const mailTransporter = nodemailer.createTransport({
     service: 'gmail',
@@ -202,7 +205,7 @@ export const sendEmail = async (
   mailTransporter.sendMail(mailDetails, (err: unknown) => {
     if (err) {
       // eslint-disable-next-line no-console
-      console.log(err);
+      console.log('Error sending email');
     } else {
       // eslint-disable-next-line no-console
       console.log('Email sent successfully');

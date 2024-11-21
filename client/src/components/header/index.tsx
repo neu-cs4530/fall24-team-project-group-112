@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import './index.css';
 import Badge from '@mui/material/Badge';
-import MailIcon from '@mui/icons-material/Mail';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';

@@ -1547,3 +1547,46 @@ export const getFeedForUser = async (
     return { error: `Error when getting feed: ${(error as Error).message}` };
   }
 };
+
+/**
+ * Retrieves follow recommendations for a given user based on their current followings.
+ *
+ * @param username - The username of the user for whom to get follow recommendations.
+ * @returns A promise that resolves to an array of recommended users to follow or an error object.
+ *
+ * The function performs the following steps:
+ * 1. Finds the user by the given username.
+ * 2. Retrieves the list of users that the given user is following.
+ * 3. Aggregates users who are not already followed by the given user, sorted by their follower count in descending order.
+ * 4. Returns the list of recommended users or an error object if an error occurs.
+ *
+ * @throws Will throw an error if the username is invalid or if there is an issue with the database query.
+ */
+export const getFollowRecommendationsForUser = async (
+  username: string,
+): Promise<User[] | { error: string }> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) {
+      throw new Error('Invalid username');
+    }
+    const following = await FollowModel.find({ followerUsername: username });
+    const followingUsernames = following.map(f => f.followeeUsername);
+    return await UserModel.aggregate([
+      { $match: { username: { $nin: followingUsernames.concat(username) } } },
+      {
+        $lookup: {
+          from: 'follows',
+          localField: 'username',
+          foreignField: 'followeeUsername',
+          as: 'followers',
+        },
+      },
+      { $addFields: { followerCount: { $size: '$followers' } } },
+      { $sort: { followerCount: -1 } },
+      { $limit: 10 },
+    ]);
+  } catch (e) {
+    return { error: `Error when getting follow recommendations: ${(e as Error).message}` };
+  }
+};

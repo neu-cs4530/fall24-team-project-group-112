@@ -20,6 +20,7 @@ import {
   addFollow,
   getFollowersAndFollowingForUser,
   getFeedForUser,
+  getFollowRecommendationsForUser,
 } from '../models/application';
 import { auth } from '../firebaseConfig';
 import UserModel from '../models/users';
@@ -327,6 +328,30 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves follow recommendations for a given user.
+   *
+   * @param req - The request object containing the username parameter.
+   * @param res - The response object used to send the follow recommendations or an error message.
+   * @returns A promise that resolves to void.
+   *
+   * @throws Will throw an error if there is an issue retrieving follow recommendations.
+   */
+  const getFollowRecommendations = async (req: FindUserRequest, res: Response): Promise<void> => {
+    const { username } = req.params;
+    try {
+      const result = await getFollowRecommendationsForUser(username);
+
+      if (result && 'error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when getting follow recommendations: ${(err as Error).message}`);
+    }
+  };
+
   router.post('', createUser);
   router.post('/login', loginUser);
   router.post('/logout', logoutUser);
@@ -334,6 +359,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/:username', updateProfile);
   router.post('/follow', createFollow);
   router.get('/follow/:username', getFollowersAndFollowing);
+  router.get('/follow/recommendations/:username', getFollowRecommendations);
   router.get('/feed/:username', getFeed);
 
   return router;

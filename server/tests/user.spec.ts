@@ -21,6 +21,18 @@ import BadgeModel from '../models/badges';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
 
+const user = {
+  _id: '67325222c2afe26a6ab97909',
+  badges: [],
+  username: 'dummyUser',
+  firstName: 'Dummy',
+  lastName: 'User',
+  email: 'dummy@gmail.com',
+  createdAt: new Date('2024-06-03'),
+  headline: 'Software engineer',
+  bio: 'Software engineer in Boston',
+};
+
 const findOneSpy = jest.spyOn(UserModel, 'findOne');
 
 jest.mock('firebase/auth', () => ({
@@ -620,5 +632,33 @@ describe('GET /getFeed/:username', () => {
 
     expect(response.status).toBe(500);
     expect(response.text).toContain('Error when fetching user feed');
+  });
+});
+
+describe('GET /follow/recommendations/:username', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close(); // Ensure connection is properly closed
+  });
+
+  it('should return the recommendations for a user', async () => {
+    jest.spyOn(util, 'getFollowRecommendationsForUser').mockResolvedValueOnce([user]);
+    const expectedResult = { ...user, createdAt: user.createdAt.toISOString() };
+
+    const response = await supertest(app).get('/user/follow/recommendations/user1');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([expectedResult]);
+  });
+
+  it('should return an error when the user is invalid', async () => {
+    mockingoose(UserModel).toReturn(null, 'findOne');
+
+    const response = await supertest(app).get('/user/follow/recommendations/invalidUser');
+
+    expect(response.status).toBe(500);
   });
 });

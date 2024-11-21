@@ -159,3 +159,20 @@ export const getFeed = async (username: string, type?: string): Promise<FeedPost
 
   return res.data;
 };
+
+/**
+ * Function to get follow recommendations for a user.
+ *
+ * @param username - The username of the user whose follow recommendations are being retrieved.
+ * @throws Error if there is an issue fetching recommendations.
+ */
+export const getFollowRecommendations = async (username: string): Promise<User[]> => {
+  const url = `${USER_API_URL}/follow/recommendations/${username}`;
+
+  const res = await api.get(url);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching or filtering feed items');
+  }
+
+  return res.data;
+};

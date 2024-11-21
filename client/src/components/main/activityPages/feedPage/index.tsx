@@ -3,6 +3,7 @@ import { CircularProgress } from '@mui/material';
 import FeedList from './feedList';
 import FeedFilter from './filterComponent';
 import useFeed from '../../../../hooks/useFeed';
+import FollowerRecommendations from './followerRecommendations';
 
 const Feed: React.FC = () => {
   const { feedItems, error, setFeedItemType, isLoading } = useFeed();
@@ -31,9 +32,12 @@ const Feed: React.FC = () => {
       {!isLoading && (
         <div className='notification-div relative'>
           <h2 className='notification-title font-bold text-4xl'>Feed</h2>
-          <div className='absolute top-0 right-0 pr-4'>
-            <div className='mb-5'>
+          <div className='absolute top-0 right-0 pr-4 flex flex-col items-end'>
+            <div className='mb-5 max-w-xs'>
               <FeedFilter onFilterChange={handleFilterChange} />
+            </div>
+            <div className='w-full max-w-xs mt-6'>
+              <FollowerRecommendations />
             </div>
           </div>
           <div className='flex justify-between items-center'>

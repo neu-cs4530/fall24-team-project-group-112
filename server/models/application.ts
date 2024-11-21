@@ -178,7 +178,10 @@ const fillOutEmailTemplate = (data: EmailTemplateData) => {
  * @returns void
  * @throws Error if the email fails to send
  */
-const sendEmail = async (receiverUsername: string, type: NotificationType): Promise<void> => {
+export const sendEmail = async (
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<void> => {
   const user = await UserModel.findOne({ username: receiverUsername });
 
   const mailTransporter = nodemailer.createTransport({
@@ -235,7 +238,7 @@ const addNotification = async (
 
   const notification = await NotificationModel.create(notif);
 
-  sendEmail(receiverUsername, type);
+  await sendEmail(receiverUsername, type);
 
   return (await NotificationModel.findById(notification._id)
     .populate('eventId')

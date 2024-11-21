@@ -1,5 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Query } from 'mongoose';
+import nodemailer from 'nodemailer';
+import { NodemailerMock } from 'nodemailer-mock';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
 import {
@@ -36,6 +38,7 @@ import {
   checkLifesaverBadge,
   addBadge,
   getFeedForUser,
+  sendEmail,
 } from '../models/application';
 import {
   Answer,
@@ -1078,6 +1081,12 @@ describe('application module', () => {
       });
     });
 
+    jest.mock('nodemailer', () => ({
+      createTransport: jest.fn(() => ({
+        sendMail: jest.fn().mockResolvedValue('Email sent successfully'),
+      })),
+    }));
+
     describe('addAnswerToQuestion', () => {
       test('addAnswerToQuestion should return the updated question', async () => {
         const question = QUESTIONS.filter(
@@ -2005,6 +2014,76 @@ describe('application module', () => {
         expect(result).toEqual({
           error: 'Error when deleting notifications: Error performing delete',
         });
+      });
+    });
+
+    // jest.mock('nodemailer');
+
+    const { mock } = nodemailer as unknown as NodemailerMock;
+
+    describe('sendEmail', () => {
+      const mockUser = {
+        username: 'receiver1',
+        email: 'receiver1@example.com',
+      };
+      // jest.mock('nodemailer');
+      // const sendMailMock = jest.fn();
+      // (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: sendMailMock });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+
+      test('should send an email to the specified user', async () => {
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        // (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
+        // mockTransporter.sendMail.mockImplementation((mailDetails, callback) =>
+        //   callback(null, 'Email sent'),
+        // );
+
+        await sendEmail('receiver1', NotificationType.ANSWER);
+
+        expect(nodemailer.createTransport).toHaveBeenCalledWith({
+          service: 'gmail',
+          auth: {
+            user: 'stackovergram@gmail.com',
+            pass: process.env.EMAIL_KEY,
+          },
+        });
+
+        expect(nodemailer).toHaveBeenCalledWith(
+          {
+            from: 'stackovergram@gmail.com',
+            to: 'receiver1@example.com',
+            subject: 'Stack Overgram: Notification for receiver1',
+            html: expect.any(String), // Assuming fillOutEmailTemplate generates an HTML string
+          },
+          expect.any(Function),
+        );
+      });
+
+      test('should throw an error if the user is not found', async () => {
+        mockingoose(UserModel).toReturn(null, 'findOne');
+
+        await expect(sendEmail('invalidUser', NotificationType.ANSWER)).rejects.toThrow(
+          "Cannot read properties of null (reading 'email')",
+        );
+      });
+
+      test('should log an error if sending the email fails', async () => {
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        // (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
+        // mockTransporter.sendMail.mockImplementation((mailDetails, callback) =>
+        //   callback(new Error('Failed to send email'), null),
+        // );
+
+        await sendEmail('receiver1', NotificationType.ANSWER);
+
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.any(Error));
+        consoleLogSpy.mockRestore();
       });
     });
   });

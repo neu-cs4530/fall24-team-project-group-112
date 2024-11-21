@@ -3,6 +3,7 @@ import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
 const LOGIN_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/login`;
+const LOGOUT_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/logout`;
 const FEED_API_URL = `${process.env.REACT_APP_SERVER_URL}/user/feed`;
 
 /**
@@ -60,6 +61,24 @@ export const loginUser = async (
     return {
       status: 500,
       error: 'An unexpected error occurred',
+    };
+  }
+};
+
+/**
+ * Logs out a user with the given email.
+ *
+ * @param email - The email of the user logging out.
+ * @throws Error Throws an error if the request fails or the response status is not 200.
+ */
+export const logoutUser = async (): Promise<{ status: number; error: string }> => {
+  try {
+    const res = await api.post(`${LOGOUT_API_URL}`);
+    return res.data;
+  } catch (error: unknown) {
+    return {
+      status: 500,
+      error: 'There was an error logging out. Please try again.',
     };
   }
 };

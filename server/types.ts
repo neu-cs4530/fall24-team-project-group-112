@@ -468,6 +468,16 @@ export interface LoginUserRequest extends Request {
 }
 
 /**
+ * Interface extending the request body when logging out an existing user, which contains:
+ * - email - The email of the user.
+ */
+export interface LogoutUserRequest extends Request {
+  body: {
+    email: string;
+  };
+}
+
+/**
  * Interface for the request parameters when finding questions downvoted by a given user.
  * - username - The user's unique username.
  */

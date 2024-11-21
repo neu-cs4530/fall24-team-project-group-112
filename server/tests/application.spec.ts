@@ -2121,97 +2121,97 @@ describe('application module', () => {
       });
     });
 
-    // describe('fillOutEmailTemplate', () => {
-    //   const mockTemplate = `
-    //     <html>
-    //       <body>
-    //         <h1>Hello, {{username}}</h1>
-    //         <p>Your email is {{email}}</p>
-    //         <p>Notification type: {{type}}</p>
-    //       </body>
-    //     </html>
-    //   `;
+    describe('fillOutEmailTemplate', () => {
+      const mockTemplate = `
+        <html>
+          <body>
+            <h1>Hello, {{username}}</h1>
+            <p>Your email is {{email}}</p>
+            <p>Notification type: {{type}}</p>
+          </body>
+        </html>
+      `;
 
-    //   jest.mock('path', () => ({
-    //     join: jest.fn((...args) => args.join('/')),
-    //   }));
+      jest.mock('path', () => ({
+        join: jest.fn((...args) => args.join('/')),
+      }));
 
-    //   beforeEach(() => {
-    //     jest.clearAllMocks();
-    //     jest.resetModules();
-    //     mockFs({
-    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
-    //         mockTemplate,
-    //     });
-    //   });
+      beforeEach(() => {
+        jest.clearAllMocks();
+        jest.resetModules();
+        mockFs({
+          '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+            mockTemplate,
+        });
+      });
 
-    //   afterEach(() => {
-    //     mockFs.restore();
-    //   });
+      afterEach(() => {
+        mockFs.restore();
+      });
 
-    //   test('should replace placeholders with corresponding data', () => {
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
+      test('should replace placeholders with corresponding data', () => {
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
 
-    //     const result = fillOutEmailTemplate(data);
+        const result = fillOutEmailTemplate(data);
 
-    //     expect(result).toContain('Hello, JohnDoe');
-    //     expect(result).toContain('Your email is johndoe@example.com');
-    //     expect(result).toContain('Notification type: Answer');
-    //   });
+        expect(result).toContain('Hello, JohnDoe');
+        expect(result).toContain('Your email is johndoe@example.com');
+        expect(result).toContain('Notification type: Answer');
+      });
 
-    //   test('should leave placeholders unchanged if data is missing', () => {
-    //     const data = {
-    //       username: 'JohnDoe',
-    //     };
+      test('should leave placeholders unchanged if data is missing', () => {
+        const data = {
+          username: 'JohnDoe',
+        };
 
-    //     const result = fillOutEmailTemplate(data);
+        const result = fillOutEmailTemplate(data);
 
-    //     expect(result).toContain('Hello, JohnDoe');
-    //     expect(result).toContain('Your email is');
-    //     expect(result).toContain('Notification type:');
-    //   });
+        expect(result).toContain('Hello, JohnDoe');
+        expect(result).toContain('Your email is');
+        expect(result).toContain('Notification type:');
+      });
 
-    //   test('should handle an empty template gracefully', () => {
-    //     mockFs({
-    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
-    //         '',
-    //     });
+      test('should handle an empty template gracefully', () => {
+        mockFs({
+          '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+            '',
+        });
 
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
 
-    //     const result = fillOutEmailTemplate(data);
+        const result = fillOutEmailTemplate(data);
 
-    //     expect(result).toBe('');
-    //   });
+        expect(result).toBe('');
+      });
 
-    //   test('should handle missing data object gracefully', () => {
-    //     const result = fillOutEmailTemplate({} as EmailTemplateData);
+      test('should handle missing data object gracefully', () => {
+        const result = fillOutEmailTemplate({} as EmailTemplateData);
 
-    //     expect(result).toContain('Hello, ');
-    //     expect(result).toContain('Your email is ');
-    //     expect(result).toContain('Notification type: ');
-    //   });
+        expect(result).toContain('Hello, ');
+        expect(result).toContain('Your email is ');
+        expect(result).toContain('Notification type: ');
+      });
 
-    //   test('should throw an error if template file is missing', () => {
-    //     mockFs({}); // No files
+      test('should throw an error if template file is missing', () => {
+        mockFs({}); // No files
 
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
 
-    //     expect(() => fillOutEmailTemplate(data)).toThrow();
-    //   });
-    // });
+        expect(() => fillOutEmailTemplate(data)).toThrow();
+      });
+    });
   });
 
   describe('Follow model', () => {

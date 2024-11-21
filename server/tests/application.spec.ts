@@ -2136,10 +2136,6 @@ describe('application module', () => {
         join: jest.fn((...args) => args.join('/')),
       }));
 
-      jest.mock('fs', () => ({
-        readFileSync: jest.fn(() => mockTemplate),
-      }));
-
       beforeEach(() => {
         jest.clearAllMocks();
         jest.resetModules();
@@ -2150,7 +2146,7 @@ describe('application module', () => {
       });
 
       afterEach(() => {
-        mockFs.restore();
+        // mockFs.restore();
       });
 
       test('should replace placeholders with corresponding data', () => {

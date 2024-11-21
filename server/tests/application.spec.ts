@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Query } from 'mongoose';
 import * as nodemailer from 'nodemailer';
+import mockFs from 'mock-fs';
 import { NodemailerMock } from 'nodemailer-mock';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
@@ -39,6 +40,7 @@ import {
   addBadge,
   getFeedForUser,
   sendEmail,
+  fillOutEmailTemplate,
 } from '../models/application';
 import {
   Answer,
@@ -52,6 +54,7 @@ import {
   FollowResponse,
   FeedPostType,
   FeedPost,
+  EmailTemplateData,
 } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';
@@ -2076,6 +2079,98 @@ describe('application module', () => {
 
         const sentEmails = mock.getSentMail();
         expect(sentEmails.length).toBe(0);
+      });
+    });
+
+    describe('fillOutEmailTemplate', () => {
+      const mockTemplate = `
+        <html>
+          <body>
+            <h1>Hello, {{username}}</h1>
+            <p>Your email is {{email}}</p>
+            <p>Notification type: {{type}}</p>
+          </body>
+        </html>
+      `;
+
+      jest.mock('path', () => ({
+        join: jest.fn((...args) => args.join('/')),
+      }));
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        jest.resetModules();
+        mockFs({
+          '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+            mockTemplate,
+        });
+      });
+
+      afterEach(() => {
+        mockFs.restore();
+      });
+
+      test('should replace placeholders with corresponding data', () => {
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(result).toContain('Hello, JohnDoe');
+        expect(result).toContain('Your email is johndoe@example.com');
+        expect(result).toContain('Notification type: Answer');
+      });
+
+      test('should leave placeholders unchanged if data is missing', () => {
+        const data = {
+          username: 'JohnDoe',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(result).toContain('Hello, JohnDoe');
+        expect(result).toContain('Your email is');
+        expect(result).toContain('Notification type:');
+      });
+
+      test('should handle an empty template gracefully', () => {
+        mockFs({
+          '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+            '',
+        });
+
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(result).toBe('');
+      });
+
+      test('should handle missing data object gracefully', () => {
+        const result = fillOutEmailTemplate({} as EmailTemplateData);
+
+        expect(result).toContain('Hello, ');
+        expect(result).toContain('Your email is ');
+        expect(result).toContain('Notification type: ');
+      });
+
+      test('should throw an error if template file is missing', () => {
+        mockFs({}); // No files
+
+        const data = {
+          username: 'JohnDoe',
+          email: 'johndoe@example.com',
+          type: 'Answer',
+        };
+
+        expect(() => fillOutEmailTemplate(data)).toThrow();
       });
     });
   });

@@ -1,7 +1,7 @@
 /**
  * Jest Mock
  * ./__mocks__/nodemailer.js
- **/
+ * */
 // load the real nodemailer
 const nodemailer = require('nodemailer');
 // pass it in when creating the mock using getMockFor()

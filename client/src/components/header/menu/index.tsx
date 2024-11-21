@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './index.css';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
@@ -11,6 +12,7 @@ import { User } from '../../../types';
 import Avatar from '../../main/baseComponents/avatar';
 import { logoutUser } from '../../../services/userService';
 import useUser from '../../../hooks/useUser';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * HeaderMenu component displays the menu options for the user to navigate to different pages.
@@ -19,18 +21,20 @@ import useUser from '../../../hooks/useUser';
  * @param text The text to display for the menu.
  */
 export default function HeaderMenu({ user, text }: { user: User | null; text: string }) {
-  const [anchor, setAnchor] = React.useState<null | HTMLElement>(null);
-  const [error, setError] = React.useState<string | null>(null);
+  const { socket } = useUserContext();
+  const { setUser } = useUser();
+  const [anchor, setAnchor] = useState<null | HTMLElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string>(user?.avatarName || 'avatar1');
   const open = Boolean(anchor);
   const navigate = useNavigate();
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchor(event.currentTarget);
   };
   const handleClose = () => {
     setAnchor(null);
   };
-
-  const { setUser } = useUser();
 
   const handleLogout = async () => {
     try {
@@ -49,6 +53,17 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
     }
   };
 
+  useEffect(() => {
+    const handleProfileUpdate = async (updatedUser: User) => {
+      setAvatar(updatedUser.avatarName || 'avatar1');
+    };
+
+    socket.on('profileUpdate', handleProfileUpdate);
+    return () => {
+      socket.off('profileUpdate', handleProfileUpdate);
+    };
+  }, [socket]);
+
   return (
     <div>
       {error && (
@@ -65,7 +80,7 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
       <Button onClick={handleClick}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {user !== null ? (
-            <Avatar avatarName={user.avatarName} width={30} height={30} circular={true} />
+            <Avatar avatarName={avatar} width={30} height={30} circular={true} />
           ) : (
             <IoMdPerson />
           )}

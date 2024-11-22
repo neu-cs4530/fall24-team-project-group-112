@@ -1,0 +1,99 @@
+### Stack Overgram Backend
+
+The Stack Overgram leverages MongoDB and Express to build a REST API. The core entities are
+Questions, Comments, Answers, and Tags. The new entities added in this project are Users,
+Notifications, Badges, and Follows.
+
+API requests are initially handled in the controller layer where input validation occurs and
+appropriate HTTP status responses are provided. Business logic is contained within the
+`application.ts` file. Tests are written for both the controller and application layers.
+
+#### Entities
+
+- Questions: Represents questions asked by users.
+- Comments: Represents comments made on questions or answers.
+- Answers: Represents answers to questions.
+- Tags: Represents tags associated with questions.
+- Users: Represents users of the application.
+- Notifications: Represents notifications sent to users.
+- Badges: Represents badges awarded to users.
+- Follows: Represents follow relationships between users.
+
+#### API Endpoints
+
+The API endpoints are organized by entity and follow RESTful conventions. List of routes:
+
+`/question`
+
+- `GET /getQuestion` - gets questions with provided filters
+- `GET /getQuestionById/:qid` - gets question with the given question ID
+- `POST /addQuestion` - adds the provided question
+- `POST /upvoteQuestion` - upvotes the provided question
+- `POST /downvoteQuestion` - downvotes the provided question
+
+The following endpoints were newly created for this project:
+
+- `GET /askedBy/:username` - gets questions asked by the provided user
+- `GET /answeredBy/:username` - gets questions answered by the provided user
+- `GET /upvotedBy/:username` - gets questions upvoted by the provided user
+- `GET /downvotedBy/:username` - gets questions downvoted by the provided user
+
+`/answer`
+
+- `POST /addAnswer` - posts the provided answer to the provided question
+
+`/comment`
+
+- `POST /addComment` - posts the provided comment to the provided question or answer
+
+`/tag`
+
+- `GET /getTagsWithQuestionNumber` - gets tags with their associated questions
+- `GET /getTagByName/:name` - gets a tag by its name
+
+`/user`
+
+All of the following endpoints were created for this project.
+
+- `POST /` - creates the provided user in MongoDB and Firebase
+- `POST /login` - logs the user in, verifying their identity through Firebase
+- `POST /logout` - logs the provided user out
+- `GET /:username` - gets the user with the requested username
+- `PATCH /:username` - updates the provided user
+- `POST /follow` - creates a follow record
+- `GET /follow/:username` - gets the followers and following list of the provided user
+- `GET /follow/recommendations/:username` - gets recommended users for the provided user to follow
+- `GET /feed/:username` - gets a following activity feed for the provided user
+
+`/notification`
+
+All of the following endpoints were created for this project.
+
+- `GET /:username` - gets the notifications of the provided user
+- `PATCH /seen/:username` - updates the provided user's notifications as "seen"
+- `DELETE /:username/:notificationId` - deletes the given notification for the given user
+
+#### Real-time Updates
+
+Real-time updates are handled using WebSockets. The controllers contain a socket and emit typed
+events to send real-time notifications to users when certain events occur (e.g., new comments,
+answers, or follows).
+
+#### Setup and Installation
+
+1. Clone the repository and navigate to the server directory
+
+   `git clone https://github.com/neu-cs4530/fall24-team-project-group-112.git`
+
+   `cd server `
+
+2. Install dependences `npm install`
+
+3. Set up environment variables by creating a .env file in the /server directory. Add the secrets
+   provided by our project group.
+
+4. Run the server:
+
+   `npm run start` or `npm run start:dev` for hot reloading
+
+5. Access the API: The API will be available at `http://localhost:3000`

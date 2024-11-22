@@ -64,33 +64,38 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
   return (
     <>
       {user && !isLoading ? (
-        <>
-          <ProfileText user={user} loggedInUser={loggedInUser} />
-          <div>
-            {user.badges.length > 0 && (
-              <div className='mt-6'>
-                <h2 className='font-bold text-xl ml-5'>Badges</h2>
-                <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
-                  View all badges
-                </p>
-                <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
-              </div>
-            )}
+        <div className='flex justify-center'>
+          <div className='profile-container'>
+            <ProfileText user={user} loggedInUser={loggedInUser} />
+            <div>
+              {user.badges.length > 0 && (
+                <div className='mt-6'>
+                  <h2 className='font-bold text-xl ml-5'>Badges</h2>
+                  <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
+                    View all badges
+                  </p>
+                  <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+                </div>
+              )}
+            </div>
+            <QuestionList
+              questions={questionsAsked}
+              title={`Questions asked by @${user.username}`}
+            />
+            <QuestionList
+              questions={questionsAnswered}
+              title={`Questions answered by @${user.username}`}
+            />
+            <QuestionList
+              questions={questionsUpvoted}
+              title={`Questions upvoted by @${user.username}`}
+            />
+            <QuestionList
+              questions={questionsDownvoted}
+              title={`Questions downvoted by @${user.username}`}
+            />
           </div>
-          <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
-          <QuestionList
-            questions={questionsAnswered}
-            title={`Questions answered by @${user.username}`}
-          />
-          <QuestionList
-            questions={questionsUpvoted}
-            title={`Questions upvoted by @${user.username}`}
-          />
-          <QuestionList
-            questions={questionsDownvoted}
-            title={`Questions downvoted by @${user.username}`}
-          />
-        </>
+        </div>
       ) : (
         <div
           style={{

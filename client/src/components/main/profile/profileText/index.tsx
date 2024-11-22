@@ -68,9 +68,9 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     input: 'border',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
-    bioContainer: 'bg-white p-5 shadow-md flex flex-col h-48',
-    bioHeader: 'ml-3 text-2xl font-bold text-gray-500 mb-2',
-    bioContent: 'ml-3 text-xl text-gray-500',
+    bioContainer: 'bg-white p-5 shadow-md flex flex-col h-40',
+    bioHeader: 'ml-2 text-xl font-bold text-gray-500 mb-2',
+    bioContent: 'ml-2 text-l text-gray-500',
     followButton: 'bg-blue-800 text-white rounded-md py-2 px-5 ml-4 mb-1',
     followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4 mb-1',
     errorModal: 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50',
@@ -256,7 +256,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
       <hr></hr>
       {isEditing ? (
         <>
-          <div className={`${styles.bioHeader} mt-5 mb-3 ml-4`}>Bio</div>
+          <div className={`${styles.bioHeader} mt-5 mb-3 ml-4 text-xl`}>Bio</div>
           <textarea
             name='bio'
             value={formData.bio}

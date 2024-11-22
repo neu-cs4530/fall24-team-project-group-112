@@ -38,8 +38,7 @@ const useNotifications = (initialType?: string) => {
           setUnseenNotificationCount(res.filter(notification => !notification.seen).length);
         } else {
           setUnseenNotificationCount(0);
-          await markNotificationsAsSeen(user.username);
-          const updatedNotifications = await getNotifications(user.username, notificationType);
+          const updatedNotifications = await markNotificationsAsSeen(user.username);
           setNotifications(updatedNotifications || []);
         }
       } catch (err) {

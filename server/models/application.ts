@@ -1423,7 +1423,7 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
     .populate([{ path: 'comments', match: { commentBy: { $in: followingUsernames } } }]);
 
   // Find 10 most recent comments. Each comment gets its own feed post, even if part of the same question.
-  const allCommentsAsFeedPosts = questions.flatMap(question =>
+  const allQuestionCommentsAsFeedPosts = questions.flatMap(question =>
     question.comments.map(comment => {
       const com = comment as Comment;
       const questionWithSingleComment = { ...question.toObject(), comments: [com] };
@@ -1472,7 +1472,7 @@ const getCommentsMadeByUsers = async (followingUsernames: string[]): Promise<Fee
   });
 
   // combine both types of posts and then sort by date
-  const posts = [...allCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
+  const posts = [...allQuestionCommentsAsFeedPosts, ...allAnswerCommentsAsFeedPosts];
 
   if (posts.length === 0) {
     return [];

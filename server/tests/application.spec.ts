@@ -954,6 +954,78 @@ describe('application module', () => {
 
         expect(result).toEqual({ error: 'Error when adding downvote to question' });
       });
+
+      test('addVoteToQuestion should add the voter badge if user earned voter badge', async () => {
+        const mockQuestion = {
+          _id: 'someQuestionId',
+          upVotes: [],
+          downVotes: [],
+        };
+
+        mockingoose(QuestionModel).toReturn(
+          { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+          'findOneAndUpdate',
+        );
+        mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn({ name: 'VOTER', description: 'voter badge' }, 'findOne');
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
+          'findOneAndUpdate',
+        );
+
+        const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+        expect(result).toEqual({
+          msg: 'Question upvoted successfully',
+          upVotes: ['testUser'],
+          downVotes: [],
+          notifications: [],
+        });
+      });
+
+      // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
+      //   const mockQuestion = {
+      //     _id: 'someQuestionId',
+      //     upVotes: [],
+      //     downVotes: [],
+      //   };
+
+      //   const mockNotification = {
+      //     notificationType: NotificationType.BADGE,
+      //     eventId: '673425329c00935604e19ea7',
+      //     receiverUsername: 'testUser',
+      //     notificationDate: new Date(),
+      //     seen: false,
+      //     _id: 'notif12345',
+      //   };
+
+      //   mockingoose(QuestionModel).toReturn(
+      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      //   mockingoose(UserModel).toReturn({ ...USERS[0], badges: [''] }, 'findOne');
+      //   mockingoose(BadgeModel).toReturn(
+      //     { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
+      //     'findOne',
+      //   );
+      //   mockingoose(UserModel).toReturn(
+      //     { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(NotificationModel).toReturn(mockNotification, 'create');
+
+      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      //   expect(result).toEqual({
+      //     msg: 'Question upvoted successfully',
+      //     upVotes: ['testUser'],
+      //     downVotes: [],
+      //     notifications: [mockNotification],
+      //   });
+      // });
     });
 
     describe('checkSpeedyAnswererBadge', () => {
@@ -1605,6 +1677,27 @@ describe('application module', () => {
 
         const result = await updateUser('notARealUser', mockReqBody);
         expect(result).toEqual({ error: 'User does not exist' });
+      });
+
+      it('updateUser should return an error if adding a badge fails', async () => {
+        const mockReqBody = {
+          headline: 'Aspiring software engineer',
+          bio: 'Software engineer in Boston looking to connect with other engineers',
+          githubUrl: 'www.github.com',
+          company: 'Google',
+          school: 'Northeastern University',
+          city: 'Boston',
+          state: 'Massachusetts',
+          avatarName: 'avatar1',
+        };
+
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+        const expectedResult = { user: { ...mockUser, ...mockReqBody } };
+        mockingoose(UserModel).toReturn(expectedResult, 'findOneAndUpdate');
+        mockingoose(BadgeModel).toReturn(new Error('Database error'), 'findOne');
+
+        const result = await updateUser(username, mockReqBody);
+        expect(result).toEqual({ error: 'error adding badge to user' });
       });
     });
 

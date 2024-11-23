@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import './index.css';
+import Badge from '@mui/material/Badge';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
@@ -7,6 +8,9 @@ import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
 import HeaderMenu from './menu';
 import Logo from './images/logo.png';
+import useNotifications from '../../hooks/useNotifications';
+
+
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
@@ -16,6 +20,7 @@ import Logo from './images/logo.png';
  */
 const Header = ({ user }: { user: User | null }) => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
+  const { unseenNotificationCount } = useNotifications();
 
   const links = [
     { name: 'Home', route: 'home', image: <IoHomeSharp /> },
@@ -52,10 +57,21 @@ const Header = ({ user }: { user: User | null }) => {
               key={index}
               to={`/${link.route}`}
               className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}>
-              <div className='header-element'>
-                <span className='icon'>{link.image}</span>
-                <span className='text'>{link.name}</span>
-              </div>
+              {link.name === 'Notifications' && (
+                <div className='header-element'>
+                  <Badge badgeContent={unseenNotificationCount || 0} color='primary'>
+                    <span className='icon'>{link.image}</span>
+                  </Badge>
+                  <span className='text'>{link.name}</span>
+                </div>
+              )}
+
+              {link.name !== 'Notifications' && (
+                <div className='header-element'>
+                  <span className='icon'>{link.image}</span>
+                  <span className='text'>{link.name}</span>
+                </div>
+              )}
             </Link>
           ) : (
             <div key={index} className='header-element'>
@@ -67,5 +83,4 @@ const Header = ({ user }: { user: User | null }) => {
     </div>
   );
 };
-
 export default Header;

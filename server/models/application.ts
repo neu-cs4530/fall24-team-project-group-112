@@ -1183,7 +1183,9 @@ export const markNotificationsAsSeen = async (
       throw new Error('Invalid username');
     }
     await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
-    return await NotificationModel.find({ receiverUsername: username });
+    return await NotificationModel.find({ receiverUsername: username })
+      .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
+      .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
   }

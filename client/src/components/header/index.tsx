@@ -10,7 +10,6 @@ import HeaderMenu from './menu';
 import Logo from './images/logo.png';
 import useNotifications from '../../hooks/useNotifications';
 
-
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page

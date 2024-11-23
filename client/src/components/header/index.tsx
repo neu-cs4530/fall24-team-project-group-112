@@ -7,6 +7,7 @@ import { FaBell } from 'react-icons/fa';
 import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
 import HeaderMenu from './menu';
+import Logo from './images/logo.png';
 import useNotifications from '../../hooks/useNotifications';
 
 /**
@@ -29,21 +30,26 @@ const Header = ({ user }: { user: User | null }) => {
 
   const { pathname } = useLocation();
 
+  const isQuestionPage = pathname === '/home' || pathname.startsWith('/question');
+
   return (
     <div id='header' className='header'>
-      <div className='left-side-header'>
-        <div className='text-[24px] font-bold pr-8'>Stack Overgram</div>
+      <div className='logo-title flex flex-row align-middle'>
+        <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
+        <div className='text-[24px] flex font-bold w-8/12 mt-5'>Stack Overgram</div>
+      </div>
+      {isQuestionPage && (
         <input
           id='searchBar'
-          className='px-4 py-2 rounded-lg search-bar border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
-          placeholder='Search ...'
+          className='px-4 mr-24 py-2 rounded-lg search-bar border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
+          placeholder='Search for a question...'
           type='text'
           value={val}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         />
-      </div>
-      <div className='right-side-header'>
+      )}
+      <div className='right-side-header  w-6/12'>
         {links.map((link, index) =>
           link.name !== 'Me' ? (
             <Link

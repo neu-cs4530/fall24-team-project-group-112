@@ -5,7 +5,7 @@
   height: 10%;
   padding-left: 25px;
   padding-right: 10px;
-  background: #dddddd;
+  background: #f2f2f2;
 }
 
 .title {
@@ -37,7 +37,7 @@
 .right-side-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: right;
 }
 
 .left-side-header {
@@ -61,11 +61,20 @@
 }
 
 .search-bar {
-  width: 300px;
+  width: 100%;
+  margin-right: 20px;
+  margin-left: 20px;
 }
 
 .avatar-in-header {
   display: flex;
   width: 35px !important;
   height: 35px !important;
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 50%;
 }

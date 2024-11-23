@@ -45,12 +45,12 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ notificationId, answer, questio
             </button>
           )}
         </div>
-        <hr />
+        <hr className='mt-3' />
         <div className='answer'>
           {question && <ItemHeader username={question?.askedBy} headerText='asked:' />}
           <div className='clamp-text'>{question?.title}</div>
         </div>
-        <hr />
+        <hr className='mt-3' />
         <div className='answer'>
           <ItemHeader username={answer.ansBy} headerText='answered:' />
           <div className='clamp-text'>{answer.text}</div>

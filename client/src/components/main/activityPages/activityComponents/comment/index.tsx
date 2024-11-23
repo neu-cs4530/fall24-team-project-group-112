@@ -53,19 +53,19 @@ const CommentItem: React.FC<CommentItemProps> = ({
           </button>
         )}
       </div>
-      <hr />
+      <hr className='mt-3' />
       {question && (
         <div className='answer'>
           {question && <ItemHeader username={question.askedBy} headerText='asked:' />}
           <div className='clamp-text'>{question.title}</div>
-          <hr />
+          <hr className='mt-3' />
         </div>
       )}
       {answer && (
         <div className='answer'>
           <ItemHeader username={answer?.ansBy} headerText='answered:' />
           <div className='clamp-text'>{answer?.text}</div>
-          <hr />
+          <hr className='mt-3' />
         </div>
       )}
       <div className='answer'>

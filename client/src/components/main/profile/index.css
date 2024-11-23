@@ -76,3 +76,8 @@
   max-width: 260px;
   text-align: center;
 }
+
+.profile-container {
+  width: 60rem;
+  align-content: center;
+}

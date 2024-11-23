@@ -7,10 +7,11 @@
 .notification {
   display: flex;
   flex-direction: column;
-  width: 480px;
+  width: 550px;
   border: 1px solid grey;
   padding: 15px;
   border-radius: 10px;
+  justify-content: center;
 }
 
 .padding {

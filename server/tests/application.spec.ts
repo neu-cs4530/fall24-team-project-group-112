@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Query } from 'mongoose';
 import * as nodemailer from 'nodemailer';
-import mockFs from 'mock-fs';
 import { NodemailerMock } from 'nodemailer-mock';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
@@ -40,7 +39,6 @@ import {
   addBadge,
   getFeedForUser,
   sendEmail,
-  fillOutEmailTemplate,
   getQuestionByAnswerId,
   getFollowRecommendationsForUser,
 } from '../models/application';
@@ -56,7 +54,6 @@ import {
   FollowResponse,
   FeedPostType,
   FeedPost,
-  EmailTemplateData,
 } from '../types';
 import { T1_DESC, T2_DESC, T3_DESC } from '../data/posts_strings';
 import AnswerModel from '../models/answers';

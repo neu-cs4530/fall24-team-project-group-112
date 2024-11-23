@@ -165,7 +165,7 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
  * @param data the data to fill out the email template with
  * @returns the filled out email template
  */
-export const fillOutEmailTemplate = (data: EmailTemplateData) => {
+const fillOutEmailTemplate = (data: EmailTemplateData) => {
   const templatePath = path.join(__dirname, '..', 'emailTemplate.html');
   const emailTemplate = fs.readFileSync(templatePath).toString('utf8');
   return emailTemplate.replace(/{{(\w+)}}/g, (_, key) => data[key] || '');

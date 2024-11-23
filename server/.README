@@ -57,12 +57,13 @@ All of the following endpoints were created for this project.
 
 - `POST /` - creates the provided user in MongoDB and Firebase
 - `POST /login` - logs the user in, verifying their identity through Firebase
-- `POST /logout` - logs the provided user out
+- `POST /logout` - logs the provided user out locally and in Firebase
 - `GET /:username` - gets the user with the requested username
 - `PATCH /:username` - updates the provided user
 - `POST /follow` - creates a follow record
 - `GET /follow/:username` - gets the followers and following list of the provided user
-- `GET /follow/recommendations/:username` - gets recommended users for the provided user to follow
+- `GET /follow/recommendations/:username` - gets recommended users the provided user is not already
+  following
 - `GET /feed/:username` - gets a following activity feed for the provided user
 
 `/notification`
@@ -71,13 +72,14 @@ All of the following endpoints were created for this project.
 
 - `GET /:username` - gets the notifications of the provided user
 - `PATCH /seen/:username` - updates the provided user's notifications as "seen"
-- `DELETE /:username/:notificationId` - deletes the given notification for the given user
+- `DELETE /:username/:notificationId?` - deletes the given notification for the given user if a
+  notificationId is provided. If not, deletes all notifications for the given user.
 
 #### Real-time Updates
 
 Real-time updates are handled using WebSockets. The controllers contain a socket and emit typed
 events to send real-time notifications to users when certain events occur (e.g., new comments,
-answers, or follows).
+answers, follows, or profile updates).
 
 #### Setup and Installation
 
@@ -96,4 +98,4 @@ answers, or follows).
 
    `npm run start` or `npm run start:dev` for hot reloading
 
-5. Access the API: The API will be available at `http://localhost:3000`
+5. Access the API: The API will be available at `http://localhost:8000`

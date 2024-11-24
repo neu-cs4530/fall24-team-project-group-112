@@ -41,7 +41,7 @@ const useLogin = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     let isValid = true;
     if (!email || !password) {
-      setError('You can not leave any of the fields empty');
+      setError('You must enter an email and password.');
       isValid = false;
     }
 
@@ -55,7 +55,7 @@ const useLogin = () => {
       const res = await loginUser(email, password);
 
       if ('status' in res) {
-        setError(res.error);
+        setError('Incorrect email or password. Please try again.');
       } else {
         const user: User = {
           username: res.username,
@@ -83,7 +83,7 @@ const useLogin = () => {
       }
     } catch (err) {
       if (err instanceof Error) {
-        setError(`${err.message}`);
+        setError(`An error occurred while logging in. Please try again.`);
       }
     }
   };

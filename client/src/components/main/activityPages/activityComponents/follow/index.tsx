@@ -28,7 +28,7 @@ interface FollowItemProps {
 const FollowItem: React.FC<FollowItemProps> = ({ notificationId, follow, itemType }) => {
   const { deleteNotification } = useNotifications();
   return (
-    <div className='notification'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md md:w-[500px]'>
       <div className='notification-header'>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {itemType === 'notification' ? (

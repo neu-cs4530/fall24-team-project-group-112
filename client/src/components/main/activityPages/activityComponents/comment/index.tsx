@@ -41,7 +41,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='notification'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full md:w-[500px]'>
       <div className='notification-header'>
         <ItemHeader
           username={comment.commentBy}

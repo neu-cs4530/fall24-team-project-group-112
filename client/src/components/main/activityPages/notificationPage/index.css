@@ -1,9 +1,6 @@
 .notification-div {
   display: flex;
   flex-direction: column;
-  width: 100vw !important;
-  height: 100%;
-  align-items: center;
 }
 
 .notification-title {

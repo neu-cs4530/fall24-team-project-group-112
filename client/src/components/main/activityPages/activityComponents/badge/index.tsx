@@ -37,12 +37,12 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, b
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='notification'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full md:w-[500px]'>
       <div className='notification-header'>
         <div className={styles.badgeContainer}>
           <div className={styles.circle} style={{ backgroundColor: getCircleColor() }}></div>
           <div>
-            You earned the <span className='font-bold'>{badge.name.toLowerCase()}</span> badge
+            You earned the <span className='font-bold'>{badge.name?.toLowerCase()}</span> badge
           </div>
         </div>
         {notificationId && (

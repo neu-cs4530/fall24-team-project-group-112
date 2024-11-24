@@ -10,64 +10,65 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
   };
 
   return (
-    <div className='notification-filter flex flex-col mt-5 ml-1 border border-black rounded px-3 py-2'>
+    <div className='w-full border border-black rounded md:mt-5 pl-3 py-2'>
       <h3 className='font-bold mb-2'>Filter By:</h3>
+      <div className='flex flex-wrap md:flex-col'>
+        <label className='mr-3'>
+          <input
+            className='mr-1 accent-stackpurple'
+            type='radio'
+            name='filter'
+            value=''
+            onChange={handleRadioChange}
+            defaultChecked
+          />
+          All Notifications
+        </label>
 
-      <label className='mr-3'>
-        <input
-          className='mr-1 accent-stackpurple'
-          type='radio'
-          name='filter'
-          value=''
-          onChange={handleRadioChange}
-          defaultChecked
-        />
-        All Notifications
-      </label>
+        <label className='mr-3'>
+          <input
+            className='mr-1 accent-stackpurple'
+            type='radio'
+            name='filter'
+            value='Answer'
+            onChange={handleRadioChange}
+          />
+          Answers
+        </label>
 
-      <label className='mr-3'>
-        <input
-          className='mr-1 accent-stackpurple'
-          type='radio'
-          name='filter'
-          value='Answer'
-          onChange={handleRadioChange}
-        />
-        Answers
-      </label>
+        <label className='mr-3'>
+          <input
+            className='mr-1 accent-stackpurple'
+            type='radio'
+            name='filter'
+            value='Comment'
+            onChange={handleRadioChange}
+          />
+          Comments
+        </label>
 
-      <label className='mr-3'>
-        <input
-          className='mr-1 accent-stackpurple'
-          type='radio'
-          name='filter'
-          value='Comment'
-          onChange={handleRadioChange}
-        />
-        Comments
-      </label>
+        <label className='mr-3'>
+          <input
+            className='mr-1 accent-stackpurple'
+            type='radio'
+            name='filter'
+            value='Question'
+            onChange={handleRadioChange}
+          />
+          Questions
+        </label>
 
-      <label className='mr-3'>
-        <input
-          className='mr-1 accent-stackpurple'
-          type='radio'
-          name='filter'
-          value='Question'
-          onChange={handleRadioChange}
-        />
-        Questions
-      </label>
-
-      <label>
-        <input
-          className='mr-1'
-          type='radio'
-          name='filter'
-          value='Follow'
-          onChange={handleRadioChange}
-        />
-        Follows
-      </label>
+        <label>
+          <input
+            className='mr-1'
+            type='radio'
+            name='filter'
+            value='Follow'
+            onChange={handleRadioChange}
+          />
+          Follows
+        </label>
+      </div>
     </div>
   );
 };

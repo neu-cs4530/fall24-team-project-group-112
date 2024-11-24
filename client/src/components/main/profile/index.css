@@ -42,21 +42,12 @@
 .signup-button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-left: 20px;
   margin-bottom: 10px;
-}
-
-.signup-button:hover {
-  background-color: #0056b3;
-}
-
-.signup-button:active {
-  background-color: #003f7f;
 }
 
 .account-creation-error {

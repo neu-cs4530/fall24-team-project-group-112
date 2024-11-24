@@ -33,7 +33,7 @@ const Login = () => {
           id='passwordInput'
         />
         {error && <div className='error-message'>{error}</div>}
-        <button type='submit' className='login-button'>
+        <button type='submit' className='login-button bg-stackpurple hover:bg-stackpurplehover'>
           Submit
         </button>
         <div className='mt-5'>

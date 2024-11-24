@@ -1,11 +1,11 @@
 ### Stack Overgram Client
-The Stack Overgram client is built using React and TypeScript to build a dynamic web app resembling Stack Overflow. Throughout the devleopment process, we have added new pages and components, enhanced functionality of existing pages, and updated the styling of previous pages and components. To do so effectively, we focused on reusing components as much as possible to maintain consistency and reduce redundancy across the application. This approach helps in maintaining a clean and manageable codebase. In addition to the creation of new pages, we also updated the styling of the website to be cleaner, and resemble more modern web applications and social medias.
+The Stack Overgram client is built using React and TypeScript to build a dynamic web app resembling Stack Overflow. During development, we added new pages and components, enhanced the functionality of existing features, and improved the styling of previous elements. To do so effectively, we focused on reusing components as much as possible to maintain consistency and reduce redundancy across the application. This approach helps in maintaining a clean and manageable codebase. Additionally, we updated the overall design adn styling of the web app to be cleaner, and resemble more modern web applications and social medias.
 
 ### Setup of frontend
-Generally, most pages are composed of multiple components that may or may not be reusable. In all components, the business logic is separated from the actual html & JSX that make up what the user sees in custom hooks.
+Generally, most pages are composed of multiple components, some of which are reusable. In all components, to ensure for separation, the business logic is isolated in custom hooks from the actual HTML & JSX consisting what the user sees.
 
 ### Component Reuse
-Some places where we made sure to create reusable components were our question component and our feed & notification pages:
+To maintain consistency and streamline the development process, we emphasized creating reusable components in several key areas, which include:
 
 #### Question Component: 
 The Question component is used to accomplish multiple functions, including on the Profile page to display different aspects of a user. This ensures that the display and behavior of questions remain consistent throughout the application.

@@ -11,7 +11,7 @@ When adding new components and pages and updating some of the existing component
 To maintain consistency and streamline the development process, we emphasized creating reusable components in several key areas, which include:
 
 #### Question Component: 
-The Question component is used to accomplish multiple functions, including on the Profile page to display different aspects of a user. This ensures that the display and behavior of questions remain consistent throughout the application.
+The Question component is used to accomplish multiple functions: it shows questions on the Home page, but it also shows questions asked, answered, or voted on by a user on the Profile page. This ensures that the display and behavior of questions remain consistent throughout the application.
 
 #### Feed and Notification Pages: 
 Both the Feed and Notification pages rely on shared components and styling to display lists of follower activities and notifications. This reuse of components helps in maintaining a uniform look and feel across different parts of the application that have similar functionality.

@@ -4,6 +4,9 @@ The Stack Overgram client is built using React and TypeScript to build a dynamic
 ### Setup of frontend
 Generally, most pages are composed of multiple components, some of which are reusable. In all components, to ensure for separation, the business logic is isolated in custom hooks from the actual HTML & JSX consisting what the user sees.
 
+### Tailwind styling
+When adding new components and pages and updating some of the existing components, we used Tailwind, a CSS framework, to create a more uniform look and enable a smoother development experience. Additionally, it made the process of making our pages responsive much easier.
+
 ### Component Reuse
 To maintain consistency and streamline the development process, we emphasized creating reusable components in several key areas, which include:
 

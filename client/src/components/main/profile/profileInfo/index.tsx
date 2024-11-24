@@ -25,7 +25,7 @@ const ProfileInfo = ({
   handleChange,
 }: ProfileInfoProps) => {
   const styles = {
-    infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 w-full justify-between',
+    infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 justify-between mr-40',
     infoItem: 'flex flex-row gap-2 items-center',
     icon: 'text-sm mb-1',
     input: 'border p-1 w-full',

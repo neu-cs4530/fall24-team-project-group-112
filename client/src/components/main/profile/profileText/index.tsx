@@ -131,7 +131,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             )}
 
             {isEditing && loggedInUser && loggedInUser.username === user.username && (
-              <>
+              <div className='flex flex-row flex-wrap'>
                 <div>
                   <button
                     className={styles.editButton}
@@ -160,7 +160,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
                     <FaSave className={styles.editIcon} />
                   </button>
                 </div>
-              </>
+              </div>
             )}
             {loggedInUser && loggedInUser?.username !== user.username && (
               <div>
@@ -214,19 +214,16 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
               user.headline && <div>{user.headline}</div>
             )}
           </div>
-
-          <div className='w-full'>
-            <ProfileInfo
-              isEditing={isEditing}
-              user={user}
-              editingGithubUrl={formData.githubUrl}
-              editingSchool={formData.school}
-              editingCity={formData.city}
-              editingState={formData.state}
-              editingCompany={formData.company}
-              handleChange={handleChange}
-            />
-          </div>
+          <ProfileInfo
+            isEditing={isEditing}
+            user={user}
+            editingGithubUrl={formData.githubUrl}
+            editingSchool={formData.school}
+            editingCity={formData.city}
+            editingState={formData.state}
+            editingCompany={formData.company}
+            handleChange={handleChange}
+          />
 
           <div className={styles.followersContainer}>
             <div>

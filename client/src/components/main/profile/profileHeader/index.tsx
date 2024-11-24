@@ -40,7 +40,7 @@ const ProfileHeader = ({
   };
 
   return isEditing ? (
-    <div className='flex flex-col sm:flex-row items-center'>
+    <div className='flex items-center'>
       <div className='flex flex-wrap gap-2'>
         <input
           type='text'

@@ -182,7 +182,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
             {BADGES.filter(badge => badge.color === 'bronze').map(badge => {
               const isEarned = userBadges.includes(badge);
               return (
-                <div className='badge-inv' key={badge._id}>
+                <div className='mt-5 badge-inv' key={badge._id}>
                   <span
                     className={`badge flex flex-row border p-2 rounded-md ${isEarned ? '' : 'greyed-out'}`}>
                     <span className={`mt-1 mr-2 bronze`}>

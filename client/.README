@@ -13,6 +13,9 @@ The Question component is used to accomplish multiple functions, including on th
 #### Feed and Notification Pages: 
 Both the Feed and Notification pages rely on shared components and styling to display lists of follower activities and notifications. This reuse of components helps in maintaining a uniform look and feel across different parts of the application that have similar functionality.
 
+### Client testing
+To test our client, we manually tested all added components and pages. If you are interested in viewing our testing, you can search through our closed Pull Requests in our repository. For reference, here is one:  [Editable profile page](https://github.com/neu-cs4530/fall24-team-project-group-112/pull/39)
+
 ### Setup and Installation
 1. Clone the repository and navigate to the client directory
 

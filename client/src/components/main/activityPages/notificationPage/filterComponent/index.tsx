@@ -15,7 +15,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
 
       <label className='mr-3'>
         <input
-          className='mr-1'
+          className='mr-1 accent-stackpurple'
           type='radio'
           name='filter'
           value=''
@@ -27,7 +27,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
 
       <label className='mr-3'>
         <input
-          className='mr-1'
+          className='mr-1 accent-stackpurple'
           type='radio'
           name='filter'
           value='Answer'
@@ -38,7 +38,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
 
       <label className='mr-3'>
         <input
-          className='mr-1'
+          className='mr-1 accent-stackpurple'
           type='radio'
           name='filter'
           value='Comment'
@@ -49,7 +49,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
 
       <label className='mr-3'>
         <input
-          className='mr-1'
+          className='mr-1 accent-stackpurple'
           type='radio'
           name='filter'
           value='Badge'

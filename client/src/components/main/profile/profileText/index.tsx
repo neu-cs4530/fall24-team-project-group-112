@@ -57,10 +57,11 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
   } = useProfile(loggedInUser);
 
   const styles = {
-    container: 'flex-col ',
+    container: 'w-full max-w-4xl',
     header: 'bg-white p-5 shadow-md flex flex-row',
     avatarContainer: 'flex flex-col ml-4',
-    nameUsernameContainer: 'flex flex-row items-end justify-between',
+    textContainer: 'flex flex-col ml-4 w-full',
+    nameUsernameContainer: 'flex flex-row space-x-8',
     editAvatarContainer: 'flex flex-col ml-4',
     editButton: 'bg-white text-black text-lg rounded-md p-2',
     editIcon: 'text-2xl mt-1',
@@ -107,29 +108,27 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
         ) : (
           <Avatar avatarName={user.avatarName || 'avatar1'} />
         )}
-        <div className={styles.avatarContainer}>
+        <div className={styles.textContainer}>
           <div className={styles.nameUsernameContainer}>
-            <div className='flex flex-row items-end'>
-              <ProfileHeader
-                isEditing={isEditing}
-                firstName={formData.firstName}
-                lastName={formData.lastName}
-                user={user}
-                handleChange={handleChange}
-              />
+            <ProfileHeader
+              isEditing={isEditing}
+              firstName={formData.firstName}
+              lastName={formData.lastName}
+              user={user}
+              handleChange={handleChange}
+            />
 
-              {!isEditing && loggedInUser && loggedInUser.username === user.username && (
-                <div>
-                  <button
-                    className={styles.editButton}
-                    onClick={() => {
-                      setIsEditing(true);
-                    }}>
-                    <FaEdit className={styles.editIcon} />
-                  </button>
-                </div>
-              )}
-            </div>
+            {!isEditing && loggedInUser && loggedInUser.username === user.username && (
+              <div>
+                <button
+                  className={styles.editButton}
+                  onClick={() => {
+                    setIsEditing(true);
+                  }}>
+                  <FaEdit className={styles.editIcon} />
+                </button>
+              </div>
+            )}
 
             {isEditing && loggedInUser && loggedInUser.username === user.username && (
               <>
@@ -216,16 +215,18 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             )}
           </div>
 
-          <ProfileInfo
-            isEditing={isEditing}
-            user={user}
-            editingGithubUrl={formData.githubUrl}
-            editingSchool={formData.school}
-            editingCity={formData.city}
-            editingState={formData.state}
-            editingCompany={formData.company}
-            handleChange={handleChange}
-          />
+          <div className='w-full'>
+            <ProfileInfo
+              isEditing={isEditing}
+              user={user}
+              editingGithubUrl={formData.githubUrl}
+              editingSchool={formData.school}
+              editingCity={formData.city}
+              editingState={formData.state}
+              editingCompany={formData.company}
+              handleChange={handleChange}
+            />
+          </div>
 
           <div className={styles.followersContainer}>
             <div>

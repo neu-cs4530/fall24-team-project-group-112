@@ -8,38 +8,37 @@ const BADGES = [
   {
     _id: '673425329c00935604e19ea6',
     name: 'AUTOBIOGRAPHER',
-    description: 'You have completed every section of your profile details!',
+    description: 'Complete every section of your profile details!',
     color: 'bronze',
   },
   {
     _id: '673425329c00935604e19ea7',
     name: 'VOTER',
-    description: 'You have cast your first upvote or downvote!',
+    description: 'Cast your first upvote or downvote!',
     color: 'bronze',
   },
   {
     _id: '673425329c00935604e19ea8',
     name: 'SPEEDY_ANSWERER',
-    description: 'You have answered a question within 30 minutes of it being asked!',
+    description: 'Answer a question within 30 minutes of it being asked!',
     color: 'silver',
   },
   {
     _id: '673425329c00935604e19ea9',
     name: 'COMMUNITY_HELPER',
-    description: 'You have answered 10 different questions within a week!',
+    description: 'Answer 10 different questions within a week!',
     color: 'silver',
   },
   {
     _id: '673425329c00935604e19eaa',
     name: 'TOP_ANSWERER',
-    description: 'You have answered over 20 questions!',
+    description: 'Answer over 20 questions!',
     color: 'gold',
   },
   {
     _id: '673425329c00935604e19eab',
     name: 'LIFESAVER',
-    description:
-      'You have asked a question that is upvoted more than 50 times within a week of posting!',
+    description: 'Ask a question that is upvoted more than 50 times within a week of posting!',
     color: 'gold',
   },
 ];
@@ -103,7 +102,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
           </div>
         </Dialog>
       </div>
-      <div className='flex flex-row'>
+      <div className='flex flex-col md:flex-row w-full md:w-full'>
         {/* Gold Badges */}
         <div className='badge-card'>
           <div className='flex flex-row'>
@@ -183,7 +182,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
             {BADGES.filter(badge => badge.color === 'bronze').map(badge => {
               const isEarned = userBadges.includes(badge);
               return (
-                <div className='mt-5 badge-inv' key={badge._id}>
+                <div className='badge-inv' key={badge._id}>
                   <span
                     className={`badge flex flex-row border p-2 rounded-md ${isEarned ? '' : 'greyed-out'}`}>
                     <span className={`mt-1 mr-2 bronze`}>

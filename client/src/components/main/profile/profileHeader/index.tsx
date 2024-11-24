@@ -40,25 +40,27 @@ const ProfileHeader = ({
   };
 
   return isEditing ? (
-    <>
-      <input
-        type='text'
-        name='firstName'
-        value={firstName}
-        onChange={handleChange}
-        className={`${styles.name} border w-1/4`}
-        placeholder='First Name'
-      />
-      <input
-        type='text'
-        name='lastName'
-        value={lastName}
-        onChange={handleChange}
-        className={`${styles.name} border w-1/4 ml-4`}
-        placeholder='Last Name'
-      />
+    <div className='flex flex-col sm:flex-row items-center'>
+      <div className='flex flex-wrap gap-2'>
+        <input
+          type='text'
+          name='firstName'
+          value={firstName}
+          onChange={handleChange}
+          className={`${styles.name} border w-48`}
+          placeholder='First Name'
+        />
+        <input
+          type='text'
+          name='lastName'
+          value={lastName}
+          onChange={handleChange}
+          className={`${styles.name} border w-48`}
+          placeholder='Last Name'
+        />
+      </div>
       <div className={styles.username}>{`@${user.username}`}</div>
-    </>
+    </div>
   ) : (
     <>
       <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>

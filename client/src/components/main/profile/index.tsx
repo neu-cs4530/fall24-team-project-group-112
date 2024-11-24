@@ -64,20 +64,21 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
   return (
     <>
       {user && !isLoading ? (
-        <div className='flex justify-center'>
-          <div className='profile-container'>
-            <ProfileText user={user} loggedInUser={loggedInUser} />
-            <div>
-              {user.badges.length > 0 && (
-                <div className='mt-6'>
-                  <h2 className='font-bold text-xl ml-5'>Badges</h2>
-                  <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
-                    View all badges
-                  </p>
-                  <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
-                </div>
-              )}
-            </div>
+        // <div className='flex justify-center'>
+        <div className='flex flex-col items-center'>
+          <ProfileText user={user} loggedInUser={loggedInUser} />
+          <div className='w-full max-w-4xl'>
+            {user.badges.length > 0 && (
+              <div className='mt-6'>
+                <h2 className='font-bold text-xl ml-5'>Badges</h2>
+                <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
+                  View all badges
+                </p>
+                <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+              </div>
+            )}
+          </div>
+          <div className='w-full max-w-4xl'>
             <QuestionList
               questions={questionsAsked}
               title={`Questions asked by @${user.username}`}
@@ -97,6 +98,7 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
           </div>
         </div>
       ) : (
+        // </div>
         <div
           style={{
             display: 'flex',

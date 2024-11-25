@@ -13,6 +13,13 @@ import HeaderMenu from './menu';
 import Logo from './images/logo.png';
 import useNotifications from '../../hooks/useNotifications';
 
+/**
+ * Header component that renders the main title and a search bar.
+ * The search bar allows the user to input a query and navigate to the search results page
+ * when they press Enter.
+ *
+ * @param user The user object containing the logged in user's information, or null if a user is not logged in.
+ */
 const Header = ({ user }: { user: User | null }) => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
   const { unseenNotificationCount } = useNotifications();
@@ -30,24 +37,21 @@ const Header = ({ user }: { user: User | null }) => {
 
   const isQuestionPage = pathname === '/home' || pathname.startsWith('/question');
 
-  // Open popover
   const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Close popover
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
 
   const isPopoverOpen = Boolean(anchorEl);
 
-  // Update screen size state on window resize
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth <= 1024);
       if (window.innerWidth > 1024) {
-        setAnchorEl(null); // Close popover when switching to large screen
+        setAnchorEl(null);
       }
     };
 
@@ -105,9 +109,7 @@ const Header = ({ user }: { user: User | null }) => {
                     key={index}
                     to={`/${link.route}`}
                     className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}
-                    onClick={handlePopoverClose} // Close popover after clicking a link
-                  >
-                    {/* Notifications Badge */}
+                    onClick={handlePopoverClose}>
                     {link.name === 'Notifications' && (
                       <div className='header-element'>
                         <Badge badgeContent={unseenNotificationCount || 0} color='primary'>
@@ -116,7 +118,6 @@ const Header = ({ user }: { user: User | null }) => {
                         <span className='text'>{link.name}</span>
                       </div>
                     )}
-                    {/* Other Links */}
                     {link.name !== 'Notifications' && (
                       <div className='header-element'>
                         <span className='icon'>{link.image}</span>
@@ -125,7 +126,6 @@ const Header = ({ user }: { user: User | null }) => {
                     )}
                   </Link>
                 ) : (
-                  // "Me" Menu
                   <div key={index} className='header-element'>
                     <HeaderMenu key={index} user={user} text={link.name} />
                   </div>
@@ -135,7 +135,6 @@ const Header = ({ user }: { user: User | null }) => {
           </Popover>
         </>
       ) : (
-        // Right-Side Header (Visible on Large Screens)
         <div className='right-side-header flex lg:w-6/12'>
           {links.map((link, index) =>
             link.name !== 'Me' ? (
@@ -143,7 +142,6 @@ const Header = ({ user }: { user: User | null }) => {
                 key={index}
                 to={`/${link.route}`}
                 className={`link ${pathname === `/${link.route}` ? 'active' : ''}`}>
-                {/* Notifications Badge */}
                 {link.name === 'Notifications' && (
                   <div className='header-element'>
                     <Badge badgeContent={unseenNotificationCount || 0} color='primary'>
@@ -152,7 +150,6 @@ const Header = ({ user }: { user: User | null }) => {
                     <span className='text'>{link.name}</span>
                   </div>
                 )}
-                {/* Other Links */}
                 {link.name !== 'Notifications' && (
                   <div className='header-element'>
                     <span className='icon'>{link.image}</span>
@@ -161,7 +158,6 @@ const Header = ({ user }: { user: User | null }) => {
                 )}
               </Link>
             ) : (
-              // "Me" Menu
               <div key={index} className='header-element'>
                 <HeaderMenu key={index} user={user} text={link.name} />
               </div>

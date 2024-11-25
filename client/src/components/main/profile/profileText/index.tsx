@@ -62,7 +62,6 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     avatarContainer: 'flex flex-col ml-4',
     textContainer: 'flex flex-col ml-4 w-full',
     nameUsernameContainer: 'w-full flex flex-col sm:flex-row md:space-x-12',
-    editAvatarContainer: 'flex flex-col ml-4',
     editButton: 'bg-white text-black text-lg rounded-md p-2 cursor-pointer',
     editIcon: 'text-2xl mt-1',
     headline: 'mt-1 text-xl text-gray-500 w-full',
@@ -93,7 +92,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
       )}
       <div className={styles.header}>
         {isEditing ? (
-          <div className={styles.editAvatarContainer}>
+          <div className={styles.avatarContainer}>
             <Avatar avatarName={formData.avatarName} />
             <div>
               <button className={styles.editButton} onClick={() => setAvatarOpen(true)}>
@@ -108,7 +107,9 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             </div>
           </div>
         ) : (
-          <Avatar avatarName={user.avatarName || 'avatar1'} />
+          <div className={styles.avatarContainer}>
+            <Avatar avatarName={user.avatarName || 'avatar1'} />
+          </div>
         )}
         <div className={styles.textContainer}>
           <div className={styles.nameUsernameContainer}>

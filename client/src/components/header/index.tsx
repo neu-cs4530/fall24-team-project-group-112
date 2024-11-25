@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import { IoHomeSharp } from 'react-icons/io5';
 import { MdFeed } from 'react-icons/md';
 import { FaBell } from 'react-icons/fa';
-import useHeader from '../../hooks/useHeader';
 import { User } from '../../types';
 import HeaderMenu from './menu';
 import Logo from './images/logo.png';
@@ -21,7 +20,6 @@ import useNotifications from '../../hooks/useNotifications';
  * @param user The user object containing the logged in user's information, or null if a user is not logged in.
  */
 const Header = ({ user }: { user: User | null }) => {
-  const { val, handleInputChange, handleKeyDown } = useHeader();
   const { unseenNotificationCount } = useNotifications();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State for popover
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 1024); // Track screen size
@@ -34,8 +32,6 @@ const Header = ({ user }: { user: User | null }) => {
   ];
 
   const { pathname } = useLocation();
-
-  const isQuestionPage = pathname === '/home' || pathname.startsWith('/question');
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -62,23 +58,12 @@ const Header = ({ user }: { user: User | null }) => {
   return (
     <div id='header' className='header'>
       {/* Logo Section */}
-      <div className='logo-title flex flex-row align-middle'>
-        <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
-        <div className='text-[24px] flex font-bold w-8/12 mt-5'>Stack Overgram</div>
-      </div>
-
-      {/* Search Bar */}
-      {isQuestionPage && (
-        <input
-          id='searchBar'
-          className='px-4 mr-24 py-2 rounded-lg search-bar border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
-          placeholder='Search for a question...'
-          type='text'
-          value={val}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-        />
-      )}
+      <Link to={'/'}>
+        <div className='logo-title flex align-middle'>
+          <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
+          <div className='text-[24px] leading-6 mb-3 font-bold mt-5'>Stack Overgram</div>
+        </div>
+      </Link>
 
       {isSmallScreen ? (
         <>

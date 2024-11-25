@@ -1,19 +1,8 @@
-.user-in-notification {
-  font-weight: bold;
-  margin-left: 6px;
-  margin-right: 6px;
-}
-
 .notification {
   display: flex;
   flex-direction: column;
-  width: 550px;
   border: 1px solid grey;
   padding: 15px;
   border-radius: 10px;
   justify-content: center;
-}
-
-.padding {
-  padding: 10px;
 }

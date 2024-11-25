@@ -5,6 +5,7 @@ import { Answer, Question } from '../../../../../types';
 import './index.css';
 import ItemHeader from '../itemHeader';
 import useNotifications from '../../../../../hooks/useNotifications';
+import { getMetaData } from '../../../../../tool';
 
 /**
  * AnswerItem component displays an answer to a question.
@@ -32,18 +33,21 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ notificationId, answer, questio
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='notification'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[550px]'>
       <div>
-        <div className='notification-header'>
-          <ItemHeader
-            username={answer.ansBy}
-            headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
-          />
-          {notificationId && (
-            <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
-              <RiDeleteBin5Line />
-            </button>
-          )}
+        <div>
+          <div className='notification-header'>
+            <ItemHeader
+              username={answer.ansBy}
+              headerText={` answered ${itemType === 'notification' ? 'your' : 'a'} question.`}
+            />
+            {notificationId && (
+              <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>
+                <RiDeleteBin5Line />
+              </button>
+            )}
+          </div>
+          <p className='text-gray-500'>{getMetaData(new Date(answer.ansDateTime))}</p>
         </div>
         <hr className='mt-3' />
         <div className='answer'>

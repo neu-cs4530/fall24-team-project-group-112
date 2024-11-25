@@ -3,6 +3,7 @@ import './index.css';
 import OrderButton from './orderButton';
 import { OrderType, orderTypeDisplayName } from '../../../../types';
 import AskQuestionButton from '../../askQuestionButton';
+import useHeader from '../../../../hooks/useHeader';
 
 /**
  * Interface representing the props for the QuestionHeader component.
@@ -26,25 +27,40 @@ interface QuestionHeaderProps {
  * @param qcnt - The number of questions displayed in the header.
  * @param setQuestionOrder - Function to set the order of questions based on input message.
  */
-const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => (
-  <div>
-    <div className='space_between right_padding w-100'>
-      <div className='bold_title'>{titleText}</div>
-      <AskQuestionButton />
-    </div>
-    <div className='space_between right_padding w-100'>
-      <div id='question_count'>{qcnt} questions</div>
-      <div className='btns'>
-        {Object.keys(orderTypeDisplayName).map((order, idx) => (
-          <OrderButton
-            key={idx}
-            orderType={order as OrderType}
-            setQuestionOrder={setQuestionOrder}
-          />
-        ))}
+const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => {
+  const { val, handleInputChange, handleKeyDown } = useHeader();
+
+  return (
+    <div className='my-3 px-6 mb-4'>
+      <div className='space_between py-2 w-100'>
+        <div className='bold_title'>{titleText}</div>
+      </div>
+      <div className='flex items-center py-2 justify-between'>
+        <input
+          id='searchBar'
+          className='px-4 h-12 rounded-lg w-[80%] border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
+          placeholder='Search for a question...'
+          type='text'
+          value={val}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+        />
+        <AskQuestionButton />
+      </div>
+      <div className='space_between py-2 w-100'>
+        <div id='question_count'>{qcnt} questions</div>
+        <div className='btns'>
+          {Object.keys(orderTypeDisplayName).map((order, idx) => (
+            <OrderButton
+              key={idx}
+              orderType={order as OrderType}
+              setQuestionOrder={setQuestionOrder}
+            />
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default QuestionHeader;

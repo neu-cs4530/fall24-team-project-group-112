@@ -36,8 +36,6 @@ import {
   checkLifesaverBadge,
   addBadge,
   getFeedForUser,
-  getQuestionByAnswerId,
-  getFollowRecommendationsForUser,
 } from '../models/application';
 import {
   Answer,
@@ -2143,6 +2141,78 @@ describe('application module', () => {
         expect(result).toEqual({
           error: 'Error when deleting notifications: Error performing delete',
         });
+      });
+    });
+
+    jest.mock('fs');
+
+    describe('fillOutEmailTemplate', () => {
+      const mockTemplatePath = path.join(__dirname, '..', 'emailTemplate.html');
+      const mockTemplateContent = `
+        <html>
+          <body>
+            <h1>{{title}}</h1>
+            <p>Hello {{name}},</p>
+            <p>Welcome to {{platform}}!</p>
+          </body>
+        </html>
+      `;
+
+      beforeEach(() => {
+        jest.resetAllMocks();
+        (fs.readFileSync as jest.Mock).mockReturnValue(mockTemplateContent);
+      });
+
+      test('should fill out the email template with provided data', () => {
+        const data = {
+          title: 'Welcome Email',
+          name: 'John Doe',
+          platform: 'StackOvergram',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(fs.readFileSync).toHaveBeenCalledWith(mockTemplatePath, 'utf8');
+        expect(result).toContain('<h1>Welcome Email</h1>');
+        expect(result).toContain('<p>Hello John Doe,</p>');
+        expect(result).toContain('<p>Welcome to StackOvergram!</p>');
+      });
+
+      test('should replace missing data keys with an empty string', () => {
+        const data = {
+          title: 'Welcome Email',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(result).toContain('<h1>Welcome Email</h1>');
+        expect(result).toContain('<p>Hello ,</p>'); // name is missing
+        expect(result).toContain('<p>Welcome to !</p>'); // platform is missing
+      });
+
+      test('should not replace unrelated placeholders', () => {
+        const data = {
+          title: 'Welcome Email',
+          name: 'John Doe',
+        };
+
+        const result = fillOutEmailTemplate(data);
+
+        expect(result).toContain('<h1>Welcome Email</h1>');
+        expect(result).toContain('<p>Hello John Doe,</p>');
+        expect(result).toContain('<p>Welcome to {{platform}}!</p>'); // platform placeholder remains
+      });
+
+      test('should throw an error if the email template file cannot be read', () => {
+        (fs.readFileSync as jest.Mock).mockImplementation(() => {
+          throw new Error('File not found');
+        });
+
+        const data = {
+          title: 'Welcome Email',
+        };
+
+        expect(() => fillOutEmailTemplate(data)).toThrow('File not found');
       });
     });
   });

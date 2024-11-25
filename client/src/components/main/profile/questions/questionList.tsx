@@ -17,9 +17,9 @@ const QuestionList = ({ questions, title }: QuestionListProps) => {
   const styles = {
     container: 'px-4 border border-gray-200 pb-2',
     header:
-      'cursor-pointer flex tablet:flex-row tablet:flex-wrap mobile:flex-col tablet:items-center items-start justify-between py-6',
+      'cursor-pointer flex md:flex-row md:flex-wrap mobile:flex-col md:items-center items-start justify-between py-6',
     title: 'text-xl font-bold',
-    iconContainer: 'mt-1 tablet:mt-0',
+    iconContainer: 'mt-1 md:mt-0',
   };
 
   return (

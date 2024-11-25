@@ -41,13 +41,13 @@ const FollowChip: React.FC<FollowChipProps> = ({ followeeUsername, followeeName 
           alignItems: 'center',
         }}>
         <Avatar avatarName={userAvatar} width={40} height={40} circular={true} />
-        <div className='flex flex-col gap-0 ml-4'>
+        <div className='flex flex-col ml-4'>
           <p className='font-bold'>{followeeUsername}</p>
-          <p className=''>{followeeName}</p>
+          <p>{followeeName}</p>
         </div>
       </Link>
       <button
-        className={`${followed ? 'bg-gray-200 hover:bg-white' : 'text-white bg-stackpurple border'}  rounded-md px-2 py-1`}
+        className={`${followed ? 'bg-gray-200 hover:bg-white' : 'text-white bg-stackpurple border'} rounded-md px-2 py-1 ml-6 md:ml-0`}
         onClick={() => handleFollowClick()}>
         {followed ? 'Following' : 'Follow'}
       </button>

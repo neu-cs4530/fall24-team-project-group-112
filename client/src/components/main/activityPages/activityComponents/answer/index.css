@@ -3,7 +3,6 @@
   flex-direction: column;
   border: 0px;
   margin-top: 10px;
-  /* margin-bottom: 10px; */
 }
 
 .clamp-text {
@@ -16,16 +15,10 @@
   margin-top: 5px;
 }
 
-.user-in-answer {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
 .notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* margin-bottom: 8px; */
 }
 
 .trash-icon {

@@ -38,24 +38,24 @@ const NotificationCenter: React.FC = () => {
       )}
       {!isLoading && (
         <div className='notification-div relative'>
-          <h2 className='notification-title font-bold text-4xl'>Notifications Center</h2>
-          <div className='absolute top-0 right-0'>
+          <h2 className='notification-title mt-10 mb-5 lg:mb-10 font-bold text-4xl'>
+            Notifications Center
+          </h2>
+          <div className='flex flex-col-reverse lg:flex-col lg:items-end mx-2 lg:mr-4 lg:absolute lg:top-0 lg:right-0'>
             <button
-              className=' mt-5 mr-5 border border-black rounded px-3 py-2'
+              className='mb-2 lg:mt-10 border border-black rounded px-3 py-2'
               onClick={() => setShowConfirmationModal(true)}>
               Clear all notifications
             </button>
-            <div className='mb-5 absolute'>
+            <div className='w-full lg:mt-4 mb-5 '>
               <NotificationFilter onFilterChange={handleFilterChange} />
             </div>
           </div>
-          <div className='flex justify-between items-center'>
-            <div className='flex flex-col items-center'>
-              {!notifications.length && (
-                <div className='no-notifications'>No notifications here yet</div>
-              )}
-              {notifications.length > 0 && <NotificationList notifications={notifications} />}
-            </div>
+          <div className='flex flex-col items-center'>
+            {!notifications.length && (
+              <div className='no-notifications'>No notifications here yet</div>
+            )}
+            {notifications.length > 0 && <NotificationList notifications={notifications} />}
           </div>
 
           {showConfirmationModal && (

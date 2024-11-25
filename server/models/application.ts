@@ -1,8 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { QueryOptions } from 'mongoose';
 import nodemailer from 'nodemailer';
-import fs from 'fs';
-import path from 'path';
 import {
   Answer,
   AnswerResponse,
@@ -33,6 +31,7 @@ import NotificationModel from './notifications';
 import UserModel from './users';
 import FollowModel from './follows';
 import BadgeModel from './badges';
+import { htmlTemplate } from '../emailTemplate';
 
 /**
  * Checks if the provided user has satisfied the requirements to receive the Autobiographer badge.
@@ -165,11 +164,8 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
  * @param data the data to fill out the email template with
  * @returns the filled out email template
  */
-const fillOutEmailTemplate = (data: EmailTemplateData) => {
-  const templatePath = path.join(__dirname, '..', 'emailTemplate.html');
-  const emailTemplate = fs.readFileSync(templatePath).toString('utf8');
-  return emailTemplate.replace(/{{(\w+)}}/g, (_, key) => data[key] || '');
-};
+const fillOutEmailTemplate = (data: EmailTemplateData) =>
+  htmlTemplate.replace(/{{(\w+)}}/g, (_, key) => data[key] || '');
 
 /**
  * Sends an email to the user with the provided username.
@@ -923,7 +919,7 @@ export const addAnswerToQuestion = async (
 
     return { question, notifications };
   } catch (error) {
-    return { error: 'Error when adding answer to question' };
+    return { error: `Error when adding answer to question: ${(error as Error).message}` };
   }
 };
 

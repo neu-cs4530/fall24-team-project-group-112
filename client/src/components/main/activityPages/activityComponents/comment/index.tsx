@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Answer, Comment, Question } from '../../../../../types';
-import './index.css';
 import ItemHeader from '../itemHeader';
 import useNotifications from '../../../../../hooks/useNotifications';
 import { getMetaData } from '../../../../../tool';
@@ -42,7 +41,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[600px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[550px]'>
       <div className='notification-header'>
         <ItemHeader
           username={comment.commentBy}

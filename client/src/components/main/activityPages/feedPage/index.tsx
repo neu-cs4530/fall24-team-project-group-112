@@ -16,33 +16,39 @@ const Feed: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
+  const styles = {
+    loadingContainer: 'flex justify-center items-center h-screen',
+    notificationDiv: 'notification-div relative items-center px-2',
+    notificationTitle: 'notification-title font-bold text-4xl',
+    filterContainer:
+      'lg:absolute lg:top-0 lg:right-0 flex flex-col-reverse sm:flex-row-reverse lg:flex-col items-start lg:items-end lg:w-[25%]',
+    filterWrapper: 'mt-3 sm:mt-0 lg:my-6 px-2',
+    recommendationsWrapper: 'w-full px-2 lg:mt-6',
+    feedContainer: 'flex flex-col items-center',
+    noNotifications: 'no-notifications',
+  };
+
   return (
     <>
       {isLoading && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}>
+        <div className={styles.loadingContainer}>
           <CircularProgress />
         </div>
       )}
       {!isLoading && (
-        <div className='notification-div relative items-center'>
-          <h2 className='notification-title font-bold text-4xl'>Feed</h2>
-          <div className='lg:absolute lg:top-0 lg:right-0 pr-4 flex flex-col-reverse md:flex-row-reverse md:items-start lg:flex-col items-center lg:items-end md:w-full lg:w-auto'>
-            <div className='w-full mt-4 md:mt-0 lg:my-6 ml-4 px-2'>
+        <div className={styles.notificationDiv}>
+          <h2 className={styles.notificationTitle}>Feed</h2>
+          <div className={styles.filterContainer}>
+            <div className={styles.filterWrapper}>
               <FeedFilter onFilterChange={handleFilterChange} />
             </div>
-            <div className='w-full ml-2 px-2 lg:max-w-s lg:mt-6 mx-auto'>
+            <div className={styles.recommendationsWrapper}>
               <FollowerRecommendations />
             </div>
           </div>
-          <div className='flex flex-col items-center'>
+          <div className={styles.feedContainer}>
             {!feedItems.length && (
-              <div className='no-notifications'>You are up to date on recent activity!</div>
+              <div className={styles.noNotifications}>You are up to date on recent activity!</div>
             )}
             {feedItems.length > 0 && <FeedList feedItems={feedItems} />}
           </div>

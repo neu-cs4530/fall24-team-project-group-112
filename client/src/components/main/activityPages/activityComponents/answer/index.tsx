@@ -33,7 +33,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ notificationId, answer, questio
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[600px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[550px]'>
       <div>
         <div>
           <div className='notification-header'>

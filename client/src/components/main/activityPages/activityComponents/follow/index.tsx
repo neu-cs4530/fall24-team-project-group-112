@@ -1,7 +1,6 @@
 import React from 'react';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Follow } from '../../../../../types';
-import './index.css';
 import ItemHeader from '../itemHeader';
 import useNotifications from '../../../../../hooks/useNotifications';
 import { getMetaData } from '../../../../../tool';
@@ -29,7 +28,7 @@ interface FollowItemProps {
 const FollowItem: React.FC<FollowItemProps> = ({ notificationId, follow, itemType }) => {
   const { deleteNotification } = useNotifications();
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md lg:w-[600px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md lg:w-[550px]'>
       <div className='notification-header'>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {itemType === 'notification' ? (

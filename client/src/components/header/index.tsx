@@ -60,7 +60,7 @@ const Header = ({ user }: { user: User | null }) => {
       {/* Logo Section */}
       <div className='logo-title flex flex-row align-middle'>
         <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
-        <div className='text-[24px] flex font-bold w-8/12 mt-5'>Stack Overgram</div>
+        <div className='text-[24px] leading-6  flex font-bold w-8/12 mt-5'>Stack Overgram</div>
       </div>
 
       {/* Search Bar */}

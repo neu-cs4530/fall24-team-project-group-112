@@ -1,7 +1,6 @@
 import React from 'react';
 import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Badge } from '../../../../../types';
-import './index.css';
 import useNotifications from '../../../../../hooks/useNotifications';
 import { getMetaData } from '../../../../../tool';
 
@@ -39,7 +38,7 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, d
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[600px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[550px]'>
       <div className='notification-header'>
         <div>
           <div className={styles.badgeContainer}>

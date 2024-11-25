@@ -9,13 +9,21 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
     onFilterChange(e.target.value); // Pass only the selected value (string)
   };
 
+  const styles = {
+    container: 'border border-black rounded pl-3 py-2',
+    title: 'font-bold mb-2',
+    filterGroup: 'flex flex-wrap lg:flex-col',
+    label: 'mr-3',
+    input: 'mr-1 accent-stackpurple',
+  };
+
   return (
-    <div className='border border-black rounded pl-3 py-2 w-full'>
-      <h3 className='font-bold mb-2'>Filter By:</h3>
-      <div className='flex flex-wrap md:flex-col'>
-        <label className='mr-3'>
+    <div className={styles.container}>
+      <h3 className={styles.title}>Filter By:</h3>
+      <div className={styles.filterGroup}>
+        <label className={styles.label}>
           <input
-            className='mr-1 accent-stackpurple'
+            className={styles.input}
             type='radio'
             name='filter'
             value=''
@@ -25,9 +33,9 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
           All Notifications
         </label>
 
-        <label className='mr-3'>
+        <label className={styles.label}>
           <input
-            className='mr-1 accent-stackpurple'
+            className={styles.input}
             type='radio'
             name='filter'
             value='Answer'
@@ -36,9 +44,9 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
           Answers
         </label>
 
-        <label className='mr-3'>
+        <label className={styles.label}>
           <input
-            className='mr-1 accent-stackpurple'
+            className={styles.input}
             type='radio'
             name='filter'
             value='Comment'
@@ -47,9 +55,9 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
           Comments
         </label>
 
-        <label className='mr-3'>
+        <label className={styles.label}>
           <input
-            className='mr-1 accent-stackpurple'
+            className={styles.input}
             type='radio'
             name='filter'
             value='Question'
@@ -58,7 +66,7 @@ const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
           Questions
         </label>
 
-        <label>
+        <label className={styles.label}>
           <input
             className='mr-1'
             type='radio'

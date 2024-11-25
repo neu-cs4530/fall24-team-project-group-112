@@ -50,7 +50,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ feedItem }) => {
     }
   }
 
-  return <div className='padding'>{content}</div>;
+  return <div className='p-2'>{content}</div>;
 };
 
 export default FeedItem;

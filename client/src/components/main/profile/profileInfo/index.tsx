@@ -51,9 +51,9 @@ const ProfileInfo = ({
   handleChange,
 }: ProfileInfoProps) => {
   const styles = {
-    infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 justify-between mr-40',
+    infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 lg:mr-10',
     editingInfoContainer: 'flex flex-col items-start mt-2 justify-between',
-    infoItem: 'flex flex-row gap-2 items-center w-full lg:w-1/2',
+    infoItem: 'flex flex-row gap-2 items-center',
     icon: 'text-sm mb-1',
     input: 'border p-1 w-full',
     github: 'no-underline hover:underline',

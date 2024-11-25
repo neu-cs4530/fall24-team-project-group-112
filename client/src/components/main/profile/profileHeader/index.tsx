@@ -35,13 +35,15 @@ const ProfileHeader = ({
   handleChange,
 }: ProfileHeaderProps) => {
   const styles = {
-    name: 'text-4xl font-bold text-gray-800 p-1',
-    username: 'text-2xl text-gray-600 ml-12 p-1',
+    container: 'flex gap-2',
+    editingContainer: 'flex flex-wrap gap-2',
+    name: 'text-4xl font-bold text-gray-800',
+    username: 'text-2xl text-gray-600 p-1',
   };
 
   return isEditing ? (
-    <div className='flex items-center'>
-      <div className='flex flex-wrap gap-2'>
+    <div className={styles.container}>
+      <div className={styles.editingContainer}>
         <input
           type='text'
           name='firstName'

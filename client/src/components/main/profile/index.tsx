@@ -65,13 +65,15 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
     <>
       {user && !isLoading ? (
         <div className='flex justify-center'>
-          <div className='profile-container'>
-            <ProfileText user={user} loggedInUser={loggedInUser} />
+          <div>
+            <div className='flex justify-center'>
+              <ProfileText user={user} loggedInUser={loggedInUser} />
+            </div>
             <div>
               {user.badges.length > 0 && (
                 <div className='mt-6'>
                   <div className='flex'>
-                    <h2 className='font-bold text-xl ml-5 pt-1'>Badges</h2>
+                    <h2 className='font-bold text-xl ml-4 pt-1'>Badges</h2>
                     <p
                       className='ml-5 bg-stackpurple text-white text-sm hover:bg-stackpurplehover rounded-md p-2 cursor-pointer'
                       onClick={() => setBadgeOpen(true)}>
@@ -102,13 +104,7 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
           </div>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}>
+        <div className='flex justify-center items-center h-screen'>
           <CircularProgress />
         </div>
       )}

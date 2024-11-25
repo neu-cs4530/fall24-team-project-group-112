@@ -38,20 +38,11 @@
 .login-button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-left: 20px;
-}
-
-.login-button:hover {
-  background-color: #0056b3;
-}
-
-.login-button:active {
-  background-color: #003f7f;
 }
 
 .username-and-password {

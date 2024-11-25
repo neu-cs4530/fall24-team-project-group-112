@@ -12,7 +12,8 @@
   padding: 20px;
   width: calc(33% - 20px);
   margin-bottom: 1.5rem;
-  margin-right: 1.5rem;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
   width: 350px;
 }
 

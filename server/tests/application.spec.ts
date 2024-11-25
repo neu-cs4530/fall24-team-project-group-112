@@ -1,5 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Query } from 'mongoose';
+import * as nodemailer from 'nodemailer';
+import { NodemailerMock } from 'nodemailer-mock';
 import Tags from '../models/tags';
 import QuestionModel from '../models/questions';
 import {
@@ -36,6 +38,9 @@ import {
   checkLifesaverBadge,
   addBadge,
   getFeedForUser,
+  sendEmail,
+  getQuestionByAnswerId,
+  getFollowRecommendationsForUser,
 } from '../models/application';
 import {
   Answer,
@@ -61,6 +66,9 @@ import { feedUser, populatedAnswer1, populatedComment1, populatedQuestion1 } fro
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
+
+// import nodemailer mock per docs: https://www.npmjs.com/package/nodemailer-mock
+const { mock } = nodemailer as unknown as NodemailerMock;
 
 const tag1: Tag = {
   _id: new ObjectId('507f191e810c19729de860ea'),
@@ -1202,6 +1210,9 @@ describe('application module', () => {
 
   describe('Answer model', () => {
     describe('saveAnswer', () => {
+      afterEach(() => {
+        mock.reset();
+      });
       test('saveAnswer should return the saved answer', async () => {
         const mockAnswer = {
           text: 'This is a test answer',
@@ -1254,6 +1265,7 @@ describe('application module', () => {
             })),
           'find',
         );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
@@ -1505,10 +1517,14 @@ describe('application module', () => {
     });
 
     describe('addComment', () => {
+      afterEach(() => {
+        mock.reset();
+      });
       test('addComment should return the updated question when given `question`', async () => {
         // copy the question to avoid modifying the original
         const question = { ...QUESTIONS[0], comments: [com1] };
         mockingoose(QuestionModel).toReturn(question, 'findOneAndUpdate');
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = (await addComment(
           question._id?.toString() as string,
@@ -1528,6 +1544,7 @@ describe('application module', () => {
         mockingoose(AnswerModel).toReturn(answer, 'find');
         (answer.comments as Comment[]).push(com1);
         mockingoose(AnswerModel).toReturn(answer, 'findOneAndUpdate');
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = (await addComment(
           answer._id?.toString() as string,
@@ -1807,6 +1824,10 @@ describe('application module', () => {
         jest.clearAllMocks();
       });
 
+      afterEach(() => {
+        mock.reset();
+      });
+
       const mockUser = USERS[0];
 
       test('should add a badge to the user if they do not already have it', async () => {
@@ -1819,6 +1840,7 @@ describe('application module', () => {
         jest
           .spyOn(UserModel, 'findOneAndUpdate')
           .mockResolvedValueOnce({ ...mockUser, badges: [badgeId] });
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
 
         const result = await addBadge('dummyUser', 'AUTOBIOGRAPHER');
         if (result && 'error' in result) {
@@ -2143,6 +2165,143 @@ describe('application module', () => {
         });
       });
     });
+
+    describe('sendEmail', () => {
+      const mockUser = {
+        username: 'receiver1',
+        email: 'receiver1@example.com',
+      };
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+
+      afterEach(() => {
+        mock.reset();
+      });
+
+      test('should send an email to the specified user', async () => {
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+
+        await sendEmail('receiver1', NotificationType.ANSWER);
+
+        const sentEmails = mock.getSentMail();
+
+        expect(sentEmails.length).toBe(1);
+        expect(sentEmails[0].to).toBe(mockUser.email);
+      });
+
+      test('should throw an error if the user is not found', async () => {
+        mockingoose(UserModel).toReturn(null, 'findOne');
+
+        await expect(sendEmail('invalidUser', NotificationType.ANSWER)).rejects.toThrow(
+          'User not found',
+        );
+      });
+
+      test('should throw an error if sending the email fails', async () => {
+        mock.setShouldFail(true);
+        mockingoose(UserModel).toReturn(mockUser, 'findOne');
+
+        await sendEmail('receiver1', NotificationType.ANSWER);
+
+        const sentEmails = mock.getSentMail();
+        expect(sentEmails.length).toBe(0);
+      });
+    });
+
+    // describe('fillOutEmailTemplate', () => {
+    //   const mockTemplate = `
+    //     <html>
+    //       <body>
+    //         <h1>Hello, {{username}}</h1>
+    //         <p>Your email is {{email}}</p>
+    //         <p>Notification type: {{type}}</p>
+    //       </body>
+    //     </html>
+    //   `;
+
+    //   jest.mock('path', () => ({
+    //     join: jest.fn((...args) => args.join('/')),
+    //   }));
+
+    //   beforeEach(() => {
+    //     jest.clearAllMocks();
+    //     jest.resetModules();
+    //     mockFs({
+    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+    //         mockTemplate,
+    //     });
+    //   });
+
+    //   afterEach(() => {
+    //     mockFs.restore();
+    //   });
+
+    //   test('should replace placeholders with corresponding data', () => {
+    //     const data = {
+    //       username: 'JohnDoe',
+    //       email: 'johndoe@example.com',
+    //       type: 'Answer',
+    //     };
+
+    //     const result = fillOutEmailTemplate(data);
+
+    //     expect(result).toContain('Hello, JohnDoe');
+    //     expect(result).toContain('Your email is johndoe@example.com');
+    //     expect(result).toContain('Notification type: Answer');
+    //   });
+
+    //   test('should leave placeholders unchanged if data is missing', () => {
+    //     const data = {
+    //       username: 'JohnDoe',
+    //     };
+
+    //     const result = fillOutEmailTemplate(data);
+
+    //     expect(result).toContain('Hello, JohnDoe');
+    //     expect(result).toContain('Your email is');
+    //     expect(result).toContain('Notification type:');
+    //   });
+
+    //   test('should handle an empty template gracefully', () => {
+    //     mockFs({
+    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
+    //         '',
+    //     });
+
+    //     const data = {
+    //       username: 'JohnDoe',
+    //       email: 'johndoe@example.com',
+    //       type: 'Answer',
+    //     };
+
+    //     const result = fillOutEmailTemplate(data);
+
+    //     expect(result).toBe('');
+    //   });
+
+    //   test('should handle missing data object gracefully', () => {
+    //     const result = fillOutEmailTemplate({} as EmailTemplateData);
+
+    //     expect(result).toContain('Hello, ');
+    //     expect(result).toContain('Your email is ');
+    //     expect(result).toContain('Notification type: ');
+    //   });
+
+    //   test('should throw an error if template file is missing', () => {
+    //     mockFs({}); // No files
+
+    //     const data = {
+    //       username: 'JohnDoe',
+    //       email: 'johndoe@example.com',
+    //       type: 'Answer',
+    //     };
+
+    //     expect(() => fillOutEmailTemplate(data)).toThrow();
+    //   });
+    // });
   });
 
   describe('Follow model', () => {
@@ -2382,6 +2541,35 @@ describe('application module', () => {
       expect(posts[1].postType).toEqual(FeedPostType.COMMENT);
     });
 
+    test('should return a feed with comments posted when the comment filter is applied', async () => {
+      const mockQuestion = {
+        _id: new ObjectId('65e9b716ff0e892116b2de08'),
+        title: 'Unanswered Question #3',
+        text: 'Does something like that even exist?',
+        tags: [],
+        answers: [],
+        askedBy: 'q_by4',
+        askDateTime: new Date('2023-11-21T09:24:00'),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [com1],
+      };
+
+      mockingoose(UserModel).toReturn(feedUser, 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(QuestionModel).toReturn([mockQuestion], 'find');
+      mockingoose(AnswerModel).toReturn([], 'find');
+      mockingoose(CommentModel).toReturn([populatedComment1], 'find');
+
+      const feedPosts = await getFeedForUser('user1', FeedPostType.COMMENT);
+
+      expect(Array.isArray(feedPosts)).toBe(true);
+      const posts = feedPosts as FeedPost[];
+      expect(posts.length).toBe(1);
+      expect(posts[0].postType).toEqual(FeedPostType.COMMENT);
+    });
+
     test('should return an error if there is an error fetching comments posted', async () => {
       mockingoose(UserModel).toReturn(feedUser, 'findOne');
       mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
@@ -2430,6 +2618,55 @@ describe('application module', () => {
       for (let i = 0; i < posts.length - 1; i++) {
         expect(posts[i].date.getSeconds()).toBeGreaterThanOrEqual(posts[i + 1].date.getSeconds());
       }
+    });
+  });
+
+  describe('getQuestionByAnswerId', () => {
+    test('should return a question if it contains the provided answerId', async () => {
+      mockingoose(QuestionModel).toReturn(QUESTIONS[0], 'findOne');
+
+      const result = await getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc');
+
+      expect(result).toMatchObject(QUESTIONS[0]);
+    });
+
+    test('should return an error if the provided answer is not found', async () => {
+      mockingoose(QuestionModel).toReturn(null, 'findOne');
+
+      await expect(getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc')).rejects.toThrow(
+        'Question with answer not found',
+      );
+    });
+  });
+
+  describe('getFollowRecommendationsForUser', () => {
+    beforeAll(() => {
+      mockingoose.resetAll();
+    });
+
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.clearAllMocks();
+    });
+
+    test('should return recommendations for a valid user', async () => {
+      mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
+      mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'aggregate');
+
+      const result = await getFollowRecommendationsForUser('user1');
+
+      expect(result).toEqual([USERS[1], USERS[2]]);
+    });
+
+    test('should return an error if the user does not exist', async () => {
+      mockingoose(UserModel).toReturn(null, 'findOne');
+
+      const result = await getFollowRecommendationsForUser('nonExistentUser');
+
+      expect(result).toEqual({
+        error: 'Error when getting follow recommendations: Invalid username',
+      });
     });
   });
 });

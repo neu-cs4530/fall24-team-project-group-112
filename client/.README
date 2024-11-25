@@ -1,0 +1,37 @@
+### Stack Overgram Client
+The Stack Overgram client is built using React and TypeScript to build a dynamic web app resembling Stack Overflow. During development, we added new pages and components, enhanced the functionality of existing features, and improved the styling of previous elements. To do so effectively, we focused on reusing components as much as possible to maintain consistency and reduce redundancy across the application. This approach helps in maintaining a clean and manageable codebase. Additionally, we updated the overall design and styling of the web app to be cleaner, and resemble more modern web applications and social medias.
+
+### Setup of frontend
+Generally, most pages are composed of multiple components, some of which are reusable. In all components, to ensure for separation, the business logic is isolated in custom hooks from the actual HTML & JSX consisting what the user sees.
+
+### Tailwind styling
+When adding new components and pages and updating some of the existing components, we used Tailwind, a CSS framework, to create a more uniform look and enable a smoother development experience. Additionally, it made the process of making our pages responsive much easier.
+
+### Component Reuse
+To maintain consistency and streamline the development process, we emphasized creating reusable components in several key areas, which include:
+
+#### Question Component: 
+The Question component is used to accomplish multiple functions: it shows questions on the Home page, but it also shows questions asked, answered, or voted on by a user on the Profile page. This ensures that the display and behavior of questions remain consistent throughout the application.
+
+#### Feed and Notification Pages: 
+Both the Feed and Notification pages rely on shared components and styling to display lists of follower activities and notifications. This reuse of components helps in maintaining a uniform look and feel across different parts of the application that have similar functionality.
+
+### Client testing
+To test our client, we manually tested all added components and pages. If you are interested in viewing our testing, you can search through our closed Pull Requests in our repository. For reference, here is one:  [Editable profile page](https://github.com/neu-cs4530/fall24-team-project-group-112/pull/39)
+
+### Setup and Installation
+1. Clone the repository and navigate to the client directory
+
+    `git clone https://github.com/neu-cs4530/fall24-team-project-group-112.git`
+
+    `cd client`
+
+2. Install dependencies `npm install`
+
+3. Set up environment variables by creating a .env file in the /client directory. Add the secrets provided by our project group.
+
+4. Run the client 
+   
+   `npm run start`
+
+5. Access the client: The client will be available at `http://localhost:3000`

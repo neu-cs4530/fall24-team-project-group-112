@@ -61,62 +61,66 @@ const ProfileInfo = ({
   return (
     <div className={styles.infoContainer}>
       {isEditing ? (
-        <>
-          <div className={styles.infoItem}>
-            <FaGithub className={styles.icon} />
-            <input
-              type='url'
-              name='githubUrl'
-              value={editingGithubUrl}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder='Github URL'
-            />
+        <div>
+          <div className='flex flex-row'>
+            <div className={styles.infoItem}>
+              <FaGithub className={styles.icon} />
+              <input
+                type='url'
+                name='githubUrl'
+                value={editingGithubUrl}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder='Github URL'
+              />
+            </div>
+            <div className={`${styles.infoItem} ml-5`}>
+              <FaSchool className={styles.icon} />
+              <input
+                type='text'
+                name='school'
+                value={editingSchool}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder='School'
+              />
+            </div>
           </div>
-          <div className={styles.infoItem}>
-            <FaSchool className={styles.icon} />
-            <input
-              type='text'
-              name='school'
-              value={editingSchool}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder='School'
-            />
+          <div className='flex flex-row mt-5'>
+            <div className={styles.infoItem}>
+              <FaMapMarkerAlt className={styles.icon} />
+              <input
+                type='text'
+                name='city'
+                value={editingCity}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete='addressLevel2'
+                placeholder='City'
+              />
+              <input
+                type='text'
+                name='state'
+                value={editingState}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete='addressLevel1'
+                placeholder='State'
+              />
+            </div>
+            <div className={`${styles.infoItem} ml-5`}>
+              <MdWork className={styles.icon} />
+              <input
+                type='text'
+                name='company'
+                value={editingCompany}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder='Company'
+              />
+            </div>
           </div>
-          <div className={styles.infoItem}>
-            <FaMapMarkerAlt className={styles.icon} />
-            <input
-              type='text'
-              name='city'
-              value={editingCity}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete='addressLevel2'
-              placeholder='City'
-            />
-            <input
-              type='text'
-              name='state'
-              value={editingState}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete='addressLevel1'
-              placeholder='State'
-            />
-          </div>
-          <div className={styles.infoItem}>
-            <MdWork className={styles.icon} />
-            <input
-              type='text'
-              name='company'
-              value={editingCompany}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder='Company'
-            />
-          </div>
-        </>
+        </div>
       ) : (
         <>
           {user.githubUrl && (

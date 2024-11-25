@@ -39,7 +39,7 @@ const QuestionBody = ({ views, text, askby, ansCount, meta }: QuestionBodyProps)
       </div>
       <div className='flex ml-8 gap-2 justify-end'>
         <Link to={`/profile/${askby}`}>
-          <div className='font-bold text-blue-800'>{askby}</div>
+          <div className='font-bold text-stackpurple'>{askby}</div>
         </Link>
         <div className='text-[#7f7f7f]'>asked {meta}</div>
       </div>

@@ -31,7 +31,7 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, b
 
   const styles = {
     badgeContainer: 'flex items-center',
-    circle: 'w-3 h-3 rounded-full mr-2',
+    circle: 'w-5 h-5 rounded-full mr-2',
   };
 
   const { deleteNotification } = useNotifications();

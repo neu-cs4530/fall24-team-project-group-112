@@ -4,6 +4,7 @@ import { Follow } from '../../../../../types';
 import './index.css';
 import ItemHeader from '../itemHeader';
 import useNotifications from '../../../../../hooks/useNotifications';
+import { getMetaData } from '../../../../../tool';
 
 /**
  * FollowItem component displays a follow notification.
@@ -28,7 +29,7 @@ interface FollowItemProps {
 const FollowItem: React.FC<FollowItemProps> = ({ notificationId, follow, itemType }) => {
   const { deleteNotification } = useNotifications();
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md md:w-[500px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md lg:w-[600px]'>
       <div className='notification-header'>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {itemType === 'notification' ? (
@@ -53,6 +54,7 @@ const FollowItem: React.FC<FollowItemProps> = ({ notificationId, follow, itemTyp
           </button>
         )}
       </div>
+      <p className='text-gray-500'>{getMetaData(new Date(follow.followDateTime))}</p>
     </div>
   );
 };

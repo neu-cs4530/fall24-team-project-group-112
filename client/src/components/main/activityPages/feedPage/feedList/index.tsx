@@ -7,7 +7,7 @@ interface FeedListProps {
 }
 
 const FeedList: React.FC<FeedListProps> = ({ feedItems }) => (
-  <ul className='w-full items-center'>
+  <ul>
     {feedItems.slice().map((item, idx) => (
       <FeedItem key={idx} feedItem={item} />
     ))}

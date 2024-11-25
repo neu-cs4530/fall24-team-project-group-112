@@ -3,6 +3,7 @@ import { RiDeleteBin5Line } from 'react-icons/ri';
 import { Badge } from '../../../../../types';
 import './index.css';
 import useNotifications from '../../../../../hooks/useNotifications';
+import { getMetaData } from '../../../../../tool';
 
 /**
  * BadgeNotification component displays a notification for a badge earned.
@@ -12,10 +13,11 @@ import useNotifications from '../../../../../hooks/useNotifications';
  */
 interface BadgeNotificationProps {
   notificationId?: string;
+  date: Date;
   badge: Badge;
 }
 
-const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, badge }) => {
+const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, date, badge }) => {
   const getCircleColor = () => {
     switch (badge.color) {
       case 'gold':
@@ -37,13 +39,16 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, b
   const { deleteNotification } = useNotifications();
 
   return (
-    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full md:w-[500px]'>
+    <div className='flex flex-col border border-gray-600 p-4 rounded-md w-full lg:w-[600px]'>
       <div className='notification-header'>
-        <div className={styles.badgeContainer}>
-          <div className={styles.circle} style={{ backgroundColor: getCircleColor() }}></div>
-          <div>
-            You earned the <span className='font-bold'>{badge.name?.toLowerCase()}</span> badge
+        <div>
+          <div className={styles.badgeContainer}>
+            <div className={styles.circle} style={{ backgroundColor: getCircleColor() }}></div>
+            <div>
+              You earned the <span className='font-bold'>{badge.name?.toLowerCase()}</span> badge
+            </div>
           </div>
+          <p className='text-gray-500'>{getMetaData(new Date(date))}</p>
         </div>
         {notificationId && (
           <button onClick={() => deleteNotification(notificationId)} className='trash-icon'>

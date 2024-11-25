@@ -7,7 +7,6 @@
 .notification {
   display: flex;
   flex-direction: column;
-  /* width: 350px; */
   border: 1px solid grey;
   padding: 15px;
   border-radius: 10px;

@@ -58,23 +58,12 @@ const Header = ({ user }: { user: User | null }) => {
   return (
     <div id='header' className='header'>
       {/* Logo Section */}
-      <div className='logo-title flex flex-row align-middle'>
-        <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
-        <div className='text-[24px] leading-6  flex font-bold w-8/12 mt-5'>Stack Overgram</div>
-      </div>
-
-      {/* Search Bar */}
-      {isQuestionPage && (
-        <input
-          id='searchBar'
-          className='px-4 mr-24 py-2 rounded-lg search-bar border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
-          placeholder='Search for a question...'
-          type='text'
-          value={val}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-        />
-      )}
+      <Link to={'/'}>
+        <div className='logo-title flex align-middle'>
+          <img className='mr-2 flex' width='50' src={Logo} alt='Logo' />
+          <div className='text-[24px] leading-6 mb-3 font-bold mt-5'>Stack Overgram</div>
+        </div>
+      </Link>
 
       {isSmallScreen ? (
         <>
@@ -136,7 +125,7 @@ const Header = ({ user }: { user: User | null }) => {
         </>
       ) : (
         // Right-Side Header (Visible on Large Screens)
-        <div className='right-side-header flex lg:w-6/12'>
+        <div className='right-side-header flex lg:w-4/12'>
           {links.map((link, index) =>
             link.name !== 'Me' ? (
               <Link

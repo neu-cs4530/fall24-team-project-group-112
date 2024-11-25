@@ -1,5 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { QueryOptions } from 'mongoose';
+import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
 import {
   Answer,
   AnswerResponse,
@@ -20,6 +23,7 @@ import {
   FeedPost,
   FeedPostType,
   UserNotificationResponse,
+  EmailTemplateData,
 } from '../types';
 import AnswerModel from './answers';
 import QuestionModel from './questions';
@@ -157,6 +161,59 @@ export const getBadgeIdFromName = async (badgeName: string): Promise<ObjectId | 
 };
 
 /**
+ * Fills out the email template with the provided data.
+ * @param data the data to fill out the email template with
+ * @returns the filled out email template
+ */
+const fillOutEmailTemplate = (data: EmailTemplateData) => {
+  const templatePath = path.join(__dirname, '..', 'emailTemplate.html');
+  const emailTemplate = fs.readFileSync(templatePath).toString('utf8');
+  return emailTemplate.replace(/{{(\w+)}}/g, (_, key) => data[key] || '');
+};
+
+/**
+ * Sends an email to the user with the provided username.
+ * @param receiverUsername the username of the user to send the email to
+ * @param type the type of notification to send
+ * @returns void
+ * @throws Error if the email fails to send
+ */
+export const sendEmail = async (
+  receiverUsername: string,
+  type: NotificationType,
+): Promise<void> => {
+  const user = await UserModel.findOne({ username: receiverUsername });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const mailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'stackovergram@gmail.com',
+      pass: process.env.EMAIL_KEY,
+    },
+  });
+
+  const mailDetails = {
+    from: 'stackovergram@gmail.com',
+    to: `${user?.email}`,
+    subject: `Stack Overgram: Notification for ${receiverUsername}`,
+    html: fillOutEmailTemplate({ username: receiverUsername, type }),
+  };
+
+  mailTransporter.sendMail(mailDetails, (err: unknown) => {
+    if (err) {
+      // eslint-disable-next-line no-console
+      console.log('Error sending email');
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('Email sent successfully');
+    }
+  });
+};
+
+/**
  * Adds a notification to the database for the given event and user.
  * @param {ObjectId} eventId id of event associated with this notification
  * @param {string} receiverUsername username of user who will receive this notification
@@ -185,6 +242,9 @@ const addNotification = async (
   };
 
   const notification = await NotificationModel.create(notif);
+
+  await sendEmail(receiverUsername, type);
+
   return (await NotificationModel.findById(notification._id)
     .populate('eventId')
     .populate('question')
@@ -1183,7 +1243,9 @@ export const markNotificationsAsSeen = async (
       throw new Error('Invalid username');
     }
     await NotificationModel.updateMany({ receiverUsername: username, seen: false }, { seen: true });
-    return await NotificationModel.find({ receiverUsername: username });
+    return await NotificationModel.find({ receiverUsername: username })
+      .populate([{ path: 'eventId' }, { path: 'question' }, { path: 'answer' }])
+      .sort({ notificationDate: -1 });
   } catch (error) {
     return { error: `Error when marking notifications as seen: ${(error as Error).message}` };
   }

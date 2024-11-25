@@ -62,4 +62,27 @@ const clearSingleNotification = async (username: string, notificationId: string)
   return res.data;
 };
 
-export { getNotifications, clearAllNotifications, clearSingleNotification };
+/**
+ * Function to mark notifications as seen for a user.
+ *
+ * @param username - The username of the user whose notifications are being marked as seen.
+ * @throws Error if there is an issue updating the notifications.
+ */
+const markNotificationsAsSeen = async (username: string): Promise<Notification[]> => {
+  const url = `${NOTIFICATION_API_URL}/seen/${username}`;
+
+  const res = await api.patch(url);
+
+  if (res.status !== 200) {
+    throw new Error('Error when fetching or filtering notifications');
+  }
+
+  return res.data;
+};
+
+export {
+  getNotifications,
+  clearAllNotifications,
+  clearSingleNotification,
+  markNotificationsAsSeen,
+};

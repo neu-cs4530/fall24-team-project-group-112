@@ -81,13 +81,15 @@ const Register = () => {
           className='input-text'
           id={'passwordInput'}
         />
-        <button type='submit' className='signup-button'>
+        <button type='submit' className='signup-button bg-stackpurple hover:bg-stackpurplehover'>
           Create account
         </button>
       </form>
       <div>
         Already have an account? &nbsp;
-        <NavLink to='/'>Click here to login.</NavLink>
+        <NavLink className='font-bold' to='/'>
+          Click here to login.
+        </NavLink>
       </div>
     </div>
   );

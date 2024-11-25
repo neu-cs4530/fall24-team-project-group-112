@@ -1,8 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { QueryOptions } from 'mongoose';
 import nodemailer from 'nodemailer';
-import fs from 'fs';
-import path from 'path';
 import {
   Answer,
   AnswerResponse,

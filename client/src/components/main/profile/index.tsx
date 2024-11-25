@@ -64,7 +64,6 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
   return (
     <>
       {user && !isLoading ? (
-        // <div className='flex justify-center'>
         <div className='flex flex-col items-center'>
           <ProfileText user={user} loggedInUser={loggedInUser} />
           <div className='w-full max-w-4xl'>
@@ -98,7 +97,6 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
           </div>
         </div>
       ) : (
-        // </div>
         <div
           style={{
             display: 'flex',

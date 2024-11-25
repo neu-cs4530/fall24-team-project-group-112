@@ -16,37 +16,41 @@ const Feed: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
+  const styles = {
+    loadingContainer: 'flex justify-center items-center h-screen',
+    notificationDiv: 'notification-div relative items-center px-2',
+    notificationTitle: 'notification-title mt-10 mb-5 lg:mb-10 font-bold text-4xl',
+    filterContainer:
+      'lg:absolute lg:top-0 lg:right-0 flex flex-col-reverse sm:flex-row-reverse lg:flex-col items-start lg:items-end lg:w-[25%]',
+    filterWrapper: 'mt-3 sm:mt-0 lg:my-6 px-2',
+    recommendationsWrapper: 'w-full px-2 ',
+    feedContainer: 'flex flex-col items-center mt-3',
+    noNotifications: 'no-notifications',
+  };
+
   return (
     <>
       {isLoading && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}>
+        <div className={styles.loadingContainer}>
           <CircularProgress />
         </div>
       )}
       {!isLoading && (
-        <div className='notification-div relative'>
-          <h2 className='notification-title font-bold text-4xl'>Feed</h2>
-          <div className='absolute top-0 right-0 pr-4 flex flex-col items-end'>
-            <div className='mb-5 max-w-xs'>
+        <div className={styles.notificationDiv}>
+          <h2 className={styles.notificationTitle}>Feed</h2>
+          <div className={styles.filterContainer}>
+            <div className={styles.filterWrapper}>
               <FeedFilter onFilterChange={handleFilterChange} />
             </div>
-            <div className='w-full max-w-xs mt-6'>
+            <div className={styles.recommendationsWrapper}>
               <FollowerRecommendations />
             </div>
           </div>
-          <div className='flex justify-between items-center'>
-            <div className='flex flex-col items-center'>
-              {!feedItems.length && (
-                <div className='no-notifications'>You are up to date on recent activity!</div>
-              )}
-              {feedItems.length > 0 && <FeedList feedItems={feedItems} />}
-            </div>
+          <div className={styles.feedContainer}>
+            {!feedItems.length && (
+              <div className={styles.noNotifications}>You are up to date on recent activity!</div>
+            )}
+            {feedItems.length > 0 && <FeedList feedItems={feedItems} />}
           </div>
         </div>
       )}

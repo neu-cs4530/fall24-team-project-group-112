@@ -44,7 +44,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
     }
     case 'Badge': {
       const badge = notification.eventId as Badge;
-      content = <BadgeNotification notificationId={notification._id} badge={badge} />;
+      content = (
+        <BadgeNotification
+          notificationId={notification._id}
+          date={notification.notificationDate}
+          badge={badge}
+        />
+      );
       break;
     }
     case 'Follow': {

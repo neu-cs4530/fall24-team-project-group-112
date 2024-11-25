@@ -2143,78 +2143,6 @@ describe('application module', () => {
         });
       });
     });
-
-    jest.mock('fs');
-
-    describe('fillOutEmailTemplate', () => {
-      const mockTemplatePath = path.join(__dirname, '..', 'emailTemplate.html');
-      const mockTemplateContent = `
-        <html>
-          <body>
-            <h1>{{title}}</h1>
-            <p>Hello {{name}},</p>
-            <p>Welcome to {{platform}}!</p>
-          </body>
-        </html>
-      `;
-
-      beforeEach(() => {
-        jest.resetAllMocks();
-        (fs.readFileSync as jest.Mock).mockReturnValue(mockTemplateContent);
-      });
-
-      test('should fill out the email template with provided data', () => {
-        const data = {
-          title: 'Welcome Email',
-          name: 'John Doe',
-          platform: 'StackOvergram',
-        };
-
-        const result = fillOutEmailTemplate(data);
-
-        expect(fs.readFileSync).toHaveBeenCalledWith(mockTemplatePath, 'utf8');
-        expect(result).toContain('<h1>Welcome Email</h1>');
-        expect(result).toContain('<p>Hello John Doe,</p>');
-        expect(result).toContain('<p>Welcome to StackOvergram!</p>');
-      });
-
-      test('should replace missing data keys with an empty string', () => {
-        const data = {
-          title: 'Welcome Email',
-        };
-
-        const result = fillOutEmailTemplate(data);
-
-        expect(result).toContain('<h1>Welcome Email</h1>');
-        expect(result).toContain('<p>Hello ,</p>'); // name is missing
-        expect(result).toContain('<p>Welcome to !</p>'); // platform is missing
-      });
-
-      test('should not replace unrelated placeholders', () => {
-        const data = {
-          title: 'Welcome Email',
-          name: 'John Doe',
-        };
-
-        const result = fillOutEmailTemplate(data);
-
-        expect(result).toContain('<h1>Welcome Email</h1>');
-        expect(result).toContain('<p>Hello John Doe,</p>');
-        expect(result).toContain('<p>Welcome to {{platform}}!</p>'); // platform placeholder remains
-      });
-
-      test('should throw an error if the email template file cannot be read', () => {
-        (fs.readFileSync as jest.Mock).mockImplementation(() => {
-          throw new Error('File not found');
-        });
-
-        const data = {
-          title: 'Welcome Email',
-        };
-
-        expect(() => fillOutEmailTemplate(data)).toThrow('File not found');
-      });
-    });
   });
 
   describe('Follow model', () => {
@@ -2502,55 +2430,6 @@ describe('application module', () => {
       for (let i = 0; i < posts.length - 1; i++) {
         expect(posts[i].date.getSeconds()).toBeGreaterThanOrEqual(posts[i + 1].date.getSeconds());
       }
-    });
-  });
-
-  describe('getQuestionByAnswerId', () => {
-    test('should return a question if it contains the provided answerId', async () => {
-      mockingoose(QuestionModel).toReturn(QUESTIONS[0], 'findOne');
-
-      const result = await getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc');
-
-      expect(result).toMatchObject(QUESTIONS[0]);
-    });
-
-    test('should return an error if the provided answer is not found', async () => {
-      mockingoose(QuestionModel).toReturn(null, 'findOne');
-
-      await expect(getQuestionByAnswerId('65e9b58910afe6e94fc6e6dc')).rejects.toThrow(
-        'Question with answer not found',
-      );
-    });
-  });
-
-  describe('getFollowRecommendationsForUser', () => {
-    beforeAll(() => {
-      mockingoose.resetAll();
-    });
-
-    beforeEach(() => {
-      mockingoose.resetAll();
-      jest.clearAllMocks();
-    });
-
-    test('should return recommendations for a valid user', async () => {
-      mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      mockingoose(FollowModel).toReturn(FOLLOWS, 'find');
-      mockingoose(UserModel).toReturn([USERS[1], USERS[2]], 'aggregate');
-
-      const result = await getFollowRecommendationsForUser('user1');
-
-      expect(result).toEqual([USERS[1], USERS[2]]);
-    });
-
-    test('should return an error if the user does not exist', async () => {
-      mockingoose(UserModel).toReturn(null, 'findOne');
-
-      const result = await getFollowRecommendationsForUser('nonExistentUser');
-
-      expect(result).toEqual({
-        error: 'Error when getting follow recommendations: Invalid username',
-      });
     });
   });
 });

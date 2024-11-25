@@ -78,3 +78,18 @@
   justify-content: left;
   width: 50%;
 }
+
+.popover-menu {
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px !important;
+}
+
+.popover-menu .link {
+  padding: 10px;
+  text-decoration: none;
+}
+
+.hamburger {
+  background-color: #843ab5 !important;
+}

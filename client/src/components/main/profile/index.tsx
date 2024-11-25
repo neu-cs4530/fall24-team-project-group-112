@@ -70,10 +70,14 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
             <div>
               {user.badges.length > 0 && (
                 <div className='mt-6'>
-                  <h2 className='font-bold text-xl ml-5'>Badges</h2>
-                  <p className='ml-5 mt-2 cursor-pointer' onClick={() => setBadgeOpen(true)}>
-                    View all badges
-                  </p>
+                  <div className='flex'>
+                    <h2 className='font-bold text-xl ml-5 pt-1'>Badges</h2>
+                    <p
+                      className='ml-5 bg-stackpurple text-white text-sm hover:bg-stackpurplehover rounded-md p-2 cursor-pointer'
+                      onClick={() => setBadgeOpen(true)}>
+                      View all badges
+                    </p>
+                  </div>
                   <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
                 </div>
               )}

@@ -39,7 +39,7 @@ const AnswerView = ({ text, ansBy, meta, comments, handleAddComment }: AnswerPro
       </div>
       <div className='flex gap-2'>
         <Link to={`/profile/${ansBy}`}>
-          <div className='answer_author'>{ansBy}</div>
+          <div className='answer_author text-stackpurple'>{ansBy}</div>
         </Link>
         <div className='answer_question_meta'>{meta}</div>
       </div>

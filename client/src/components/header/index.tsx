@@ -120,8 +120,7 @@ const Header = ({ user }: { user: User | null }) => {
           </Popover>
         </>
       ) : (
-        // Right-Side Header (Visible on Large Screens)
-        <div className='right-side-header flex lg:w-4/12'>
+        <div className='right-side-header flex lg:w-6/12'>
           {links.map((link, index) =>
             link.name !== 'Me' ? (
               <Link

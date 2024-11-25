@@ -990,6 +990,62 @@ describe('application module', () => {
         });
       });
 
+      test('addVoteToQuestion should return an error if error when adding voter badge', async () => {
+        const mockQuestion = {
+          _id: 'someQuestionId',
+          upVotes: [],
+          downVotes: [],
+        };
+
+        mockingoose(QuestionModel).toReturn(
+          { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+          'findOneAndUpdate',
+        );
+        mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(new Error('database error'), 'findOne');
+
+        const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+        expect(result).toEqual({
+          error: 'error adding badge to user',
+        });
+      });
+
+      // test('addVoteToQuestion should add the lifesaver badge if user earned lifesaver badge', async () => {
+      //   const mockQuestion = {
+      //     _id: 'someQuestionId',
+      //     upVotes: Array(50).fill('testUser'),
+      //     downVotes: [],
+      //     askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      //   };
+
+      //   mockingoose(QuestionModel).toReturn(
+      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(QuestionModel).toReturn(3, 'countDocuments');
+      //   mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
+      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      //   mockingoose(BadgeModel).toReturn(
+      //     { name: 'LIFESAVER', description: 'lifesaver badge' },
+      //     'findOne',
+      //   );
+      //   mockingoose(UserModel).toReturn(
+      //     { ...USERS[0], badges: ['673425329c00935604e19eab'] },
+      //     'findOneAndUpdate',
+      //   );
+
+      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      //   expect(result).toEqual({
+      //     msg: 'Question upvoted successfully',
+      //     upVotes: ['testUser'],
+      //     downVotes: [],
+      //     notifications: [],
+      //   });
+      // });
+
       // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
       //   const mockQuestion = {
       //     _id: 'someQuestionId',
@@ -1011,17 +1067,100 @@ describe('application module', () => {
       //     'findOneAndUpdate',
       //   );
       //   mockingoose(QuestionModel).toReturn(1, 'countDocuments');
-      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      //   mockingoose(UserModel).toReturn({ ...USERS[0], badges: [''] }, 'findOne');
+      //   // mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+      //   // mockingoose(UserModel).toReturn(null, 'findOne');
       //   mockingoose(BadgeModel).toReturn(
       //     { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
       //     'findOne',
       //   );
+      //   // mockingoose(UserModel).toReturn({ ...USERS[0], badges: [] }, 'findOne');
       //   mockingoose(UserModel).toReturn(
       //     { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
       //     'findOneAndUpdate',
       //   );
       //   mockingoose(NotificationModel).toReturn(mockNotification, 'create');
+      //   mockingoose(NotificationModel).toReturn(mockNotification, 'findById');
+
+      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      //   expect(result).toEqual({
+      //     msg: 'Question upvoted successfully',
+      //     upVotes: ['testUser'],
+      //     downVotes: [],
+      //     notifications: [mockNotification],
+      //   });
+      // });
+
+      // test('addVoteToQuestion should throw an error if there is an erorr adding the lifesaver badge to the user', async () => {
+      //   const mockQuestion = {
+      //     _id: 'someQuestionId',
+      //     upVotes: Array(50).fill('testUser'),
+      //     downVotes: [],
+      //     askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      //   };
+
+      //   mockingoose(QuestionModel).toReturn(
+      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(QuestionModel).toReturn(3, 'countDocuments');
+      //   mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
+      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      //   mockingoose(BadgeModel).toReturn(
+      //     { name: 'LIFESAVER', description: 'lifesaver badge' },
+      //     'findOne',
+      //   );
+      //   mockingoose(UserModel).toReturn(
+      //     { ...USERS[0], badges: ['673425329c00935604e19eab'] },
+      //     'findOneAndUpdate',
+      //   );
+
+      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+      //   expect(result).toEqual({
+      //     msg: 'Question upvoted successfully',
+      //     upVotes: ['testUser'],
+      //     downVotes: [],
+      //     notifications: [],
+      //   });
+      // });
+
+      // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
+      //   const mockQuestion = {
+      //     _id: 'someQuestionId',
+      //     upVotes: [],
+      //     downVotes: [],
+      //   };
+
+      //   const mockNotification = {
+      //     notificationType: NotificationType.BADGE,
+      //     eventId: '673425329c00935604e19ea7',
+      //     receiverUsername: 'testUser',
+      //     notificationDate: new Date(),
+      //     seen: false,
+      //     _id: 'notif12345',
+      //   };
+
+      //   mockingoose(QuestionModel).toReturn(
+      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+      //   // mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+      //   // mockingoose(UserModel).toReturn(null, 'findOne');
+      //   mockingoose(BadgeModel).toReturn(
+      //     { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
+      //     'findOne',
+      //   );
+      //   // mockingoose(UserModel).toReturn({ ...USERS[0], badges: [] }, 'findOne');
+      //   mockingoose(UserModel).toReturn(
+      //     { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
+      //     'findOneAndUpdate',
+      //   );
+      //   mockingoose(NotificationModel).toReturn(mockNotification, 'create');
+      //   mockingoose(NotificationModel).toReturn(mockNotification, 'findById');
 
       //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
 
@@ -1317,6 +1456,288 @@ describe('application module', () => {
           if (err instanceof Error) expect(err.message).toBe('Invalid answer');
         }
       });
+
+      // test('addAnswerToQuestion should add speedy answerer badge to user if they earned it', async () => {
+      //   const question = QUESTIONS.filter(
+      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //   )[0];
+      //   (question.answers as Answer[]).push(ans4);
+      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //   mockingoose(QuestionModel).toReturn(
+      //     Array(5)
+      //       .fill(null)
+      //       .map((_, index) => ({
+      //         _id: new ObjectId(),
+      //         title: `Question ${index + 1}`,
+      //         text: `This is the text for question ${index + 1}`,
+      //         tags: [tag1, tag2],
+      //         answers: [
+      //           {
+      //             _id: new ObjectId(),
+      //             text: `Answer ${index + 1}`,
+      //             ansBy: 'username',
+      //             ansDateTime: new Date(),
+      //             comments: [],
+      //           },
+      //         ],
+      //         askedBy: 'username',
+      //         askDateTime: new Date(),
+      //         views: [],
+      //         upVotes: [],
+      //         downVotes: [],
+      //         comments: [],
+      //       })),
+      //     'find',
+      //   );
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //   if (result && 'error' in result) {
+      //     fail();
+      //   }
+
+      //   const questionResult = result.question as Question;
+
+      //   expect(questionResult.answers.length).toEqual(4);
+      //   expect(questionResult.answers).toContain(ans4);
+      // });
+
+      // test('addAnswerToQuestion should throw error if there is an error adding speedy answerer badge', async () => {
+      //   const question = QUESTIONS.filter(
+      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //   )[0];
+      //   (question.answers as Answer[]).push(ans4);
+      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //   mockingoose(QuestionModel).toReturn(
+      //     Array(5)
+      //       .fill(null)
+      //       .map((_, index) => ({
+      //         _id: new ObjectId(),
+      //         title: `Question ${index + 1}`,
+      //         text: `This is the text for question ${index + 1}`,
+      //         tags: [tag1, tag2],
+      //         answers: [
+      //           {
+      //             _id: new ObjectId(),
+      //             text: `Answer ${index + 1}`,
+      //             ansBy: 'username',
+      //             ansDateTime: new Date(),
+      //             comments: [],
+      //           },
+      //         ],
+      //         askedBy: 'username',
+      //         askDateTime: new Date(),
+      //         views: [],
+      //         upVotes: [],
+      //         downVotes: [],
+      //         comments: [],
+      //       })),
+      //     'find',
+      //   );
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //   if (result && 'error' in result) {
+      //     fail();
+      //   }
+
+      //   const questionResult = result.question as Question;
+
+      //   expect(questionResult.answers.length).toEqual(4);
+      //   expect(questionResult.answers).toContain(ans4);
+      // });
+
+      // test('addAnswerToQuestion should add community helper badge to user if they earned it', async () => {
+      //   const question = QUESTIONS.filter(
+      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //   )[0];
+      //   (question.answers as Answer[]).push(ans4);
+      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //   mockingoose(QuestionModel).toReturn(
+      //     Array(5)
+      //       .fill(null)
+      //       .map((_, index) => ({
+      //         _id: new ObjectId(),
+      //         title: `Question ${index + 1}`,
+      //         text: `This is the text for question ${index + 1}`,
+      //         tags: [tag1, tag2],
+      //         answers: [
+      //           {
+      //             _id: new ObjectId(),
+      //             text: `Answer ${index + 1}`,
+      //             ansBy: 'username',
+      //             ansDateTime: new Date(),
+      //             comments: [],
+      //           },
+      //         ],
+      //         askedBy: 'username',
+      //         askDateTime: new Date(),
+      //         views: [],
+      //         upVotes: [],
+      //         downVotes: [],
+      //         comments: [],
+      //       })),
+      //     'find',
+      //   );
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //   if (result && 'error' in result) {
+      //     fail();
+      //   }
+
+      //   const questionResult = result.question as Question;
+
+      //   expect(questionResult.answers.length).toEqual(4);
+      //   expect(questionResult.answers).toContain(ans4);
+      // });
+
+      // test('addAnswerToQuestion should throw error if there is an error adding community helper badge', async () => {
+      //   const question = QUESTIONS.filter(
+      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //   )[0];
+      //   (question.answers as Answer[]).push(ans4);
+      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //   mockingoose(QuestionModel).toReturn(
+      //     Array(5)
+      //       .fill(null)
+      //       .map((_, index) => ({
+      //         _id: new ObjectId(),
+      //         title: `Question ${index + 1}`,
+      //         text: `This is the text for question ${index + 1}`,
+      //         tags: [tag1, tag2],
+      //         answers: [
+      //           {
+      //             _id: new ObjectId(),
+      //             text: `Answer ${index + 1}`,
+      //             ansBy: 'username',
+      //             ansDateTime: new Date(),
+      //             comments: [],
+      //           },
+      //         ],
+      //         askedBy: 'username',
+      //         askDateTime: new Date(),
+      //         views: [],
+      //         upVotes: [],
+      //         downVotes: [],
+      //         comments: [],
+      //       })),
+      //     'find',
+      //   );
+      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //   if (result && 'error' in result) {
+      //     fail();
+      //   }
+
+      //   const questionResult = result.question as Question;
+
+      //   expect(questionResult.answers.length).toEqual(4);
+      //   expect(questionResult.answers).toContain(ans4);
+      // });
+
+      //   test('addAnswerToQuestion should add top answerer badge to user if they earned it', async () => {
+      //     const question = QUESTIONS.filter(
+      //       q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //     )[0];
+      //     (question.answers as Answer[]).push(ans4);
+      //     jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //     jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //     jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //     mockingoose(QuestionModel).toReturn(
+      //       Array(5)
+      //         .fill(null)
+      //         .map((_, index) => ({
+      //           _id: new ObjectId(),
+      //           title: `Question ${index + 1}`,
+      //           text: `This is the text for question ${index + 1}`,
+      //           tags: [tag1, tag2],
+      //           answers: [
+      //             {
+      //               _id: new ObjectId(),
+      //               text: `Answer ${index + 1}`,
+      //               ansBy: 'username',
+      //               ansDateTime: new Date(),
+      //               comments: [],
+      //             },
+      //           ],
+      //           askedBy: 'username',
+      //           askDateTime: new Date(),
+      //           views: [],
+      //           upVotes: [],
+      //           downVotes: [],
+      //           comments: [],
+      //         })),
+      //       'find',
+      //     );
+      //     mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //     const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //     if (result && 'error' in result) {
+      //       fail();
+      //     }
+
+      //     const questionResult = result.question as Question;
+
+      //     expect(questionResult.answers.length).toEqual(4);
+      //     expect(questionResult.answers).toContain(ans4);
+      //   });
+
+      //   test('addAnswerToQuestion should throw error if there is an error adding top answerer badge', async () => {
+      //     const question = QUESTIONS.filter(
+      //       q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+      //     )[0];
+      //     (question.answers as Answer[]).push(ans4);
+      //     jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+      //     jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+      //     jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+      //     mockingoose(QuestionModel).toReturn(
+      //       Array(5)
+      //         .fill(null)
+      //         .map((_, index) => ({
+      //           _id: new ObjectId(),
+      //           title: `Question ${index + 1}`,
+      //           text: `This is the text for question ${index + 1}`,
+      //           tags: [tag1, tag2],
+      //           answers: [
+      //             {
+      //               _id: new ObjectId(),
+      //               text: `Answer ${index + 1}`,
+      //               ansBy: 'username',
+      //               ansDateTime: new Date(),
+      //               comments: [],
+      //             },
+      //           ],
+      //           askedBy: 'username',
+      //           askDateTime: new Date(),
+      //           views: [],
+      //           upVotes: [],
+      //           downVotes: [],
+      //           comments: [],
+      //         })),
+      //       'find',
+      //     );
+      //     mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+
+      //     const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+      //     if (result && 'error' in result) {
+      //       fail();
+      //     }
+
+      //     const questionResult = result.question as Question;
+
+      //     expect(questionResult.answers.length).toEqual(4);
+      //     expect(questionResult.answers).toContain(ans4);
+      // });
     });
 
     describe('checkCommunityHelperBadge', () => {

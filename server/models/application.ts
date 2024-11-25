@@ -923,7 +923,7 @@ export const addAnswerToQuestion = async (
 
     return { question, notifications };
   } catch (error) {
-    return { error: 'Error when adding answer to question' };
+    return { error: `Error when adding answer to question: ${(error as Error).message}` };
   }
 };
 

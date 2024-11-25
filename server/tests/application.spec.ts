@@ -797,6 +797,18 @@ describe('application module', () => {
     });
 
     describe('addVoteToQuestion', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+
+      // Optional: Clean up after all tests
+      afterAll(() => {
+        mockingoose.resetAll();
+        jest.clearAllMocks();
+        mock.reset();
+      });
+
       test('addVoteToQuestion should upvote a question', async () => {
         const mockQuestion = {
           _id: 'someQuestionId',
@@ -1100,7 +1112,7 @@ describe('application module', () => {
         });
       });
 
-      test('addVoteToQuestion should throw an error if there is an erorr adding the lifesaver badge to the user', async () => {
+      test('addVoteToQuestion should throw an error if there is an error adding the lifesaver badge to the user', async () => {
         const mockQuestion = {
           _id: 'someQuestionId',
           upVotes: Array(50).fill('testUser'),
@@ -1112,26 +1124,13 @@ describe('application module', () => {
           { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
           'findOneAndUpdate',
         );
-        mockingoose(QuestionModel).toReturn(3, 'countDocuments');
-        mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
-        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-        mockingoose(BadgeModel).toReturn(
-          { name: 'LIFESAVER', description: 'lifesaver badge' },
-          'findOne',
-        );
-        mockingoose(UserModel).toReturn(
-          { ...USERS[0], badges: ['673425329c00935604e19eab'] },
-          'findOneAndUpdate',
-        );
+        jest.spyOn(QuestionModel, 'countDocuments').mockResolvedValueOnce(3);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(mockQuestion);
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null); // pretend we can't find a user with the badge
 
         const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
 
-        expect(result).toEqual({
-          msg: 'Question upvoted successfully',
-          upVotes: ['testUser'],
-          downVotes: [],
-          notifications: [],
-        });
+        expect(result).toEqual({ error: 'error adding badge to user' });
       });
 
       // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
@@ -1356,6 +1355,10 @@ describe('application module', () => {
   });
 
   describe('Answer model', () => {
+    beforeAll(() => {
+      mock.reset();
+    });
+
     describe('saveAnswer', () => {
       afterEach(() => {
         mock.reset();
@@ -1946,6 +1949,16 @@ describe('application module', () => {
     });
 
     describe('addComment', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+
+      // Optional: Clean up after all tests
+      afterAll(() => {
+        mockingoose.resetAll();
+      });
+
       afterEach(() => {
         mock.reset();
       });

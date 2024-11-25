@@ -19,12 +19,12 @@ const Feed: React.FC = () => {
   const styles = {
     loadingContainer: 'flex justify-center items-center h-screen',
     notificationDiv: 'notification-div relative items-center px-2',
-    notificationTitle: 'notification-title font-bold text-4xl',
+    notificationTitle: 'notification-title mt-10 mb-5 lg:mb-10 font-bold text-4xl',
     filterContainer:
       'lg:absolute lg:top-0 lg:right-0 flex flex-col-reverse sm:flex-row-reverse lg:flex-col items-start lg:items-end lg:w-[25%]',
     filterWrapper: 'mt-3 sm:mt-0 lg:my-6 px-2',
-    recommendationsWrapper: 'w-full px-2 lg:mt-6',
-    feedContainer: 'flex flex-col items-center',
+    recommendationsWrapper: 'w-full px-2 ',
+    feedContainer: 'flex flex-col items-center mt-3',
     noNotifications: 'no-notifications',
   };
 

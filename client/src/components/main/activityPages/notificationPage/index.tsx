@@ -44,7 +44,9 @@ const NotificationCenter: React.FC = () => {
       )}
       {!isLoading && (
         <div className='notification-div relative'>
-          <h2 className='notification-title font-bold text-4xl'>Notifications Center</h2>
+          <h2 className='notification-title mt-10 mb-5 lg:mb-10 font-bold text-4xl'>
+            Notifications Center
+          </h2>
           <div className='flex flex-col-reverse lg:flex-col lg:items-end mx-2 lg:mr-4 lg:absolute lg:top-0 lg:right-0'>
             <button
               className='mb-2 lg:mt-10 border border-black rounded px-3 py-2'

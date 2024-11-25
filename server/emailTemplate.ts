@@ -1,4 +1,4 @@
-<style type="text/css">
+export const htmlTemplate = `<style type="text/css">
     body, p, div {
       font-family: arial,helvetica,sans-serif;
       font-size: 20px;
@@ -147,4 +147,4 @@
         </div>
       </center>
     </body>
-  </html>
+  </html>`;

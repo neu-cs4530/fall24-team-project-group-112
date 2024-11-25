@@ -848,8 +848,8 @@ export const addVoteToQuestion = async (
     return {
       error:
         type === 'upvote'
-          ? `Error when adding upvote to question: ${(err as Error).message}`
-          : `Error when adding downvote to question: ${(err as Error).message}`,
+          ? 'Error when adding upvote to question'
+          : 'Error when adding downvote to question',
     };
   }
 };

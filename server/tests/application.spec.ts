@@ -1012,119 +1012,127 @@ describe('application module', () => {
         });
       });
 
-      // test('addVoteToQuestion should add the lifesaver badge if user earned lifesaver badge', async () => {
-      //   const mockQuestion = {
-      //     _id: 'someQuestionId',
-      //     upVotes: Array(50).fill('testUser'),
-      //     downVotes: [],
-      //     askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      //   };
+      test('addVoteToQuestion should add the lifesaver badge if user earned lifesaver badge', async () => {
+        const mockQuestion = {
+          _id: 'someQuestionId',
+          upVotes: Array(50).fill('testUser'),
+          downVotes: [],
+          askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        };
 
-      //   mockingoose(QuestionModel).toReturn(
-      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(QuestionModel).toReturn(3, 'countDocuments');
-      //   mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
-      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      //   mockingoose(BadgeModel).toReturn(
-      //     { name: 'LIFESAVER', description: 'lifesaver badge' },
-      //     'findOne',
-      //   );
-      //   mockingoose(UserModel).toReturn(
-      //     { ...USERS[0], badges: ['673425329c00935604e19eab'] },
-      //     'findOneAndUpdate',
-      //   );
+        mockingoose(QuestionModel).toReturn(
+          { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+          'findOneAndUpdate',
+        );
+        mockingoose(QuestionModel).toReturn(3, 'countDocuments');
+        mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'LIFESAVER', description: 'lifesaver badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19eab'] },
+          'findOneAndUpdate',
+        );
 
-      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+        const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
 
-      //   expect(result).toEqual({
-      //     msg: 'Question upvoted successfully',
-      //     upVotes: ['testUser'],
-      //     downVotes: [],
-      //     notifications: [],
-      //   });
-      // });
+        expect(result).toEqual({
+          msg: 'Question upvoted successfully',
+          upVotes: ['testUser'],
+          downVotes: [],
+          notifications: [],
+        });
+      });
 
-      // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
-      //   const mockQuestion = {
-      //     _id: 'someQuestionId',
-      //     upVotes: [],
-      //     downVotes: [],
-      //   };
+      test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
+        const mockQuestion = {
+          _id: 'someQuestionId',
+          upVotes: [],
+          downVotes: [],
+        };
 
-      //   const mockNotification = {
-      //     notificationType: NotificationType.BADGE,
-      //     eventId: '673425329c00935604e19ea7',
-      //     receiverUsername: 'testUser',
-      //     notificationDate: new Date(),
-      //     seen: false,
-      //     _id: 'notif12345',
-      //   };
+        const mockNotification = {
+          notificationType: NotificationType.BADGE,
+          eventId: new ObjectId('673425329c00935604e19ea7'),
+          receiverUsername: 'testUser',
+          notificationDate: new Date(),
+          seen: false,
+        };
 
-      //   mockingoose(QuestionModel).toReturn(
-      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(QuestionModel).toReturn(1, 'countDocuments');
-      //   // mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
-      //   // mockingoose(UserModel).toReturn(null, 'findOne');
-      //   mockingoose(BadgeModel).toReturn(
-      //     { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
-      //     'findOne',
-      //   );
-      //   // mockingoose(UserModel).toReturn({ ...USERS[0], badges: [] }, 'findOne');
-      //   mockingoose(UserModel).toReturn(
-      //     { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(NotificationModel).toReturn(mockNotification, 'create');
-      //   mockingoose(NotificationModel).toReturn(mockNotification, 'findById');
+        mockingoose(QuestionModel).toReturn(
+          { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+          'findOneAndUpdate',
+        );
+        mockingoose(QuestionModel).toReturn(1, 'countDocuments');
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ ...USERS[0] });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null); // pretend we can't find a user with the badge
+        jest
+          .spyOn(UserModel, 'findOne')
+          .mockResolvedValueOnce({ ...USERS[0], badges: ['673425329c00935604e19ea7'] });
 
-      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+        mockingoose(BadgeModel).toReturn(
+          { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
+          'findOneAndUpdate',
+        );
 
-      //   expect(result).toEqual({
-      //     msg: 'Question upvoted successfully',
-      //     upVotes: ['testUser'],
-      //     downVotes: [],
-      //     notifications: [mockNotification],
-      //   });
-      // });
+        const createMockQuery = (resolvedValue: Notification) =>
+          ({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue(resolvedValue),
+          }) as unknown as Query<Notification[], Notification>;
+        jest
+          .spyOn(NotificationModel, 'findById')
+          .mockImplementationOnce(() => createMockQuery(mockNotification));
 
-      // test('addVoteToQuestion should throw an error if there is an erorr adding the lifesaver badge to the user', async () => {
-      //   const mockQuestion = {
-      //     _id: 'someQuestionId',
-      //     upVotes: Array(50).fill('testUser'),
-      //     downVotes: [],
-      //     askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      //   };
+        const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
 
-      //   mockingoose(QuestionModel).toReturn(
-      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(QuestionModel).toReturn(3, 'countDocuments');
-      //   mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
-      //   mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      //   mockingoose(BadgeModel).toReturn(
-      //     { name: 'LIFESAVER', description: 'lifesaver badge' },
-      //     'findOne',
-      //   );
-      //   mockingoose(UserModel).toReturn(
-      //     { ...USERS[0], badges: ['673425329c00935604e19eab'] },
-      //     'findOneAndUpdate',
-      //   );
+        expect(result).toEqual({
+          msg: 'Question upvoted successfully',
+          upVotes: ['testUser'],
+          downVotes: [],
+          notifications: [mockNotification],
+        });
+      });
 
-      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+      test('addVoteToQuestion should throw an error if there is an erorr adding the lifesaver badge to the user', async () => {
+        const mockQuestion = {
+          _id: 'someQuestionId',
+          upVotes: Array(50).fill('testUser'),
+          downVotes: [],
+          askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        };
 
-      //   expect(result).toEqual({
-      //     msg: 'Question upvoted successfully',
-      //     upVotes: ['testUser'],
-      //     downVotes: [],
-      //     notifications: [],
-      //   });
-      // });
+        mockingoose(QuestionModel).toReturn(
+          { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
+          'findOneAndUpdate',
+        );
+        mockingoose(QuestionModel).toReturn(3, 'countDocuments');
+        mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'LIFESAVER', description: 'lifesaver badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19eab'] },
+          'findOneAndUpdate',
+        );
+
+        const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
+
+        expect(result).toEqual({
+          msg: 'Question upvoted successfully',
+          upVotes: ['testUser'],
+          downVotes: [],
+          notifications: [],
+        });
+      });
 
       // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
       //   const mockQuestion = {

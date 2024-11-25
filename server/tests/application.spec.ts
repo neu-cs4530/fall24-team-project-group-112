@@ -1024,12 +1024,21 @@ describe('application module', () => {
         });
       });
 
-      test('addVoteToQuestion should add the lifesaver badge if user earned lifesaver badge', async () => {
+      test('addVoteToQuestion should add the lifesaver badge and create a notification if user earned lifesaver badge', async () => {
         const mockQuestion = {
+          ...QUESTIONS[0],
           _id: 'someQuestionId',
           upVotes: Array(50).fill('testUser'),
           downVotes: [],
           askDateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        };
+
+        const mockNotification = {
+          notificationType: NotificationType.BADGE,
+          eventId: new ObjectId('673425329c00935604e19eab'),
+          receiverUsername: 'testUser',
+          notificationDate: new Date(),
+          seen: false,
         };
 
         mockingoose(QuestionModel).toReturn(
@@ -1037,8 +1046,13 @@ describe('application module', () => {
           'findOneAndUpdate',
         );
         mockingoose(QuestionModel).toReturn(3, 'countDocuments');
-        mockingoose(QuestionModel).toReturn(mockQuestion, 'findById');
-        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(mockQuestion);
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ ...USERS[0] });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null); // pretend we can't find a user with the badge
+        jest
+          .spyOn(UserModel, 'findOne')
+          .mockResolvedValueOnce({ ...USERS[0], badges: ['673425329c00935604e19eab'] });
+
         mockingoose(BadgeModel).toReturn(
           { name: 'LIFESAVER', description: 'lifesaver badge' },
           'findOne',
@@ -1048,13 +1062,22 @@ describe('application module', () => {
           'findOneAndUpdate',
         );
 
+        const createMockQuery = (resolvedValue: Notification) =>
+          ({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue(resolvedValue),
+          }) as unknown as Query<Notification[], Notification>;
+        jest
+          .spyOn(NotificationModel, 'findById')
+          .mockImplementationOnce(() => createMockQuery(mockNotification));
+
         const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
 
         expect(result).toEqual({
           msg: 'Question upvoted successfully',
           upVotes: ['testUser'],
           downVotes: [],
-          notifications: [],
+          notifications: [mockNotification],
         });
       });
 
@@ -1132,52 +1155,6 @@ describe('application module', () => {
 
         expect(result).toEqual({ error: 'error adding badge to user' });
       });
-
-      // test('addVoteToQuestion should add the voter badge and create a notification if user earned voter badge', async () => {
-      //   const mockQuestion = {
-      //     _id: 'someQuestionId',
-      //     upVotes: [],
-      //     downVotes: [],
-      //   };
-
-      //   const mockNotification = {
-      //     notificationType: NotificationType.BADGE,
-      //     eventId: '673425329c00935604e19ea7',
-      //     receiverUsername: 'testUser',
-      //     notificationDate: new Date(),
-      //     seen: false,
-      //     _id: 'notif12345',
-      //   };
-
-      //   mockingoose(QuestionModel).toReturn(
-      //     { ...mockQuestion, upVotes: ['testUser'], downVotes: [] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(QuestionModel).toReturn(1, 'countDocuments');
-      //   // mockingoose(UserModel).toReturn(USERS[0], 'findOne');
-      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
-      //   // mockingoose(UserModel).toReturn(null, 'findOne');
-      //   mockingoose(BadgeModel).toReturn(
-      //     { _id: '673425329c00935604e19ea7', name: 'VOTER', description: 'voter badge' },
-      //     'findOne',
-      //   );
-      //   // mockingoose(UserModel).toReturn({ ...USERS[0], badges: [] }, 'findOne');
-      //   mockingoose(UserModel).toReturn(
-      //     { ...USERS[0], badges: ['673425329c00935604e19ea7'] },
-      //     'findOneAndUpdate',
-      //   );
-      //   mockingoose(NotificationModel).toReturn(mockNotification, 'create');
-      //   mockingoose(NotificationModel).toReturn(mockNotification, 'findById');
-
-      //   const result = await addVoteToQuestion('someQuestionId', 'testUser', 'upvote');
-
-      //   expect(result).toEqual({
-      //     msg: 'Question upvoted successfully',
-      //     upVotes: ['testUser'],
-      //     downVotes: [],
-      //     notifications: [mockNotification],
-      //   });
-      // });
     });
 
     describe('checkSpeedyAnswererBadge', () => {

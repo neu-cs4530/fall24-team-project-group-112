@@ -45,7 +45,7 @@ const NotificationCenter: React.FC = () => {
       {!isLoading && (
         <div className='notification-div relative'>
           <h2 className='notification-title font-bold text-4xl'>Notifications Center</h2>
-          <div className='flex flex-col-reverse md:flex-col md:items-end mx-2 md:absolute md:top-0 md:right-0'>
+          <div className='flex flex-col-reverse lg:flex-col lg:items-end mx-2 lg:absolute lg:top-0 lg:right-0'>
             <button
               className='mb-2 md:mt-10 border border-black rounded px-3 py-2'
               onClick={() => setShowConfirmationModal(true)}>

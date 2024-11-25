@@ -10,7 +10,7 @@ const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange 
   };
 
   return (
-    <div className='w-full border border-black rounded pl-3 py-2'>
+    <div className='lg:w-full border border-black rounded pl-3 py-2'>
       <h3 className='font-bold mb-2'>Filter By:</h3>
       <div className='flex flex-wrap md:flex-col'>
         <label className='mr-3'>

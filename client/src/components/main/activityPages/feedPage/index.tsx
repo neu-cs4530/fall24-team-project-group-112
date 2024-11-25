@@ -32,14 +32,14 @@ const Feed: React.FC = () => {
       {!isLoading && (
         <div className='notification-div relative items-center'>
           <h2 className='notification-title font-bold text-4xl'>Feed</h2>
-          {/* <div className='md:absolute md:top-0 md:right-0 pr-4 flex flex-col-reverse md:flex-col items-center md:items-end w-full md:w-auto'>
-            <div className='my-6 ml-4 px-2 md:max-w-xs  md:mt-0'>
+          <div className='lg:absolute lg:top-0 lg:right-0 pr-4 flex flex-col-reverse md:flex-row-reverse md:items-start lg:flex-col items-center lg:items-end md:w-full lg:w-auto'>
+            <div className='w-full mt-4 md:mt-0 lg:my-6 ml-4 px-2'>
               <FeedFilter onFilterChange={handleFilterChange} />
             </div>
-            <div className='w-full ml-2 px-2 md:px-0 md:max-w-xs md:mt-6 mx-auto'>
+            <div className='w-full ml-2 px-2 lg:max-w-s lg:mt-6 mx-auto'>
               <FollowerRecommendations />
             </div>
-          </div> */}
+          </div>
           <div className='flex flex-col items-center'>
             {!feedItems.length && (
               <div className='no-notifications'>You are up to date on recent activity!</div>

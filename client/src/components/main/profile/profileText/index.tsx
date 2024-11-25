@@ -58,20 +58,20 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
 
   const styles = {
     container: 'w-full max-w-4xl',
-    header: 'bg-white p-5 shadow-md flex flex-row',
+    header: 'bg-white p-5 flex flex-row border',
     avatarContainer: 'flex flex-col ml-4',
     textContainer: 'flex flex-col ml-4 w-full',
     nameUsernameContainer: 'flex flex-row space-x-8',
     editAvatarContainer: 'flex flex-col ml-4',
     editButton: 'bg-white text-black text-lg rounded-md p-2',
     editIcon: 'text-2xl mt-1',
-    headline: 'mt-1 text-xl text-gray-500',
+    headline: 'mt-1 text-xl text-gray-500 w-full',
     input: 'border',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
     followerCount: 'text-2xl font-bold text-gray-800',
-    bioContainer: 'bg-white p-5 shadow-md flex flex-col h-40',
-    bioHeader: 'ml-2 text-xl font-bold text-gray-500 mb-2',
-    bioContent: 'ml-2 text-l text-gray-500',
+    bioContainer: 'w-full resize-none overflow-hidden p-2 border rounded-md',
+    bioHeader: 'ml-2 text-xl font-bold text-black-500 mb-2',
+    bioContent: 'ml-2 text-l text-gray-800 mb-2',
     followButton: 'bg-blue-800 text-white rounded-md py-2 px-5 ml-4 mb-1',
     followingButton: 'bg-gray-500 text-white rounded-md p-2 ml-4 mb-1',
     errorModal: 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50',
@@ -251,7 +251,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
           </div>
         </div>
       </div>
-      <hr></hr>
+
       {isEditing ? (
         <>
           <div className={`${styles.bioHeader} mt-5 mb-3 ml-4 text-xl`}>Bio</div>
@@ -266,7 +266,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
         </>
       ) : (
         user.bio && (
-          <div className={styles.bioContainer}>
+          <div className={`${styles.bioContainer}`}>
             <div className={styles.bioHeader}>Bio</div>
             <div className={styles.bioContent}>{user.bio}</div>
           </div>

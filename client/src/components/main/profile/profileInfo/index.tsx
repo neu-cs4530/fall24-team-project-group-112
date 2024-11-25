@@ -26,16 +26,17 @@ const ProfileInfo = ({
 }: ProfileInfoProps) => {
   const styles = {
     infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 justify-between mr-40',
-    infoItem: 'flex flex-row gap-2 items-center',
+    editingInfoContainer: 'flex flex-col items-start mt-2 justify-between',
+    infoItem: 'flex flex-row gap-2 items-center w-full lg:w-1/2',
     icon: 'text-sm mb-1',
     input: 'border p-1 w-full',
     github: 'no-underline hover:underline',
   };
 
   return (
-    <div className={styles.infoContainer}>
+    <>
       {isEditing ? (
-        <>
+        <div className={styles.editingInfoContainer}>
           <div className={styles.infoItem}>
             <FaGithub className={styles.icon} />
             <input
@@ -92,9 +93,9 @@ const ProfileInfo = ({
               placeholder='Company'
             />
           </div>
-        </>
+        </div>
       ) : (
-        <>
+        <div className={styles.infoContainer}>
           {user.githubUrl && (
             <a className={styles.infoItem} href={user.githubUrl} target='_blank' rel='noreferrer'>
               <FaGithub className={styles.icon} />
@@ -118,9 +119,9 @@ const ProfileInfo = ({
               <p>{user.company}</p>
             </div>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -46,13 +46,6 @@ const BADGES = [
 const toSentenceCase = (title: string) =>
   title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
 
-const adjustDescription = (description: string) => {
-  const words = description.split(' ');
-  return words.length > 2
-    ? words.slice(2).join(' ').charAt(0).toUpperCase() + words.slice(2).join(' ').slice(1)
-    : description;
-};
-
 interface BadgeDisplayProps {
   user: User;
   open: boolean;
@@ -93,7 +86,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
                     <ListItemText
                       className={styles.badgeTextContainer}
                       primary={`${toSentenceCase(badge.name.replace(/_/g, ' '))}`}
-                      secondary={adjustDescription(badge.description)}
+                      secondary={badge.description}
                     />
                   </div>
                 </ListItem>
@@ -102,7 +95,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
           </div>
         </Dialog>
       </div>
-      <div className='flex flex-row'>
+      <div className='flex flex-col md:flex-row w-full md:w-full'>
         {/* Gold Badges */}
         <div className='badge-card'>
           <div className='flex flex-row'>

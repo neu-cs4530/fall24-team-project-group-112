@@ -35,30 +35,34 @@ const ProfileHeader = ({
   handleChange,
 }: ProfileHeaderProps) => {
   const styles = {
-    name: 'text-4xl font-bold text-gray-800 p-1',
-    username: 'text-2xl text-gray-600 ml-12 p-1',
+    container: 'flex gap-2',
+    editingContainer: 'flex flex-wrap gap-2',
+    name: 'text-4xl font-bold text-gray-800',
+    username: 'text-2xl text-gray-600 p-1',
   };
 
   return isEditing ? (
-    <>
-      <input
-        type='text'
-        name='firstName'
-        value={firstName}
-        onChange={handleChange}
-        className={`${styles.name} border w-1/4`}
-        placeholder='First Name'
-      />
-      <input
-        type='text'
-        name='lastName'
-        value={lastName}
-        onChange={handleChange}
-        className={`${styles.name} border w-1/4 ml-4`}
-        placeholder='Last Name'
-      />
+    <div className={styles.container}>
+      <div className={styles.editingContainer}>
+        <input
+          type='text'
+          name='firstName'
+          value={firstName}
+          onChange={handleChange}
+          className={`${styles.name} border w-48`}
+          placeholder='First Name'
+        />
+        <input
+          type='text'
+          name='lastName'
+          value={lastName}
+          onChange={handleChange}
+          className={`${styles.name} border w-48`}
+          placeholder='Last Name'
+        />
+      </div>
       <div className={styles.username}>{`@${user.username}`}</div>
-    </>
+    </div>
   ) : (
     <>
       <div className={styles.name}>{`${user.firstName} ${user.lastName}`}</div>

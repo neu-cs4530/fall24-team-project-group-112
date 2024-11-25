@@ -14,7 +14,7 @@
   margin-bottom: 1.5rem;
   margin-right: 0.5rem;
   margin-left: 0.5rem;
-  width: 350px;
+  width: 100%;
 }
 
 .badge-icon.gold {
@@ -55,9 +55,9 @@
 }
 
 .badge-inv {
-  width: 11rem;
   position: relative;
   display: inline-block;
+  margin-right: 1rem;
 }
 
 .tooltip {

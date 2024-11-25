@@ -51,44 +51,43 @@ const ProfileInfo = ({
   handleChange,
 }: ProfileInfoProps) => {
   const styles = {
-    infoContainer: 'flex gap-4 mt-3 mb-3',
-    infoItem: 'flex gap-2 items-center',
+    infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 lg:mr-10',
+    editingInfoContainer: 'flex flex-col items-start mt-2 justify-between',
+    infoItem: 'flex flex-row gap-2 items-center',
     icon: 'text-sm mb-1',
-    input: 'border p-1',
+    input: 'border p-1 w-full',
     github: 'no-underline hover:underline',
   };
 
   return (
-    <div className={styles.infoContainer}>
+    <>
       {isEditing ? (
-        <div>
-          <div className='flex flex-row'>
-            <div className={styles.infoItem}>
-              <FaGithub className={styles.icon} />
-              <input
-                type='url'
-                name='githubUrl'
-                value={editingGithubUrl}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder='Github URL'
-              />
-            </div>
-            <div className={`${styles.infoItem} ml-5`}>
-              <FaSchool className={styles.icon} />
-              <input
-                type='text'
-                name='school'
-                value={editingSchool}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder='School'
-              />
-            </div>
+        <div className={styles.editingInfoContainer}>
+          <div className={styles.infoItem}>
+            <FaGithub className={styles.icon} />
+            <input
+              type='url'
+              name='githubUrl'
+              value={editingGithubUrl}
+              onChange={handleChange}
+              className={styles.input}
+              placeholder='Github URL'
+            />
           </div>
-          <div className='flex flex-row mt-5'>
-            <div className={styles.infoItem}>
-              <FaMapMarkerAlt className={styles.icon} />
+          <div className={styles.infoItem}>
+            <FaSchool className={styles.icon} />
+            <input
+              type='text'
+              name='school'
+              value={editingSchool}
+              onChange={handleChange}
+              className={styles.input}
+              placeholder='School'
+            />
+          </div>
+          <div className={styles.infoItem}>
+            <FaMapMarkerAlt className={styles.icon} />
+            <div className='flex flex-row'>
               <input
                 type='text'
                 name='city'
@@ -108,28 +107,26 @@ const ProfileInfo = ({
                 placeholder='State'
               />
             </div>
-            <div className={`${styles.infoItem} ml-5`}>
-              <MdWork className={styles.icon} />
-              <input
-                type='text'
-                name='company'
-                value={editingCompany}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder='Company'
-              />
-            </div>
+          </div>
+          <div className={styles.infoItem}>
+            <MdWork className={styles.icon} />
+            <input
+              type='text'
+              name='company'
+              value={editingCompany}
+              onChange={handleChange}
+              className={styles.input}
+              placeholder='Company'
+            />
           </div>
         </div>
       ) : (
-        <>
+        <div className={styles.infoContainer}>
           {user.githubUrl && (
-            <div className={styles.github}>
-              <a className={styles.infoItem} href={user.githubUrl} target='_blank' rel='noreferrer'>
-                <FaGithub className={styles.icon} />
-                GitHub
-              </a>
-            </div>
+            <a className={styles.infoItem} href={user.githubUrl} target='_blank' rel='noreferrer'>
+              <FaGithub className={styles.icon} />
+              GitHub
+            </a>
           )}
           {user.school && (
             <div className={styles.infoItem}>
@@ -138,7 +135,8 @@ const ProfileInfo = ({
           )}
           {user.city && user.state && (
             <div className={styles.infoItem}>
-              <FaMapMarkerAlt className={styles.icon} /> {`${user.city}, ${user.state}`}
+              <FaMapMarkerAlt className={styles.icon} />
+              <span>{`${user.city}, ${user.state}`}</span>
             </div>
           )}
           {user.company && (
@@ -147,9 +145,9 @@ const ProfileInfo = ({
               <p>{user.company}</p>
             </div>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

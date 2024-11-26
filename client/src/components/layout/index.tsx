@@ -1,7 +1,5 @@
-import React from 'react';
 import './index.css';
 import { Outlet, useLocation } from 'react-router-dom';
-import SideBarNav from '../main/sideBarNav';
 import Header from '../header';
 import { User } from '../../types';
 
@@ -26,7 +24,6 @@ const Layout = ({ user }: { user: User | null }) => {
     <>
       <Header user={user} />
       <div id='main' className='main'>
-        {!isNotificationsPage && !isFeedPage && !isProfilePage && <SideBarNav />}
         <div
           id='right_main'
           className={!isNotificationsPage || !isFeedPage || !isProfilePage ? 'right_main' : ''}>

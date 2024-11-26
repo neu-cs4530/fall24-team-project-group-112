@@ -1,5 +1,3 @@
-import React from 'react';
-import './index.css';
 import { TagData } from '../../../../types';
 import useTagSelected from '../../../../hooks/useTagSelected';
 
@@ -25,14 +23,15 @@ interface TagProps {
 const TagView = ({ t, clickTag }: TagProps) => {
   const { tag } = useTagSelected(t);
 
+  const styles = {
+    tagNode: 'border border-dashed p-2 flex flex-col justify-items-center align-items-center',
+    tagName: 'text-stackpurple',
+  };
+
   return (
-    <div
-      className='tagNode'
-      onClick={() => {
-        clickTag(t.name);
-      }}>
-      <div className='tagName'>{tag.name}</div>
-      <div className='tagDescription'>{tag.description}</div>
+    <div className={styles.tagNode} onClick={() => clickTag(t.name)}>
+      <div className={styles.tagName}>{tag.name}</div>
+      <div>{tag.description}</div>
       <div>{t.qcnt} questions</div>
     </div>
   );

@@ -36,7 +36,7 @@ const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderPro
     search:
       'px-4 rounded-lg h-12 w-full mb-4 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500',
     filterButtons: 'flex flex-wrap gap-1',
-    questionContainer: 'flex flex-col items-center gap-4 md:flex-row justify-between py-2',
+    questionContainer: 'flex flex-col md:items-center gap-4 md:flex-row justify-between py-2',
   };
 
   return (

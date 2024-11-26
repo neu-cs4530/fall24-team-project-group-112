@@ -1,5 +1,3 @@
-import React from 'react';
-import './index.css';
 import TagView from './tag';
 import useTagPage from '../../../hooks/useTagPage';
 import AskQuestionButton from '../askQuestionButton';
@@ -15,10 +13,10 @@ const TagPage = () => {
   const styles = {
     container: 'flex flex-col md:flex-row',
     sideBarContainer: 'md:w-2/12',
-    tagContainer: 'md:w-10/12',
-    topRowContainer: 'flex justify-between mt-2 px-2',
+    tagContainer: 'md:w-10/12 px-4',
+    topRowContainer: 'flex justify-between mt-2 items-center',
     topRowText: 'bold_title my-4',
-    tagList: 'tag_list right_padding',
+    tagList: 'grid grid-cols-2 md:grid-cols-3 gap-5 pt-0 justify-items-start',
   };
 
   return (

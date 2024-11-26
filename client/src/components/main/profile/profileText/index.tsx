@@ -63,7 +63,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     textContainer: 'flex flex-col ml-4 w-full',
     nameUsernameContainer: 'w-full flex flex-col sm:flex-row md:space-x-12',
     editButton: 'bg-white text-black text-lg rounded-md p-2 cursor-pointer',
-    editIcon: 'text-2xl mt-1',
+    editIcon: 'text-2xl',
     headline: 'mt-1 text-xl text-gray-500 w-full',
     input: 'border',
     followersContainer: 'flex gap-5 mt-2 cursor-pointer',
@@ -253,7 +253,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
       </div>
 
       {isEditing ? (
-        <>
+        <div className={styles.bioContainer}>
           <div className={styles.bioHeader}>Bio</div>
           <textarea
             name='bio'
@@ -263,7 +263,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
             rows={10}
             placeholder='Write a bio here!'
           />
-        </>
+        </div>
       ) : (
         user.bio && (
           <div className={styles.bioContainer}>

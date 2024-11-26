@@ -52,7 +52,7 @@ const ProfileInfo = ({
 }: ProfileInfoProps) => {
   const styles = {
     infoContainer: 'flex flex-col md:flex-row md:space-x-4 items-start mt-2 lg:mr-10',
-    editingInfoContainer: 'flex flex-col items-start mt-2 justify-between',
+    editingInfoContainer: 'flex flex-col lg:w-1/2 mt-2 justify-between',
     infoItem: 'flex flex-row gap-2 items-center',
     icon: 'text-sm mb-1',
     input: 'border p-1 w-full',

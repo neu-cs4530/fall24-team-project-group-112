@@ -63,7 +63,7 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
 
   const styles = {
     loadingContainer: 'flex justify-center items-center h-screen',
-    container: 'flex justify-center',
+    container: 'flex justify-center w-full flex-col md:px-[10%] mb-6',
     badgeContainerOuter: 'mt-6',
     badgeContainerInner: 'flex',
     badgeText: 'font-bold text-xl ml-4 pt-1',
@@ -75,41 +75,34 @@ const Profile = ({ loggedInUser }: { loggedInUser: User | null }) => {
     <>
       {user && !isLoading ? (
         <div className={styles.container}>
+          <ProfileText user={user} loggedInUser={loggedInUser} />
           <div>
-            <div className={styles.container}>
-              <ProfileText user={user} loggedInUser={loggedInUser} />
-            </div>
-            <div>
-              {user.badges.length > 0 && (
-                <div className={styles.badgeContainerOuter}>
-                  <div className={styles.badgeContainerInner}>
-                    <h2 className={styles.badgeText}>Badges</h2>
-                    <p className={styles.badgeButton} onClick={() => setBadgeOpen(true)}>
-                      View all badges
-                    </p>
-                  </div>
-                  <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+            {user.badges.length > 0 && (
+              <div className={styles.badgeContainerOuter}>
+                <div className={styles.badgeContainerInner}>
+                  <h2 className={styles.badgeText}>Badges</h2>
+                  <p className={styles.badgeButton} onClick={() => setBadgeOpen(true)}>
+                    View all badges
+                  </p>
                 </div>
-              )}
-            </div>
-
-            <QuestionList
-              questions={questionsAsked}
-              title={`Questions asked by @${user.username}`}
-            />
-            <QuestionList
-              questions={questionsAnswered}
-              title={`Questions answered by @${user.username}`}
-            />
-            <QuestionList
-              questions={questionsUpvoted}
-              title={`Questions upvoted by @${user.username}`}
-            />
-            <QuestionList
-              questions={questionsDownvoted}
-              title={`Questions downvoted by @${user.username}`}
-            />
+                <BadgeDisplay user={user} open={badgeOpen} onClose={() => setBadgeOpen(false)} />
+              </div>
+            )}
           </div>
+
+          <QuestionList questions={questionsAsked} title={`Questions asked by @${user.username}`} />
+          <QuestionList
+            questions={questionsAnswered}
+            title={`Questions answered by @${user.username}`}
+          />
+          <QuestionList
+            questions={questionsUpvoted}
+            title={`Questions upvoted by @${user.username}`}
+          />
+          <QuestionList
+            questions={questionsDownvoted}
+            title={`Questions downvoted by @${user.username}`}
+          />
         </div>
       ) : (
         <div className={styles.loadingContainer}>

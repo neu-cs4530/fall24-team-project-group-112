@@ -63,6 +63,18 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
     userInfoContainer: 'flex-col ml-2 mt-2',
     badgeIconContainer: 'mr-2 mt-1 ml-4',
     badgeTextContainer: 'mr-4',
+    badgeContainer: 'flex justify-between px-4 flex-col w-full',
+    badgeDialogContainer: 'flex flex-col mb-5',
+    badgeCardContainer: 'flex flex-col md:flex-row w-full',
+    badgeCard: 'border border-gray-300 rounded-lg p-5 mb-6 mr-2 md:ml-2 w-full',
+    badgeIcon: 'text-5xl pr-4 mt-1',
+    badgeInv: 'mt-5 relative inline-block mr-4 group',
+    tooltip:
+      'bg-gray-800 text-white text-center rounded p-1.5 absolute top-[120%] w-48 opacity-0 transition-opacity duration-300 pointer-events-none z-50 group-hover:opacity-100',
+    badgeText: 'flex flex-row',
+    font: 'text-2xl font-bold',
+    badgeType: 'badge flex flex-row border p-2 rounded-md',
+    badgeIconMini: 'mt-1 mr-2',
   };
 
   const userBadges = BADGES.filter(badge => userBadgeNames.includes(badge.name));
@@ -71,9 +83,9 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
   const silverBadges = userBadges.filter(badge => badge.color === 'silver');
   const bronzeBadges = userBadges.filter(badge => badge.color === 'bronze');
   return (
-    <div className='badge-container'>
-      <div className='flex flex-col badge-title'>
-        <Dialog onClose={() => onClose()} open={open} className='view-badges'>
+    <div className={styles.badgeContainer}>
+      <div className={styles.badgeDialogContainer}>
+        <Dialog onClose={() => onClose()} open={open} className='mt-1'>
           <div className={styles.dialogContainer}>
             <List sx={{ pt: 1, pb: 2 }}>
               <p className={styles.title}>All Badges:</p>
@@ -95,16 +107,16 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
           </div>
         </Dialog>
       </div>
-      <div className='flex flex-col md:flex-row w-full md:w-full'>
+      <div className={styles.badgeCardContainer}>
         {/* Gold Badges */}
-        <div className='badge-card'>
-          <div className='flex flex-row'>
-            <div className='badge-icon gold'>
+        <div className={styles.badgeCard}>
+          <div className={styles.badgeText}>
+            <div className={`${styles.badgeIcon} gold`}>
               <FaCircle />
             </div>
-            <div className='badge-info'>
+            <div>
               <h3>
-                <span className='text-2xl font-bold'>{goldBadges.length}</span>
+                <span className={styles.font}>{goldBadges.length}</span>
                 <br></br>gold badges
               </h3>
             </div>
@@ -113,29 +125,28 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
             {BADGES.filter(badge => badge.color === 'gold').map(badge => {
               const isEarned = userBadges.includes(badge);
               return (
-                <div className='mt-5 badge-inv' key={badge._id}>
-                  <span
-                    className={`badge flex flex-row border p-2 rounded-md ${isEarned ? '' : 'greyed-out'}`}>
-                    <span className={`mt-1 mr-2 gold`}>
+                <div className={styles.badgeInv} key={badge._id}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                    <span className={`${styles.badgeIconMini} gold`}>
                       <FaCircle />
                     </span>
                     {badge.name.replace(/_/g, ' ').toLowerCase()}
                   </span>
-                  <div className='tooltip'>{badge.description}</div>
+                  <div className={styles.tooltip}>{badge.description}</div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className='badge-card'>
-          <div className='flex flex-row'>
-            <div className='badge-icon silver'>
+        <div className={styles.badgeCard}>
+          <div className={styles.badgeText}>
+            <div className={`${styles.badgeIcon} silver`}>
               <FaCircle />
             </div>
-            <div className='badge-info'>
+            <div>
               <h3>
-                <span className='text-2xl font-bold'>{silverBadges.length}</span>
+                <span className={styles.font}>{silverBadges.length}</span>
                 <br></br>silver badges
               </h3>
             </div>
@@ -144,29 +155,28 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
             {BADGES.filter(badge => badge.color === 'silver').map(badge => {
               const isEarned = userBadges.includes(badge);
               return (
-                <div className='mt-5 badge-inv' key={badge._id}>
-                  <span
-                    className={`badge flex flex-row border p-2 rounded-md ${isEarned ? '' : 'greyed-out'}`}>
-                    <span className={`mt-1 mr-2 silver`}>
+                <div className={styles.badgeInv} key={badge._id}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                    <span className={`${styles.badgeIconMini} silver`}>
                       <FaCircle />
                     </span>
                     {badge.name.replace(/_/g, ' ').toLowerCase()}
                   </span>
-                  <div className='tooltip'>{badge.description}</div>
+                  <div className={styles.tooltip}>{badge.description}</div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className='badge-card'>
-          <div className='flex flex-row'>
-            <div className='badge-icon bronze'>
+        <div className={styles.badgeCard}>
+          <div className={styles.badgeText}>
+            <div className={`${styles.badgeIcon} bronze`}>
               <FaCircle />
             </div>
-            <div className='badge-info'>
+            <div>
               <h3>
-                <span className='text-2xl font-bold'>{bronzeBadges.length}</span>
+                <span className={styles.font}>{bronzeBadges.length}</span>
                 <br></br>bronze badges
               </h3>
             </div>
@@ -175,15 +185,14 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
             {BADGES.filter(badge => badge.color === 'bronze').map(badge => {
               const isEarned = userBadges.includes(badge);
               return (
-                <div className='mt-5 badge-inv' key={badge._id}>
-                  <span
-                    className={`badge flex flex-row border p-2 rounded-md ${isEarned ? '' : 'greyed-out'}`}>
-                    <span className={`mt-1 mr-2 bronze`}>
+                <div className={styles.badgeInv} key={badge._id}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                    <span className={`${styles.badgeIconMini} bronze`}>
                       <FaCircle />
                     </span>
                     {badge.name.replace(/_/g, ' ').toLowerCase()}
                   </span>
-                  <div className='tooltip'>{badge.description}</div>
+                  <div className={styles.tooltip}>{badge.description}</div>
                 </div>
               );
             })}

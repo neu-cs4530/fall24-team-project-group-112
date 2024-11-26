@@ -1,8 +1,7 @@
-import React from 'react';
-import './index.css';
 import TagView from './tag';
 import useTagPage from '../../../hooks/useTagPage';
 import AskQuestionButton from '../askQuestionButton';
+import SideBarNav from '../sideBarNav';
 
 /**
  * Represents the TagPage component which displays a list of tags
@@ -11,19 +10,33 @@ import AskQuestionButton from '../askQuestionButton';
 const TagPage = () => {
   const { tlist, clickTag } = useTagPage();
 
+  const styles = {
+    container: 'flex flex-col md:flex-row',
+    sideBarContainer: 'md:w-2/12',
+    tagContainer: 'md:w-10/12 px-4',
+    topRowContainer: 'flex justify-between mt-2 items-center',
+    topRowText: 'bold_title my-4',
+    tagList: 'grid grid-cols-2 md:grid-cols-3 gap-5 pt-0 justify-items-start',
+  };
+
   return (
-    <>
-      <div className='space_between right_padding'>
-        <div className='bold_title'>{tlist.length} Tags</div>
-        <div className='bold_title'>All Tags</div>
-        <AskQuestionButton />
+    <div className={styles.container}>
+      <div className={styles.sideBarContainer}>
+        <SideBarNav />
       </div>
-      <div className='tag_list right_padding'>
-        {tlist.map((t, idx) => (
-          <TagView key={idx} t={t} clickTag={clickTag} />
-        ))}
+      <div className={styles.tagContainer}>
+        <div className={styles.topRowContainer}>
+          <div className={styles.topRowText}>{tlist.length} Tags</div>
+          <div className={styles.topRowText}>All Tags</div>
+          <AskQuestionButton />
+        </div>
+        <div className={styles.tagList}>
+          {tlist.map((t, idx) => (
+            <TagView key={idx} t={t} clickTag={clickTag} />
+          ))}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

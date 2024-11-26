@@ -71,7 +71,7 @@ const ProfileText = ({ user, loggedInUser }: ProfileTextProps) => {
     bioContainer: 'w-full p-2 border rounded-md',
     bioHeader: 'font-bold text-xl ml-2 pt-1',
     bioContent: 'ml-2 text-l text-gray-800 mb-2',
-    followButton: 'bg-blue-800 text-white rounded-md py-2 px-5 mb-1',
+    followButton: 'bg-stackpurple text-white rounded-md py-2 px-5 mb-1',
     followingButton: 'bg-gray-500 text-white rounded-md p-2 mb-1',
     errorModal: 'fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50',
     modalContent: 'bg-white p-6 rounded-md shadow-lg text-center',

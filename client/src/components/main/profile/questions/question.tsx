@@ -8,7 +8,7 @@ export interface QuestionProps {
 
 const QuestionDisplay = ({ question }: QuestionProps) => {
   const styles = {
-    container: 'px-12 py-6 border border-gray-200 cursor-pointer hover:bg-stackpurplehover',
+    container: 'px-6 md:px-12 py-6 border border-gray-200 cursor-pointer hover:bg-stackpurplehover',
     header: 'md:flex justify-between',
     title: 'font-bold text-xl',
     linkContainer: 'flex gap-6 cursor-pointer',

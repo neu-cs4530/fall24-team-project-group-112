@@ -70,7 +70,7 @@ const Header = ({ user }: { user: User | null }) => {
           <Button
             variant='contained'
             onClick={handlePopoverOpen}
-            className='hamburger'
+            className='!bg-stackpurple !mr-2'
             aria-label='Toggle navigation menu'>
             ☰
           </Button>

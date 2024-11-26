@@ -30,26 +30,35 @@ interface QuestionHeaderProps {
 const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => {
   const { val, handleInputChange, handleKeyDown } = useHeader();
 
+  const styles = {
+    container: 'mt-2 px-4 mb-4',
+    topRowContainer: 'flex items-center justify-between',
+    search:
+      'px-4 rounded-lg h-12 w-full mb-4 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500',
+    filterButtons: 'flex flex-wrap gap-1',
+    questionContainer: 'flex flex-col md:items-center gap-4 md:flex-row justify-between py-2',
+  };
+
   return (
-    <div className='my-3 px-6 mb-4'>
-      <div className='space_between py-2 w-100'>
+    <div className={styles.container}>
+      <div className={styles.topRowContainer}>
         <div className='bold_title'>{titleText}</div>
+        <AskQuestionButton />
       </div>
-      <div className='flex items-center py-2 justify-between'>
+      <div>
         <input
           id='searchBar'
-          className='px-4 h-12 rounded-lg w-[80%] border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500'
+          className={styles.search}
           placeholder='Search for a question...'
           type='text'
           value={val}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         />
-        <AskQuestionButton />
       </div>
-      <div className='space_between py-2 w-100'>
-        <div id='question_count'>{qcnt} questions</div>
-        <div className='btns'>
+      <div className={styles.questionContainer}>
+        <div>{qcnt} questions</div>
+        <div className={styles.filterButtons}>
           {Object.keys(orderTypeDisplayName).map((order, idx) => (
             <OrderButton
               key={idx}

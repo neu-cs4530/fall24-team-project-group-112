@@ -32,13 +32,7 @@ const NotificationCenter: React.FC = () => {
   return (
     <>
       {isLoading && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}>
+        <div className='flex justify-center items-center h-screen'>
           <CircularProgress />
         </div>
       )}

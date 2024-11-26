@@ -1,7 +1,9 @@
-import './index.css';
+import { CircularProgress } from '@mui/material';
 import QuestionHeader from './header';
 import useQuestionPage from '../../../hooks/useQuestionPage';
 import QuestionDisplay from '../profile/questions/question';
+import SideBarNav from '../sideBarNav';
+import './index.css';
 
 /**
  * QuestionPage component renders a page displaying a list of questions
@@ -9,24 +11,42 @@ import QuestionDisplay from '../profile/questions/question';
  * It includes a header with order buttons and a button to ask a new question.
  */
 const QuestionPage = () => {
-  const { titleText, qlist, setQuestionOrder } = useQuestionPage();
+  const { titleText, qlist, setQuestionOrder, isLoading } = useQuestionPage();
 
-  return (
-    <>
-      <QuestionHeader
-        titleText={titleText}
-        qcnt={qlist.length}
-        setQuestionOrder={setQuestionOrder}
-      />
-      <div id='question_list' className='question_list'>
-        {qlist.map((q, idx) => (
-          <QuestionDisplay question={q} key={idx} />
-        ))}
+  const styles = {
+    loadingContainer: 'flex justify-center items-center h-screen',
+    mainContainer: 'flex flex-col md:flex-row',
+    sideBarContainer: 'md:w-2/12',
+    questionContainer: 'md:w-10/12',
+    questionList: 'question_list',
+    noQuestions: 'bold_title right_padding',
+  };
+
+  return isLoading ? (
+    <div className={styles.loadingContainer}>
+      <CircularProgress />
+    </div>
+  ) : (
+    <div className={styles.mainContainer}>
+      <div className={styles.sideBarContainer}>
+        <SideBarNav />
       </div>
-      {titleText === 'Search Results' && !qlist.length && (
-        <div className='bold_title right_padding'>No Questions Found</div>
-      )}
-    </>
+      <div className={styles.questionContainer}>
+        <QuestionHeader
+          titleText={titleText}
+          qcnt={qlist.length}
+          setQuestionOrder={setQuestionOrder}
+        />
+        <div className={styles.questionList}>
+          {qlist.map((q, idx) => (
+            <QuestionDisplay question={q} key={idx} />
+          ))}
+        </div>
+        {titleText === 'Search Results' && !qlist.length && (
+          <div className={styles.noQuestions}>No Questions Found</div>
+        )}
+      </div>
+    </div>
   );
 };
 

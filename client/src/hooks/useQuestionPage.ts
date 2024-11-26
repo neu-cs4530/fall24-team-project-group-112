@@ -19,6 +19,7 @@ const useQuestionPage = () => {
   const [search, setSearch] = useState<string>('');
   const [questionOrder, setQuestionOrder] = useState<OrderType>('newest');
   const [qlist, setQlist] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     let pageTitle = 'All Questions';
@@ -44,9 +45,11 @@ const useQuestionPage = () => {
      * Function to fetch questions based on the filter and update the question list.
      */
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const res = await getQuestionsByFilter(questionOrder, search);
         setQlist(res || []);
+        setIsLoading(false);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error);
@@ -105,7 +108,7 @@ const useQuestionPage = () => {
     };
   }, [questionOrder, search, socket]);
 
-  return { titleText, qlist, setQuestionOrder };
+  return { titleText, qlist, setQuestionOrder, isLoading };
 };
 
 export default useQuestionPage;

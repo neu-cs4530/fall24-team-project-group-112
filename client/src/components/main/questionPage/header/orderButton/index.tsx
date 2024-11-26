@@ -23,7 +23,7 @@ interface OrderButtonProps {
  */
 const OrderButton = ({ orderType, setQuestionOrder }: OrderButtonProps) => (
   <button
-    className='btn'
+    className='btn md:ml-2'
     onClick={() => {
       setQuestionOrder(orderType);
     }}>

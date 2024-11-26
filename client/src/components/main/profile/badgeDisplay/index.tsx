@@ -126,7 +126,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
               const isEarned = userBadges.includes(badge);
               return (
                 <div className={styles.badgeInv} key={badge._id}>
-                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'opacity-40'}`}>
                     <span className={`${styles.badgeIconMini} gold`}>
                       <FaCircle />
                     </span>
@@ -156,7 +156,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
               const isEarned = userBadges.includes(badge);
               return (
                 <div className={styles.badgeInv} key={badge._id}>
-                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'opacity-40'}`}>
                     <span className={`${styles.badgeIconMini} silver`}>
                       <FaCircle />
                     </span>
@@ -186,7 +186,7 @@ const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
               const isEarned = userBadges.includes(badge);
               return (
                 <div className={styles.badgeInv} key={badge._id}>
-                  <span className={`${styles.badgeType} ${isEarned ? '' : 'greyed-out'}`}>
+                  <span className={`${styles.badgeType} ${isEarned ? '' : 'opacity-40'}`}>
                     <span className={`${styles.badgeIconMini} bronze`}>
                       <FaCircle />
                     </span>

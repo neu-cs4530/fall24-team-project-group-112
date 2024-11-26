@@ -1676,6 +1676,16 @@ describe('application module', () => {
           'find',
         );
         mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'SPEEDY_ANSWERER', description: 'speedy answerer badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea8'] },
+          'findOneAndUpdate',
+        );
         mockingoose(AnswerModel).toReturn(10, 'countDocuments');
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(BadgeModel).toReturn(
@@ -1683,7 +1693,7 @@ describe('application module', () => {
           'findOne',
         );
         mockingoose(UserModel).toReturn(
-          { ...USERS[0], badges: ['673425329c00935604e19ea9'] },
+          { ...USERS[0], badges: ['673425329c00935604e19ea8', '673425329c00935604e19ea9'] },
           'findOneAndUpdate',
         );
 
@@ -1732,7 +1742,7 @@ describe('application module', () => {
             })),
           'find',
         );
-        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(AnswerModel).toReturn(new Error('database error'), 'countDocuments');
         mockingoose(QuestionModel).toReturn(question, 'findById');
         mockingoose(UserModel).toReturn(USERS[0], 'findOne');
         mockingoose(BadgeModel).toReturn(new Error('database error'), 'findOne');

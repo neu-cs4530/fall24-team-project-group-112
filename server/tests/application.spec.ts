@@ -123,7 +123,15 @@ const ans4: Answer = {
   _id: new ObjectId('65e9b58910afe6e94fc6e6df'),
   text: 'ans4',
   ansBy: 'ansBy4',
-  ansDateTime: new Date('2023-11-19T09:24:00'),
+  ansDateTime: new Date(Date.now()),
+  comments: [],
+};
+
+const ans5: Answer = {
+  _id: new ObjectId('67452bd57eefb292169102a4'),
+  text: 'ans5',
+  ansBy: 'ansBy5',
+  ansDateTime: new Date(Date.now()),
   comments: [],
 };
 
@@ -148,7 +156,7 @@ const QUESTIONS: Question[] = [
     tags: [tag1, tag2],
     answers: [ans1, ans2, ans3],
     askedBy: 'q_by2',
-    askDateTime: new Date('2023-11-17T09:24:00'),
+    askDateTime: new Date(Date.now()),
     views: ['question2_user'],
     upVotes: ['user1'],
     downVotes: ['dummyUser'],
@@ -413,9 +421,9 @@ describe('application module', () => {
         const result = await getQuestionsByOrder('active');
 
         expect(result.length).toEqual(3);
-        expect(result[0]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
-        expect(result[1]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
-        expect(result[2]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result[0]._id?.toString()).toEqual('65e9b9b44c052f0a08ecade0');
+        expect(result[1]._id?.toString()).toEqual('65e9b5a995b6c7045a30d823');
+        expect(result[2]._id?.toString()).toEqual('65e9b58910afe6e94fc6e6dc');
       });
 
       test('get active questions, newest questions sorted by most recently answered 2', async () => {
@@ -1358,6 +1366,17 @@ describe('application module', () => {
     });
 
     describe('addAnswerToQuestion', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockingoose.resetAll();
+      });
+      // Optional: Clean up after all tests
+      afterAll(() => {
+        mockingoose.resetAll();
+        jest.clearAllMocks();
+        mock.reset();
+      });
+
       test('addAnswerToQuestion should return the updated question', async () => {
         const question = QUESTIONS.filter(
           q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
@@ -1445,99 +1464,285 @@ describe('application module', () => {
         }
       });
 
-      // test('addAnswerToQuestion should add speedy answerer badge to user if they earned it', async () => {
-      //   const question = QUESTIONS.filter(
-      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
-      //   )[0];
-      //   (question.answers as Answer[]).push(ans4);
-      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
-      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
-      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
-      //   mockingoose(QuestionModel).toReturn(
-      //     Array(5)
-      //       .fill(null)
-      //       .map((_, index) => ({
-      //         _id: new ObjectId(),
-      //         title: `Question ${index + 1}`,
-      //         text: `This is the text for question ${index + 1}`,
-      //         tags: [tag1, tag2],
-      //         answers: [
-      //           {
-      //             _id: new ObjectId(),
-      //             text: `Answer ${index + 1}`,
-      //             ansBy: 'username',
-      //             ansDateTime: new Date(),
-      //             comments: [],
-      //           },
-      //         ],
-      //         askedBy: 'username',
-      //         askDateTime: new Date(),
-      //         views: [],
-      //         upVotes: [],
-      //         downVotes: [],
-      //         comments: [],
-      //       })),
-      //     'find',
-      //   );
-      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+      test('addAnswerToQuestion should add speedy answerer badge to user if user earned speedy answerer', async () => {
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        (question.answers as Answer[]).push(ans5);
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'SPEEDY_ANSWERER', description: 'speedy answerer badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea8'] },
+          'findOneAndUpdate',
+        );
 
-      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
-      //   if (result && 'error' in result) {
-      //     fail();
-      //   }
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+        if (result && 'error' in result) {
+          fail();
+        }
 
-      //   const questionResult = result.question as Question;
+        const questionResult = result.question as Question;
 
-      //   expect(questionResult.answers.length).toEqual(4);
-      //   expect(questionResult.answers).toContain(ans4);
-      // });
+        expect(questionResult.answers.length).toEqual(5);
+        expect(questionResult.answers).toContain(ans5);
+      });
 
-      // test('addAnswerToQuestion should throw error if there is an error adding speedy answerer badge', async () => {
-      //   const question = QUESTIONS.filter(
-      //     q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
-      //   )[0];
-      //   (question.answers as Answer[]).push(ans4);
-      //   jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
-      //   jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
-      //   jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
-      //   mockingoose(QuestionModel).toReturn(
-      //     Array(5)
-      //       .fill(null)
-      //       .map((_, index) => ({
-      //         _id: new ObjectId(),
-      //         title: `Question ${index + 1}`,
-      //         text: `This is the text for question ${index + 1}`,
-      //         tags: [tag1, tag2],
-      //         answers: [
-      //           {
-      //             _id: new ObjectId(),
-      //             text: `Answer ${index + 1}`,
-      //             ansBy: 'username',
-      //             ansDateTime: new Date(),
-      //             comments: [],
-      //           },
-      //         ],
-      //         askedBy: 'username',
-      //         askDateTime: new Date(),
-      //         views: [],
-      //         upVotes: [],
-      //         downVotes: [],
-      //         comments: [],
-      //       })),
-      //     'find',
-      //   );
-      //   mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+      test('addAnswerToQuestion should return an error if error when adding speedy answerer badge', async () => {
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        (question.answers as Answer[]).push(ans5);
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(new Error('database error'), 'findOne');
 
-      //   const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
-      //   if (result && 'error' in result) {
-      //     fail();
-      //   }
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
 
-      //   const questionResult = result.question as Question;
+        expect(result).toEqual({
+          error: 'error adding badge to user',
+        });
+      });
 
-      //   expect(questionResult.answers.length).toEqual(4);
-      //   expect(questionResult.answers).toContain(ans4);
-      // });
+      test('addAnswerToQuestion should add the speedy answerer badge and create a notification if user earned speedy answerer badge', async () => {
+        const mockNotification = {
+          notificationType: NotificationType.BADGE,
+          eventId: new ObjectId('65e9b58910afe6e94fc6e6dc'),
+          receiverUsername: 'testUser',
+          notificationDate: new Date(),
+          seen: false,
+        };
+
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        (question.answers as Answer[]).push(ans5);
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'SPEEDY_ANSWERER', description: 'speedy answerer badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea8'] },
+          'findOneAndUpdate',
+        );
+
+        const createMockQuery = (resolvedValue: Notification) =>
+          ({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue(resolvedValue),
+          }) as unknown as Query<Notification[], Notification>;
+        jest
+          .spyOn(NotificationModel, 'findById')
+          .mockImplementationOnce(() => createMockQuery(mockNotification));
+
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+        if (result && 'error' in result) {
+          fail();
+        }
+
+        const questionResult = result.question as Question;
+
+        expect(questionResult.answers.length).toEqual(4);
+        expect(questionResult.answers).toContain(ans5);
+      });
+
+      test('addAnswerToQuestion should add community helper badge to user if user earned community helper', async () => {
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        (question.answers as Answer[]).push(ans5);
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(AnswerModel).toReturn(10, 'countDocuments');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'COMMUNITY_HELPER', description: 'community helper badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea9'] },
+          'findOneAndUpdate',
+        );
+
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+        if (result && 'error' in result) {
+          fail();
+        }
+
+        const questionResult = result.question as Question;
+
+        expect(questionResult.answers.length).toEqual(4);
+        expect(questionResult.answers).toContain(ans5);
+      });
+
+      test('addAnswerToQuestion should return an error if error when adding community helper badge', async () => {
+        const question = QUESTIONS.filter(
+          q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
+        )[0];
+        (question.answers as Answer[]).push(ans5);
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
+        mockingoose(QuestionModel).toReturn(
+          Array(5)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(UserModel).toReturn(USERS[0], 'findOne');
+        mockingoose(BadgeModel).toReturn(new Error('database error'), 'findOne');
+
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+
+        expect(result).toEqual({
+          error: 'error adding badge to user',
+        });
+      });
 
       // test('addAnswerToQuestion should add community helper badge to user if they earned it', async () => {
       //   const question = QUESTIONS.filter(

@@ -32,14 +32,14 @@ const useNotifications = (initialType?: string) => {
       setError(null);
 
       try {
+        const res = await getNotifications(user.username, notificationType);
+        setNotifications(res || []);
+
         if (location.pathname !== '/notification') {
-          const res = await getNotifications(user.username, notificationType);
-          setNotifications(res || []);
           setUnseenNotificationCount(res.filter(notification => !notification.seen).length);
         } else {
           setUnseenNotificationCount(0);
-          const updatedNotifications = await markNotificationsAsSeen(user.username);
-          setNotifications(updatedNotifications || []);
+          await markNotificationsAsSeen(user.username); // mark them seen for the future
         }
       } catch (err) {
         setError('Failed to fetch notifications');

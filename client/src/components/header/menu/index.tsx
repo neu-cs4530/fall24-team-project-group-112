@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './index.css';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -28,6 +28,7 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
   const [avatar, setAvatar] = useState<string>(user?.avatarName || 'avatar1');
   const open = Boolean(anchor);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchor(event.currentTarget);
@@ -86,13 +87,7 @@ export default function HeaderMenu({ user, text }: { user: User | null; text: st
           )}
 
           <span
-            style={{
-              fontSize: '14px',
-              fontWeight: 400,
-              textDecoration: 'none',
-              color: 'black',
-              textTransform: 'none',
-            }}>
+            className={`text-sm py-1 normal-case ${pathname === `/profile/${user?.username}` ? 'text-[#843ab5] text-bold' : 'text-black'}`}>
             {text}
           </span>
         </div>

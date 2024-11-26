@@ -1284,7 +1284,6 @@ describe('application module', () => {
 
     describe('checkLifesaverBadge', () => {
       const qid = '507f1f77bcf86cd799439011'; // example question ID
-      // const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // date exactly one week ago
 
       it('should return true if the question has 50 or more upvotes and was asked within the last week', async () => {
         const recentQuestion = {
@@ -1573,7 +1572,7 @@ describe('application module', () => {
         });
       });
 
-      test('addAnswerToQuestion should add community helper badge to user if they earned it', async () => {
+      test('addAnswerToQuestion should add community helper badge to user and create notification if they earned it', async () => {
         const mockNotification = {
           notificationType: NotificationType.BADGE,
           eventId: new ObjectId('673425329c00935604e19ea9'),
@@ -1684,99 +1683,128 @@ describe('application module', () => {
         expect(result).toEqual({ error: 'error adding badge to user' });
       });
 
-      //   test('addAnswerToQuestion should add top answerer badge to user if they earned it', async () => {
-      //     const question = QUESTIONS.filter(
-      //       q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
-      //     )[0];
-      //     (question.answers as Answer[]).push(ans4);
-      //     jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
-      //     jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
-      //     jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
-      //     mockingoose(QuestionModel).toReturn(
-      //       Array(5)
-      //         .fill(null)
-      //         .map((_, index) => ({
-      //           _id: new ObjectId(),
-      //           title: `Question ${index + 1}`,
-      //           text: `This is the text for question ${index + 1}`,
-      //           tags: [tag1, tag2],
-      //           answers: [
-      //             {
-      //               _id: new ObjectId(),
-      //               text: `Answer ${index + 1}`,
-      //               ansBy: 'username',
-      //               ansDateTime: new Date(),
-      //               comments: [],
-      //             },
-      //           ],
-      //           askedBy: 'username',
-      //           askDateTime: new Date(),
-      //           views: [],
-      //           upVotes: [],
-      //           downVotes: [],
-      //           comments: [],
-      //         })),
-      //       'find',
-      //     );
-      //     mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+      test('addAnswerToQuestion should add top answerer badge to user and create notification if they earned it', async () => {
+        const mockNotification = {
+          notificationType: NotificationType.BADGE,
+          eventId: new ObjectId('673425329c00935604e19ea9'),
+          receiverUsername: 'testUser',
+          notificationDate: new Date(),
+          seen: false,
+        };
 
-      //     const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
-      //     if (result && 'error' in result) {
-      //       fail();
-      //     }
+        const question = { ...QUESTIONS[0], answers: [ans5] };
 
-      //     const questionResult = result.question as Question;
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(2);
+        mockingoose(QuestionModel).toReturn(
+          Array(20)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
 
-      //     expect(questionResult.answers.length).toEqual(4);
-      //     expect(questionResult.answers).toContain(ans4);
-      //   });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ ...USERS[0] });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ ...USERS[0] });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null);
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({
+          ...USERS[0],
+          badges: ['673425329c00935604e19ea9'],
+        });
 
-      //   test('addAnswerToQuestion should throw error if there is an error adding top answerer badge', async () => {
-      //     const question = QUESTIONS.filter(
-      //       q => q._id && q._id.toString() === '65e9b5a995b6c7045a30d823',
-      //     )[0];
-      //     (question.answers as Answer[]).push(ans4);
-      //     jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
-      //     jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
-      //     jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(5);
-      //     mockingoose(QuestionModel).toReturn(
-      //       Array(5)
-      //         .fill(null)
-      //         .map((_, index) => ({
-      //           _id: new ObjectId(),
-      //           title: `Question ${index + 1}`,
-      //           text: `This is the text for question ${index + 1}`,
-      //           tags: [tag1, tag2],
-      //           answers: [
-      //             {
-      //               _id: new ObjectId(),
-      //               text: `Answer ${index + 1}`,
-      //               ansBy: 'username',
-      //               ansDateTime: new Date(),
-      //               comments: [],
-      //             },
-      //           ],
-      //           askedBy: 'username',
-      //           askDateTime: new Date(),
-      //           views: [],
-      //           upVotes: [],
-      //           downVotes: [],
-      //           comments: [],
-      //         })),
-      //       'find',
-      //     );
-      //     mockingoose(UserModel).toReturn({ ...USERS[0] }, 'findOne');
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(BadgeModel).toReturn(
+          { name: 'TOP_ANSWERER', description: 'top answerer badge' },
+          'findOne',
+        );
+        mockingoose(UserModel).toReturn(
+          { ...USERS[0], badges: ['673425329c00935604e19ea9'] },
+          'findOneAndUpdate',
+        );
 
-      //     const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
-      //     if (result && 'error' in result) {
-      //       fail();
-      //     }
+        const createMockQuery = (resolvedValue: Notification) =>
+          ({
+            populate: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue(resolvedValue),
+          }) as unknown as Query<Notification[], Notification>;
+        jest
+          .spyOn(NotificationModel, 'findById')
+          .mockImplementation(() => createMockQuery(mockNotification));
 
-      //     const questionResult = result.question as Question;
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+        if (result && 'error' in result) {
+          console.error('COMM HELPER FAIL: ', result);
+          fail();
+        }
 
-      //     expect(questionResult.answers.length).toEqual(4);
-      //     expect(questionResult.answers).toContain(ans4);
-      // });
+        const questionResult = result.question as Question;
+
+        expect(questionResult.answers.length).toEqual(1);
+        expect(questionResult.answers).toContain(ans5);
+        expect(result.notifications).toContain(mockNotification);
+      });
+
+      test('addAnswerToQuestion should throw error if there is an error adding top answerer badge', async () => {
+        const question = { ...QUESTIONS[0], answers: [ans5] };
+
+        jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
+        jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce(question);
+        jest.spyOn(AnswerModel, 'countDocuments').mockResolvedValueOnce(2);
+        mockingoose(QuestionModel).toReturn(
+          Array(20)
+            .fill(null)
+            .map((_, index) => ({
+              _id: new ObjectId(),
+              title: `Question ${index + 1}`,
+              text: `This is the text for question ${index + 1}`,
+              tags: [tag1, tag2],
+              answers: [
+                {
+                  _id: new ObjectId(),
+                  text: `Answer ${index + 1}`,
+                  ansBy: 'username',
+                  ansDateTime: new Date(),
+                  comments: [],
+                },
+              ],
+              askedBy: 'username',
+              askDateTime: new Date(),
+              views: [],
+              upVotes: [],
+              downVotes: [],
+              comments: [],
+            })),
+          'find',
+        );
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({ ...USERS[0] });
+        jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(null); // pretend we can't find a user with the badge
+
+        mockingoose(QuestionModel).toReturn(question, 'findById');
+        mockingoose(BadgeModel).toReturn(null, 'findOne');
+        const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
+
+        expect(result).toEqual({ error: 'error adding badge to user' });
+      });
     });
 
     describe('checkCommunityHelperBadge', () => {
@@ -2680,98 +2708,6 @@ describe('application module', () => {
         expect(sentEmails.length).toBe(0);
       });
     });
-
-    // describe('fillOutEmailTemplate', () => {
-    //   const mockTemplate = `
-    //     <html>
-    //       <body>
-    //         <h1>Hello, {{username}}</h1>
-    //         <p>Your email is {{email}}</p>
-    //         <p>Notification type: {{type}}</p>
-    //       </body>
-    //     </html>
-    //   `;
-
-    //   jest.mock('path', () => ({
-    //     join: jest.fn((...args) => args.join('/')),
-    //   }));
-
-    //   beforeEach(() => {
-    //     jest.clearAllMocks();
-    //     jest.resetModules();
-    //     mockFs({
-    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
-    //         mockTemplate,
-    //     });
-    //   });
-
-    //   afterEach(() => {
-    //     mockFs.restore();
-    //   });
-
-    //   test('should replace placeholders with corresponding data', () => {
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
-
-    //     const result = fillOutEmailTemplate(data);
-
-    //     expect(result).toContain('Hello, JohnDoe');
-    //     expect(result).toContain('Your email is johndoe@example.com');
-    //     expect(result).toContain('Notification type: Answer');
-    //   });
-
-    //   test('should leave placeholders unchanged if data is missing', () => {
-    //     const data = {
-    //       username: 'JohnDoe',
-    //     };
-
-    //     const result = fillOutEmailTemplate(data);
-
-    //     expect(result).toContain('Hello, JohnDoe');
-    //     expect(result).toContain('Your email is');
-    //     expect(result).toContain('Notification type:');
-    //   });
-
-    //   test('should handle an empty template gracefully', () => {
-    //     mockFs({
-    //       '/Users/aarohinadkarni/2024/swe/fall24-team-project-group-112/server/emailTemplate.html':
-    //         '',
-    //     });
-
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
-
-    //     const result = fillOutEmailTemplate(data);
-
-    //     expect(result).toBe('');
-    //   });
-
-    //   test('should handle missing data object gracefully', () => {
-    //     const result = fillOutEmailTemplate({} as EmailTemplateData);
-
-    //     expect(result).toContain('Hello, ');
-    //     expect(result).toContain('Your email is ');
-    //     expect(result).toContain('Notification type: ');
-    //   });
-
-    //   test('should throw an error if template file is missing', () => {
-    //     mockFs({}); // No files
-
-    //     const data = {
-    //       username: 'JohnDoe',
-    //       email: 'johndoe@example.com',
-    //       type: 'Answer',
-    //     };
-
-    //     expect(() => fillOutEmailTemplate(data)).toThrow();
-    //   });
-    // });
   });
 
   describe('Follow model', () => {

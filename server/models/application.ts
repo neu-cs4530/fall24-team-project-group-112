@@ -1199,6 +1199,15 @@ export const findQuestionUpvotedBy = async (
   }
 };
 
+/**
+ * Updates the user information based on the provided username and update payload.
+ * If the user does not exist, returns an error message.
+ * If the user qualifies for the "AUTOBIOGRAPHER" badge, it is added to their profile.
+ *
+ * @param {string} username - The username of the user to update.
+ * @param {UpdateUserPayload} userUpdate - The payload containing the user information to update.
+ * @returns {Promise<UserNotificationResponse>} - A promise that resolves to a response containing the updated user information or an error message.
+ */
 export const updateUser = async (
   username: string,
   userUpdate: UpdateUserPayload,

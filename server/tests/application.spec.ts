@@ -1647,7 +1647,6 @@ describe('application module', () => {
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
-          console.error('COMM HELPER FAIL: ', result);
           fail();
         }
 
@@ -1753,7 +1752,6 @@ describe('application module', () => {
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
-          console.error('COMM HELPER FAIL: ', result);
           fail();
         }
 

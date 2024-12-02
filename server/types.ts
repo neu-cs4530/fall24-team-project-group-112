@@ -154,6 +154,11 @@ export interface Question {
   comments: Comment[] | ObjectId[];
 }
 
+/**
+ * Interface representing a Question with its associated notifications, which contains:
+ * - question - The question document.
+ * - notifications - An array of notifications associated with the question.
+ */
 export interface QuestionWithNotification {
   question: Question;
   notifications: Notification[];

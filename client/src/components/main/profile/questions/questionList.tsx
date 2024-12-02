@@ -3,11 +3,23 @@ import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import QuestionDisplay from './question';
 import { Question } from '../../../../types';
 
+/**
+ * QuestionListProps is an interface for the QuestionList component props.
+ *
+ * @param {Question[]} questions - The list of questions.
+ * @param {string} title - The title of the question list.
+ */
 export interface QuestionListProps {
   questions: Question[];
   title: string;
 }
 
+/**
+ * QuestionList component displays a list of questions.
+ *
+ * @param {Question[]} questions - The list of questions.
+ * @param {string} title - The title of the question list.
+ */
 const QuestionList = ({ questions, title }: QuestionListProps) => {
   const [open, setOpen] = useState(false);
   const toggleOpen = () => {

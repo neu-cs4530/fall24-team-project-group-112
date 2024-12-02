@@ -16,6 +16,11 @@ interface BadgeNotificationProps {
   badge: Badge;
 }
 
+/**
+ * Displays a notification for a badge earned.
+ * @param {BadgeNotificationProps} props - The props for the component.
+ * @returns {JSX.Element} The BadgeNotification component.
+ */
 const BadgeNotification: React.FC<BadgeNotificationProps> = ({ notificationId, date, badge }) => {
   const getCircleColor = () => {
     switch (badge.color) {

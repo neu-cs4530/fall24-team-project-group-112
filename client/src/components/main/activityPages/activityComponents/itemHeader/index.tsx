@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import Avatar from '../../../baseComponents/avatar';
 import useUserAvatar from '../../../../../hooks/useUserAvatar';
 
+/**
+ * ItemHeaderProps is an interface for the ItemHeader component props.
+ *
+ * @param {string} username - The username of the user.
+ * @param {string} headerText? - The header text. This field is optional.
+ */
 interface ItemHeaderProps {
   username: string;
   headerText?: string;

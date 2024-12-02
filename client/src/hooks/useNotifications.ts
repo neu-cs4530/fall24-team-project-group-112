@@ -9,6 +9,21 @@ import {
   markNotificationsAsSeen,
 } from '../services/notificationService';
 
+/**
+ * Custom hook to handle fetching and managing notifications.
+ *
+ * @param initialType - The initial notification type to filter by.
+ * @returns notifications - The list of notifications.
+ * @returns error - The error message, if any.
+ * @returns setNotificationType - Function to set the notification type filter.
+ * @returns deleteNotifications - Function to delete all notifications.
+ * @returns deleteNotification - Function to delete a single notification.
+ * @returns showConfirmationModal - Boolean to show/hide the confirmation modal.
+ * @returns setShowConfirmationModal - Function to set the confirmation modal visibility.
+ * @returns isLoading - Boolean to indicate if the notifications are loading.
+ * @returns unseenNotificationCount - The count of unseen notifications.
+ * @returns setUnseenNotificationCount - Function to set the count of unseen notifications.
+ */
 const useNotifications = (initialType?: string) => {
   const { user, socket } = useUserContext();
   const location = useLocation();

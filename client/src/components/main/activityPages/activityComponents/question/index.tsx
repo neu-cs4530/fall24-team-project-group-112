@@ -4,10 +4,20 @@ import { Question } from '../../../../../types';
 import './index.css';
 import ItemHeader from '../itemHeader';
 
+/**
+ * QuestionItemProps is an interface for the QuestionItem component props.
+ *
+ * @param {Question} question - The question object.
+ */
 interface QuestionItemProps {
   question: Question;
 }
 
+/**
+ * QuestionItem component displays a question notification.
+ *
+ * @param {Question} question - The question object.
+ */
 const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => (
   <div className='notification'>
     <div className='notification-header'>

@@ -3,6 +3,12 @@ import useUserContext from './useUserContext';
 import { FeedPost } from '../types';
 import { getFeed } from '../services/userService';
 
+/**
+ * Custom hook for managing the feed state and fetching feed items.
+ *
+ * @param initialType - The initial feed item type to filter by.
+ * @returns feedItems - The list of feed items.
+ */
 const useFeed = (initialType?: string) => {
   const { user } = useUserContext();
 

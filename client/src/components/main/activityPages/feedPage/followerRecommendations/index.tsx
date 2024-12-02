@@ -2,6 +2,11 @@ import React from 'react';
 import useFollowerRecommendations from '../../../../../hooks/useFollowerRecommendations';
 import FollowChip from './followChip';
 
+/**
+ * FollowerRecommendationsProps is an interface for the FollowerRecommendations component props.
+ *
+ * @param {string} followeeUsername - The username of the followee.
+ */
 interface FollowerRecommendationsProps {}
 
 const FollowerRecommendations: React.FC<FollowerRecommendationsProps> = () => {

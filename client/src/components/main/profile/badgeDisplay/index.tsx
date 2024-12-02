@@ -46,12 +46,25 @@ const BADGES = [
 const toSentenceCase = (title: string) =>
   title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
 
+/**
+ * BadgeDisplayProps is an interface for the BadgeDisplay component props.
+ *
+ * @param user The user object.
+ * @param open The open state of the dialog.
+ * @param onClose The function to close the dialog.
+ */
 interface BadgeDisplayProps {
   user: User;
   open: boolean;
   onClose: () => void;
 }
 
+/**
+ * BadgeDisplay component displays a user's badges.
+ *
+ * @param {BadgeDisplayProps} props - The props for the component.
+ * @returns {JSX.Element} The BadgeDisplay component.
+ */
 const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ user, open, onClose }) => {
   const userBadgeNames = user.badges.map(
     badgeId => BADGES.find(badge => badge._id?.toString() === badgeId.toString())?.name,

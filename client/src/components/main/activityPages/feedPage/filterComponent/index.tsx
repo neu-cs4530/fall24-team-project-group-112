@@ -1,9 +1,19 @@
 import React from 'react';
 
+/**
+ * FeedFilterProps is an interface for the FeedFilter component props.
+ *
+ * @param {function} onFilterChange - The function to call when the filter changes.
+ */
 interface FeedFilterProps {
   onFilterChange: (type: string) => void;
 }
 
+/**
+ * FeedFilter component displays a filter for the feed items.
+ *
+ * @param {function} onFilterChange - The function to call when the filter changes.
+ */
 const FeedFilter: React.FC<FeedFilterProps> = ({ onFilterChange }) => {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange(e.target.value); // Pass only the selected value (string)

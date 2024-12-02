@@ -323,6 +323,7 @@ export interface ServerToClientEvents {
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
   notificationUpdate: (notification: Notification) => void;
+  notificationDelete: (notificatioId: string) => void;
   profileUpdate: (user: User) => void;
   followUpdate: (follow: String) => void;
 }

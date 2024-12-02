@@ -8,6 +8,8 @@ import { NotificationType } from '../../types';
  *
  * - notificationType: The type of notification, one of NotificationType. This field is required.
  * - eventId: The unique identifier of the event that triggered the notification. This field is required.
+ * - question: The unique identifier of the question associated with the notification. This field is optional but provided if the notification type is 'Answer' or 'Comment'.
+ * - answer: The unique identifier of the answer associated with the notification. This field is optional but provided if the notification type is 'Comment' and the comment is on an Answer.
  * - receiverUsername: The username of the user who will receive the notification. This field is required.
  * - notificationDate: The date and time when the notification was created. This field is required.
  * - seen: A boolean value indicating whether the notification has been seen by the user. This field is required and defaults to false.

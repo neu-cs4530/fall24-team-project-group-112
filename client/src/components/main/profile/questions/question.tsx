@@ -8,13 +8,14 @@ export interface QuestionProps {
 
 const QuestionDisplay = ({ question }: QuestionProps) => {
   const styles = {
-    container: 'px-6 md:px-12 py-6 border border-gray-200 cursor-pointer hover:bg-stackpurplehover',
+    container: 'px-6 md:px-12 py-6 border border-gray-200 hover:bg-stackpurplehover',
     header: 'md:flex justify-between',
-    title: 'font-bold text-xl',
+    title: 'font-bold text-xl cursor-pointer',
     linkContainer: 'flex gap-6 cursor-pointer',
     link: 'font-bold text-stackpurple',
     tagContainer: 'flex gap-2 lg:gap-4 flex-wrap',
     tag: 'text-gray-500 bg-gray-200 rounded-full px-2 lg:px-2 py-1',
+    cursor: 'cursor-pointer',
     questionText: 'line-clamp-2',
     bottomContainer: 'lg:flex justify-between mt-2',
     button: 'text-blue-700 rounded-md',
@@ -35,28 +36,30 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
           <p>{getMetaData(new Date(question.askDateTime))}</p>
         </div>
       </div>
-      <Link key={question._id} to={`/question/${question._id}`}>
-        <p className={styles.questionText}>{question.text}</p>
-        <div className={styles.bottomContainer}>
-          <div className={styles.tagContainer}>
-            {question.tags.map(tag => (
-              <span key={tag.name} className={styles.tag}>
-                {tag.name}
-              </span>
-            ))}
-          </div>
-          <div className={styles.metricsContainer}>
-            <div className={styles.metricsPair}>
-              <p>{question.upVotes.length} upvotes</p>
-              <p>{question.downVotes.length} downvotes</p>
+      <div className={styles.cursor}>
+        <Link key={question._id} to={`/question/${question._id}`}>
+          <p className={styles.questionText}>{question.text}</p>
+          <div className={styles.bottomContainer}>
+            <div className={styles.tagContainer}>
+              {question.tags.map(tag => (
+                <span key={tag.name} className={styles.tag}>
+                  {tag.name}
+                </span>
+              ))}
             </div>
-            <div className={styles.metricsPair}>
-              <p>{question.comments.length} comments</p>
-              <p>{question.views.length} views</p>
+            <div className={styles.metricsContainer}>
+              <div className={styles.metricsPair}>
+                <p>{question.upVotes.length} upvotes</p>
+                <p>{question.downVotes.length} downvotes</p>
+              </div>
+              <div className={styles.metricsPair}>
+                <p>{question.comments.length} comments</p>
+                <p>{question.views.length} views</p>
+              </div>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 };

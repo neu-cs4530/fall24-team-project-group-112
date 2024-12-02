@@ -5,6 +5,9 @@ import FeedFilter from './filterComponent';
 import useFeed from '../../../../hooks/useFeed';
 import FollowerRecommendations from './followerRecommendations';
 
+/**
+ * Feed component displays the feed page.
+ */
 const Feed: React.FC = () => {
   const { feedItems, error, setFeedItemType, isLoading } = useFeed();
 

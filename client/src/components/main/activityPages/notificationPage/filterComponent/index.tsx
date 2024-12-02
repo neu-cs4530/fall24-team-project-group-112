@@ -1,9 +1,19 @@
 import React from 'react';
 
+/**
+ * NotificationFilterProps is an interface for the NotificationFilter component props.
+ *
+ * @param {string} onFilterChange - The filter change event handler.
+ */
 interface NotificationFilterProps {
   onFilterChange: (type: string) => void;
 }
 
+/**
+ * NotificationFilter component displays a filter for the notifications.
+ *
+ * @param {string} onFilterChange - The filter change event handler.
+ */
 const NotificationFilter: React.FC<NotificationFilterProps> = ({ onFilterChange }) => {
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange(e.target.value); // Pass only the selected value (string)

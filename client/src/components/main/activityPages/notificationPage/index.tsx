@@ -6,6 +6,9 @@ import NotificationFilter from './filterComponent';
 import ConfirmationDisplay from './confirmation';
 import './index.css';
 
+/**
+ * NotificationCenter component displays the notifications page.
+ */
 const NotificationCenter: React.FC = () => {
   const {
     notifications,

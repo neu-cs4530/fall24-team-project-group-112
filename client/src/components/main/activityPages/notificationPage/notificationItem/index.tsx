@@ -6,10 +6,20 @@ import CommentItem from '../../activityComponents/comment';
 import BadgeNotification from '../../activityComponents/badge';
 import FollowItem from '../../activityComponents/follow';
 
+/**
+ * NotificationItemProps is an interface for the NotificationItem component props.
+ *
+ * @param {Notification} notification - The notification object.
+ */
 interface NotificationItemProps {
   notification: Notification;
 }
 
+/**
+ * NotificationItem component displays a notification item.
+ *
+ * @param {Notification} notification - The notification object.
+ */
 const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => {
   let content;
 

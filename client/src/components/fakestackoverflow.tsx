@@ -19,6 +19,11 @@ import NotificationCenter from './main/activityPages/notificationPage';
 import Feed from './main/activityPages/feedPage';
 import useUser from '../hooks/useUser';
 
+/**
+ * Represents a protected route that checks if a user is logged in.
+ * If the user is not logged in, they are redirected to the login page.
+ * If the user is logged in, the user and socket are passed to the children components.
+ */
 const ProtectedRoute = ({
   user,
   socket,

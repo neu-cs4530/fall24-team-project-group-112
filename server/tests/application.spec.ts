@@ -1647,7 +1647,6 @@ describe('application module', () => {
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
-          console.error('COMM HELPER FAIL: ', result);
           fail();
         }
 
@@ -1659,14 +1658,6 @@ describe('application module', () => {
       });
 
       test('addAnswerToQuestion should throw error if there is an error adding community helper badge', async () => {
-        const mockNotification = {
-          notificationType: NotificationType.BADGE,
-          eventId: new ObjectId('673425329c00935604e19ea9'),
-          receiverUsername: 'testUser',
-          notificationDate: new Date(),
-          seen: false,
-        };
-
         const question = { ...QUESTIONS[0], answers: [ans5] };
 
         jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValueOnce(question);
@@ -1753,7 +1744,6 @@ describe('application module', () => {
 
         const result = await addAnswerToQuestion('65e9b5a995b6c7045a30d823', ans1);
         if (result && 'error' in result) {
-          console.error('COMM HELPER FAIL: ', result);
           fail();
         }
 

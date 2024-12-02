@@ -43,10 +43,16 @@ const notificationController = (socket: FakeSOSocket) => {
     res: Response,
   ): Promise<void> => {
     const { username, notificationId } = req.params;
+
+    let result;
+
     try {
-      const result = notificationId
-        ? await deleteNotificationsForUser(username, notificationId) // Pass notificationId if provided
-        : await deleteNotificationsForUser(username);
+      if (notificationId) {
+        result = await deleteNotificationsForUser(username, notificationId); // Pass notificationId if provided
+        socket.emit('notificationDelete', notificationId);
+      } else {
+        result = await deleteNotificationsForUser(username);
+      }
 
       if (result && 'error' in result) {
         throw new Error(result.error);

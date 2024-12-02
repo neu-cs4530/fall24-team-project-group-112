@@ -70,12 +70,25 @@ const useNotifications = (initialType?: string) => {
       }
     };
 
+    /**
+     * Handles real-time updates via socket events for deleted notifications.
+     *
+     * @param notificationId - The id of the notification that was deleted
+     */
+    const handleNotificationDelete = async (notificationId: string) => {
+      setNotifications(prevNotifications =>
+        prevNotifications.filter(notification => notification._id !== notificationId),
+      );
+    };
+
     fetchData();
 
     socket.on('notificationUpdate', handleNotificationUpdate);
+    socket.on('notificationDelete', handleNotificationDelete);
 
     return () => {
       socket.off('notificationUpdate', handleNotificationUpdate);
+      socket.off('notificationDelete', handleNotificationDelete);
     };
   }, [user.username, notificationType, location.pathname, unseenNotificationCount, socket]);
 
@@ -90,9 +103,6 @@ const useNotifications = (initialType?: string) => {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      setNotifications(prevNotifications =>
-        prevNotifications.filter(notification => notification._id !== notificationId),
-      );
       await clearSingleNotification(user.username, notificationId);
     } catch (err) {
       setError('Failed to delete notifications');

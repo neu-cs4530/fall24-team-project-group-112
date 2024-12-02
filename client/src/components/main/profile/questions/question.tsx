@@ -23,17 +23,19 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
   };
 
   return (
-    <Link key={question._id} to={`/question/${question._id}`}>
-      <div className={styles.container}>
-        <div className={styles.header}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <Link key={question._id} to={`/question/${question._id}`}>
           <p className={styles.title}>{question.title}</p>
-          <div className={styles.linkContainer}>
-            <Link className={styles.link} key={question._id} to={`/profile/${question.askedBy}`}>
-              {question.askedBy}
-            </Link>
-            <p>{getMetaData(new Date(question.askDateTime))}</p>
-          </div>
+        </Link>
+        <div className={styles.linkContainer}>
+          <Link className={styles.link} key={question._id} to={`/profile/${question.askedBy}`}>
+            {question.askedBy}
+          </Link>
+          <p>{getMetaData(new Date(question.askDateTime))}</p>
         </div>
+      </div>
+      <Link key={question._id} to={`/question/${question._id}`}>
         <p className={styles.questionText}>{question.text}</p>
         <div className={styles.bottomContainer}>
           <div className={styles.tagContainer}>
@@ -54,8 +56,8 @@ const QuestionDisplay = ({ question }: QuestionProps) => {
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 
